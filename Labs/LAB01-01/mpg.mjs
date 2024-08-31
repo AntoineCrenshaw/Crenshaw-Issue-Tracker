@@ -5,10 +5,7 @@ const rl = readline.createInterface({ input, output });
 
 let milesDriven = null;
 let gallonsUsed = null;
-<<<<<<< Updated upstream
 let averageMpg;
-=======
->>>>>>> Stashed changes
 
 // Display an error message if the user enters a negative number or 0
 // Ask the user to enter the miles driven and the gallons used
@@ -16,7 +13,6 @@ let averageMpg;
 do{
     milesDriven = await rl.question('Enter the miles driven(Number greater than 0): ');
     milesDriven = parseFloat(milesDriven);
-<<<<<<< Updated upstream
 }while(!milesDriven || milesDriven < 0); 
 do{
     gallonsUsed = await rl.question("Enter your gallons used(Number greater than 0): ");
@@ -26,16 +22,3 @@ do{
 
 averageMpg = milesDriven / gallonsUsed;
 console.log(`Your average MPG is: ${averageMpg.toFixed(2)}`);
-=======
-}while(!milesDriven || milesDriven < 0);
-
-do {
-    gallonsUsed = await rl.question('Enter the gallons used(Number greater than 0):');
-    gallonsUsed = parseFloat(gallonsUsed);
-}while(!gallonsUsed || gallonsUsed < 0);
-
-let averageMPG = milesDriven / gallonsUsed;
-console.log(averageMPG.toFixed(2) + " miles per gallon");
-
-rl.close();
->>>>>>> Stashed changes
