@@ -3,9 +3,6 @@ import {stdin as input, stdout as output } from 'node:process';
 
 const rl = readline.createInterface({ input, output });
 
-
-
-
 async function calculateTax() {
     try {
         let income = parseFloat(await rl.question("Enter your taxable income for 2024:")); //get income from user
