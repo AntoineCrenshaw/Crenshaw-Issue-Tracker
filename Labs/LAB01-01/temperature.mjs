@@ -4,7 +4,7 @@ import { stdin as input, stdout as output } from 'node:process';
 const rl = readline.createInterface({ input, output });
 
 async function temperatureConverter() {
-  let convert = await rl.question('Do you want to convert to Celsius or Fahrenheit? ');
+  const convert = await rl.question('Do you want to convert to Celsius or Fahrenheit? ');
 
   if (convert.toLowerCase() === "f") {
     let celsius = await rl.question('Enter temperature in Celsius: ');
