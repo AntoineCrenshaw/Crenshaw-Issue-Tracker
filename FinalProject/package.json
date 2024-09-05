@@ -1,0 +1,31 @@
+{
+  "name": "issuetracker",
+  "version": "1.0.0",
+  "description": "Issue Tracker for Tracking software bugs during the software development life cycle.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "start-dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RankenTechnicalCollege/all-coursework-AntoineCrenshaw1.git#master"
+  },
+  "keywords": [
+    "Issue",
+    "Tracker",
+    "Antoine",
+    "Crenshaw"
+  ],
+  "author": "Antoine Crenshaw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RankenTechnicalCollege/all-coursework-AntoineCrenshaw1/issues"
+  },
+  "homepage": "https://github.com/RankenTechnicalCollege/all-coursework-AntoineCrenshaw1/tree/master#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
