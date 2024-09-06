@@ -1,17 +1,23 @@
 import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
+import debug from 'debug';
+const debugServer = debug('app:server');
+import {userRouter} from './routes/api/user.js';
+import {bugRouter} from './routes/api/bugs.js';
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use(express.static('frontend/dist'));
+
+app.use('/api/user', userRouter);
+app.use('/api/bugs', bugRouter);
 
 const port = process.env.PORT || 3000;
 
 app.listen(port,() => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
-
-app.get('/api', (req, res) => {
-    res.send('Hello World from the back end route!');
+    debugServer(`Server is running on http://localhost:${port}`);
 });

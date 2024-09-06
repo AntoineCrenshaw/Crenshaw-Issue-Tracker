@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "start-dev": "nodemon index.js"
+    "start-dev": "nodemon -r dotenv/config index.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,8 @@
   },
   "homepage": "https://github.com/RankenTechnicalCollege/all-coursework-AntoineCrenshaw1/tree/master#readme",
   "dependencies": {
+    "debug": "^4.3.6",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2"
   }
 }
