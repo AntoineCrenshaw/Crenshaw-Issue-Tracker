@@ -7,10 +7,10 @@ const debugBug = debug('app:BugRouter');
 router.use(express.urlencoded({ extended: false }));
 
 const bugsArray = [
-    { bugId: 1, bugDescription: 'Bug 1', reportedBy: 'John Doe', createdDate: new Date(), classification: 'Class1', assignedTo: 'Jane Doe', resolvedDate: new Date(), resolution: 'Resolved' },
-    { bugId: 2, bugDescription: 'Bug 2', reportedBy: 'John Doe', createdDate: new Date(), classification: 'Class2', assignedTo: 'Jane Doe', resolvedDate: new Date(), resolution: 'Resolved' },
-    { bugId: 3, bugDescription: 'Bug 3', reportedBy: 'John Doe', createdDate: new Date(), classification: 'Class3', assignedTo: 'Jane Doe', resolvedDate: new Date(), resolution: 'Resolved' },
-    { bugId: 4, bugDescription: 'Bug 4', reportedBy: 'John Doe', createdDate: new Date(), classification: 'Class4', assignedTo: 'Jane Doe', resolvedDate: new Date(), resolution: 'Resolved' },
+    { bugId: 1, bugDescription: 'Bug 1', reportedBy: 'John Doe', createdDate: new Date(),  classification: 'Class1', assignedTo: 'Jane Doe', resolvedDate: new Date(), resolution: 'Resolved', lastUpdated: new Date() },
+    { bugId: 2, bugDescription: 'Bug 2', reportedBy: 'John Doe', createdDate: new Date(),  classification: 'Class2', assignedTo: 'Jane Doe', resolvedDate: new Date(), resolution: 'Resolved', lastUpdated: new Date() },
+    { bugId: 3, bugDescription: 'Bug 3', reportedBy: 'John Doe', createdDate: new Date(),  classification: 'Class3', assignedTo: 'Jane Doe', resolvedDate: new Date(), resolution: 'Resolved', lastUpdated: new Date() },
+    { bugId: 4, bugDescription: 'Bug 4', reportedBy: 'John Doe', createdDate: new Date(), classification: 'Class4', assignedTo: 'Jane Doe', resolvedDate: new Date(), resolution: 'Resolved', lastUpdated: new Date() },
 ];
 
 router.get('/list', (req, res) => {
@@ -64,14 +64,24 @@ router.post('/new', (req, res) => {
         return;
     }
 
+    // resolvedDate and resolution are optional
     if (!newBug.resolvedDate) {
-        res.status(400).send('Resolved Date is required');
-        return;
+        newBug.resolvedDate = "";
+    } else {
+        const resolvedDate = new Date(req.body.resolvedDate);
+        if (isNaN(resolvedDate)) {
+            res.status(400).send(`${resolvedDate} is not a valid date`);
+            return;
+        } else {
+            newBug.resolvedDate = resolvedDate;
+        }
     }
 
     if (!newBug.resolution) {
-        res.status(400).send('Resolution is required');
-        return;
+        newBug.resolution = "";
+    }
+    else {
+        newBug.resolution = req.body.resolution;
     }
 
     bugsArray.push(newBug);
@@ -88,6 +98,7 @@ router.put('/:bugId', (req, res) => {
         for (const key in updatedBug) {
             bugsArray[key] = updatedBug[key];
         }
+        bugsArray.lastUpdated = new Date();
     }
 
     const index = bugsArray.findIndex(bug => bug.bugId === parseInt(bugId));
@@ -136,10 +147,29 @@ router.put('/:bugId/assign', (req, res) => {
     }
 });
 
+// close bug
 router.put('/:bugId/close', (req, res) => {
     const bugId = req.params.bugId;
-    close();
-    res.status(200).json(`Bug ${bugId} closed successfully`);
+    const resolvedDate = req.body.resolvedDate;
+    const resolution = req.body.resolution;
+
+    if (!resolvedDate && !resolution) {
+        res.status(400).send('Resolved Date and Resolution are required');
+        return;
+    }else {
+        const bug = bugsArray.find(bug => bug.bugId === parseInt(bugId));
+        debugBug(JSON.stringify(bug));
+        debugBug(`Index Of Bug ${bugsArray.indexOf(bug)}`);
+        if (bug) {
+            bug.resolvedDate = resolvedDate;
+            bug.resolution = resolution;
+            bugsArray[bugsArray.indexOf(bug)] = bug;
+            res.status(200).json(`Bug ${bugId} closed successfully`);
+        } else {
+            res.status(404).send(`Bug ${bugId} not found`);
+            return;
+        }
+    }
 });
 
 

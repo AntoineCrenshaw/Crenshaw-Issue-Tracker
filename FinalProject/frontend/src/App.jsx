@@ -1,5 +1,4 @@
 import "./App.css";
-import axios from "axios";
 
 function App() {
   return (
@@ -32,12 +31,16 @@ function App() {
               <div className="collapse navbar-collapse" id="navbarNav">
                 <ul className="navbar-nav">
                   <li className="nav-item">
-                    <a className="nav-link active" aria-current="page" href="#">
+                    <a
+                      className="nav-link active"
+                      aria-current="page"
+                      href="/api/user/list"
+                    >
                       Users
                     </a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link" href="#">
+                    <a className="nav-link" href="/api/bugs/list">
                       Bugs
                     </a>
                   </li>
@@ -51,36 +54,36 @@ function App() {
       <main className="d-flex justify-space-between">
         <div className="card" style={{ width: "30rem" }}>
           <div className="card-body">
-            <h2 className="card-title">Users</h2>
-            <div>
-              <a href="#">Lebron</a>
+            <h2 className="card-title ">Users</h2>
+            <div className="">
+              <a href="/api/user/1">Lebron</a>
             </div>
-            <div>
-              <a href="#">Curry</a>
+            <div className="">
+              <a href="/api/user/2">Curry</a>
             </div>
-            <div>
-              <a href="#">Wade</a>
+            <div className="">
+              <a href="/api/user/3">Wade</a>
             </div>
-            <div>
-              <a href="#">Micheal Jordan</a>
+            <div className="">
+              <a href="/api/user/4">Micheal Jordan</a>
             </div>
           </div>
         </div>
 
         <div className="card " style={{ width: "30rem" }}>
           <div className="card-body">
-            <h2 className="card-title">Bugs</h2>
-            <div>
-              <a href="#">Lebron</a>
+            <h2 className="card-title ">Bugs</h2>
+            <div className="">
+              <a href="/api/bugs/1">Lebron</a>
             </div>
-            <div>
-              <a href="#">Curry</a>
+            <div className="">
+              <a href="/api/bugs/2">Curry</a>
             </div>
-            <div>
-              <a href="#">Wade</a>
+            <div className="">
+              <a href="/api/bugs/3">Wade</a>
             </div>
-            <div>
-              <a href="#">Micheal Jordan</a>
+            <div className="">
+              <a href="/api/bugs/4">Micheal Jordan</a>
             </div>
           </div>
         </div>
