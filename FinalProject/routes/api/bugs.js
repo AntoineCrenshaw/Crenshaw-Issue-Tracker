@@ -81,30 +81,65 @@ router.post('/new', (req, res) => {
 router.put('/:bugId', (req, res) => {
     const bugId = req.params.bugId;
     //update existing bug
+    const bugToUpdate = bugsArray.find(bug => bug.bugId === parseInt(bugId));
     const updatedBug = req.body;
+
+    if (bugToUpdate) {
+        for (const key in updatedBug) {
+            bugsArray[key] = updatedBug[key];
+        }
+    }
 
     const index = bugsArray.findIndex(bug => bug.bugId === parseInt(bugId));
 
     if (index !== -1) {
         bugsArray[index] = updatedBug;
-        res.json(updatedBug);
+        res.status(200).json(`bugId ${bugId} updated successfully`);
     } else {
         res.status(404).send(`Bug ${bugId} not found`);
     }
 });
 
-router.put('/:bugID/classify', (req, res) => {
+router.put('/:bugId/classify', (req, res) => {
     const bugId = req.params.bugId;
     const classification = req.body.classification;
+
+    if (!classification) {
+        res.status(400).send('Classification is required');
+        return;
+    } else {
+        const bug = bugsArray.find(bug => bug.bugId === parseInt(bugId));
+        if (bug) {
+            bug.classification = classification;
+            res.status(200).json(`Bug ${bugId} classified successfully`);
+        } else {
+            res.status(404).send(`Bug ${bugId} not found`);
+        }
+    }
 });
 
 router.put('/:bugId/assign', (req, res) => {
     const bugId = req.params.bugId;
     const assignedTo = req.body.assignedTo;
+
+    if (!assignedTo) {
+        res.status(400).send('Assigned To is required');
+        return;
+    } else {
+        const bug = bugsArray.find(bug => bug.bugId === parseInt(bugId));
+        if (bug) {
+            bug.assignedTo = assignedTo;
+            res.status(200).json(`Bug ${bugId} assigned successfully`);
+        } else {
+            res.status(404).send(`Bug ${bugId} not found`);
+        }
+    }
 });
 
 router.put('/:bugId/close', (req, res) => {
     const bugId = req.params.bugId;
+    close();
+    res.status(200).json(`Bug ${bugId} closed successfully`);
 });
 
 
