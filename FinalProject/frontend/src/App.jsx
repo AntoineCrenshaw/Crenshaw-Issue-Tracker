@@ -34,13 +34,13 @@ function App() {
                     <a
                       className="nav-link active"
                       aria-current="page"
-                      href="/api/user/list"
+                      href="./api/user/list"
                     >
                       Users
                     </a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link" href="/api/bugs/list">
+                    <a className="nav-link" href="./api/bugs/list">
                       Bugs
                     </a>
                   </li>

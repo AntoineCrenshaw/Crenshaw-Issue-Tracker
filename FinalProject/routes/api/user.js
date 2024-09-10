@@ -112,9 +112,6 @@ router.put("/:userId", (req, res) => {
     res.status(404).send("User not found");
   }
 
-
- 
- 
 });
 
 router.delete("/:userId", (req, res) => {
