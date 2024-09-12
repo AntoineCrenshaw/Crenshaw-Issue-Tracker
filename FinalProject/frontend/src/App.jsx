@@ -1,89 +1,62 @@
+import React from "react";
 import "./App.css";
 
 function App() {
   return (
     <>
-      <header className="mb-5">
-        <div className="d-flex justify-space-between">
-          <nav className="navbar navbar-expand-lg navbar-light bg-light w-100">
-            <div className="container-fluid">
-              <a className="navbar-brand" href="#">
-                <img
-                  src="https://www.pngkey.com/png/full/114-1149878_react-js-logo-png.png"
-                  alt=""
-                  width="30"
-                  height="24"
-                  className="d-inline-block align-text-top"
-                />
-                My Issue Tracker
-              </a>
-              <button
-                className="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarNav"
-                aria-controls="navbarNav"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
-              >
-                <span className="navbar-toggler-icon" />
-              </button>
-              <div className="collapse navbar-collapse" id="navbarNav">
-                <ul className="navbar-nav">
-                  <li className="nav-item">
-                    <a
-                      className="nav-link active"
-                      aria-current="page"
-                      href="./api/user/list"
-                    >
-                      Users
-                    </a>
-                  </li>
-                  <li className="nav-item">
-                    <a className="nav-link" href="./api/bugs/list">
-                      Bugs
-                    </a>
-                  </li>
-                </ul>
+      <header>
+        <nav className="navbar navbar-expand-lg bg-body-tertiary">
+          <div className="container-fluid">
+            <a className="navbar-brand" href="#">
+              Issue Tracker
+            </a>
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarNavAltMarkup"
+              aria-controls="navbarNavAltMarkup"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
+            <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
+              <div className="navbar-nav">
+                <a
+                  className="nav-link active"
+                  aria-current="page"
+                  href="/api/bugs.js/list"
+                >
+                  Bugs
+                </a>
+                <a className="nav-link" href="/api/user/list">
+                  Users
+                </a>
               </div>
             </div>
-          </nav>
-        </div>
+          </div>
+        </nav>
       </header>
 
-      <main className="d-flex justify-space-between">
-        <div className="card" style={{ width: "30rem" }}>
-          <div className="card-body">
-            <h2 className="card-title ">Users</h2>
-            <div className="">
-              <a href="/api/user/1">Lebron</a>
+      <main>
+        <div className="container text-center">
+          <div className="row">
+            <div className="col">
+              <h2>Users</h2>
+              <ul>
+                <li href="">Lebron</li>
+                <li href="">Curry</li>
+                <li href="">Anthony Edwards</li>
+              </ul>
             </div>
-            <div className="">
-              <a href="/api/user/2">Curry</a>
-            </div>
-            <div className="">
-              <a href="/api/user/3">Wade</a>
-            </div>
-            <div className="">
-              <a href="/api/user/4">Micheal Jordan</a>
-            </div>
-          </div>
-        </div>
-
-        <div className="card " style={{ width: "30rem" }}>
-          <div className="card-body">
-            <h2 className="card-title ">Bugs</h2>
-            <div className="">
-              <a href="/api/bugs/1">Lebron</a>
-            </div>
-            <div className="">
-              <a href="/api/bugs/2">Curry</a>
-            </div>
-            <div className="">
-              <a href="/api/bugs/3">Wade</a>
-            </div>
-            <div className="">
-              <a href="/api/bugs/4">Micheal Jordan</a>
+            <div className="col">
+              <h2>Bugs</h2>
+              <ul>
+                <li href="">Runtime Error</li>
+                <li href="">Syntax Errors</li>
+                <li href="">Error 404</li>
+              </ul>
             </div>
           </div>
         </div>
