@@ -1,0 +1,56 @@
+db.users.insertOne( { name: 'Antoine Crenshaw', email: 'Antoine@gmail.com', password: 'password123'})
+db.movies.insertOne({
+  plot: 'A family divided between France and Germany is torn apart as World War I forces them to fight on opposite sides.',
+  genres: [
+    'Drama',
+    'Romance',
+    'War'
+  ],
+  runtime: 150,
+  rated: 'PASSED',
+  cast: [
+    'Pomeroy Cannon',
+    'Josef Swickard',
+    'Bridgetta Clark',
+    'Rudolph Valentino'
+  ],
+  num_mflix_comments: 1,
+  poster: 'https://m.media-amazon.com/images/M/MV5BOTU1ODQyYTctODhkNy00YWRmLWE2YzYtMTQ5ZjA3OTNiN2QyXkEyXkFqcGdeQXVyMzE0MjY5ODA@._V1_SY1000_SX677_AL_.jpg',
+  title: 'The Four Horsemen of the Apocalypse',
+  fullplot: 'The Madariaga family is divided between France and Germany. As war breaks out, they find themselves fighting on opposite sides of the conflict. Julio, a French artist, falls for Marguerite Laurier, but the war brings tragedy as he faces his German cousins on the battlefield.',
+  countries: [
+    'USA'
+  ],
+  released: new Date('1923-03-31T00:00:00Z'),
+  directors: [
+    'Rex Ingram'
+  ],
+  writers: [
+    'Vicente Blasco Ibèñez (novel)',
+    'June Mathis (written for the screen by)'
+  ],
+  awards: {
+    wins: 1,
+    nominations: 0,
+    text: '1 win.'
+  },
+  lastupdated: '2015-08-24 00:59:30.430000000',
+  year: 1921,
+  imdb: {
+    rating: 7.9,
+    votes: 2475,
+    id: 12190
+  },
+  type: 'movie',
+  tomatoes: {
+    viewer: {
+      rating: 3.9,
+      numReviews: 507,
+      meter: 76
+    },
+    production: 'Metro Pictures Corporation',
+    lastUpdated: new Date('2015-07-28T18:34:16Z')
+  }
+});
+db.theaters.insertOne({ theaterId: 9999, location: { address: { street1: '4119 Oakland Ave', city: 'Hudson', state: 'TX', zipcode: '63090'}, geo: { type: 'Point', coordinates: [ -90.98977746612617, 38.53744266513183]}}})
+db.comments.insertOne({ name: 'Antoine Crenshaw', email: 'AntoineC@fakegmail.com', movie_id: 12345, text: 'Would watch again!', date: new Date()})

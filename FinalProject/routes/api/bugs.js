@@ -27,7 +27,6 @@ router.get('/:bugId', (req, res) => {
     } else {
         res.status(404).send(`Bug ${bugId} not found`);
     }
-    //FIXME: get bug from bugsArray and send response as json
 });
 
 router.post('/new', (req, res) => {
@@ -90,22 +89,17 @@ router.post('/new', (req, res) => {
 
 router.put('/:bugId', (req, res) => {
     const bugId = req.params.bugId;
-    //update existing bug
     const bugToUpdate = bugsArray.find(bug => bug.bugId === parseInt(bugId));
     const updatedBug = req.body;
 
     if (bugToUpdate) {
         for (const key in updatedBug) {
-            bugsArray[key] = updatedBug[key];
+            if (updatedBug.hasOwnProperty(key)) {
+                bugToUpdate[key] = updatedBug[key];
+            }
         }
-        bugsArray.lastUpdated = new Date();
-    }
-
-    const index = bugsArray.findIndex(bug => bug.bugId === parseInt(bugId));
-
-    if (index !== -1) {
-        bugsArray[index] = updatedBug;
-        res.status(200).json(`bugId ${bugId} updated successfully`);
+        bugToUpdate.lastUpdated = new Date();
+        res.status(200).json(`Bug ${bugId} updated successfully`);
     } else {
         res.status(404).send(`Bug ${bugId} not found`);
     }
@@ -122,6 +116,8 @@ router.put('/:bugId/classify', (req, res) => {
         const bug = bugsArray.find(bug => bug.bugId === parseInt(bugId));
         if (bug) {
             bug.classification = classification;
+            bug.classifiedOn = new Date();
+            bug.lastUpdated = new Date();
             res.status(200).json(`Bug ${bugId} classified successfully`);
         } else {
             res.status(404).send(`Bug ${bugId} not found`);
