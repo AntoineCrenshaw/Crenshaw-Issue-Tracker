@@ -15,3 +15,8 @@ db.movies.find({
   ]
 })
 
+// Exercise 2
+db.comments.insertOne({ _id: 123, name: "Antoine Crenshaw", email: "Antoine Crenshaw", movie_id: 54321, text: "Great Movie, loved every second", date: 2024-09-13})
+db.movies.updateOne({ _id: ObjectId('573a1391f29313caabcd820b')},{ $set: { imdb: { rating: 3.6, votes: 233 } , "tomatoes.rating": 7.0 } }  )
+db.movies.updateOne( {_id: ObjectId('573a1391f29313caabcd820b')}, { $push: {languages: "Spanish" } })
+db.movies.updateOne( { _id: ObjectId('573a1391f29313caabcd820b')}, {$set: { actors: ["Thor", "Iron-Man", "John Travolta"]}})
