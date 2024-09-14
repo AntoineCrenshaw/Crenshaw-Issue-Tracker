@@ -1,4 +1,3 @@
-import React from "react";
 import "./App.css";
 
 function App() {
@@ -26,7 +25,7 @@ function App() {
                 <a
                   className="nav-link active"
                   aria-current="page"
-                  href="/api/bugs.js/list"
+                  href="/api/bugs/list"
                 >
                   Bugs
                 </a>
@@ -44,19 +43,17 @@ function App() {
           <div className="row">
             <div className="col">
               <h2>Users</h2>
-              <ul>
-                <li href="">Lebron</li>
-                <li href="">Curry</li>
-                <li href="">Anthony Edwards</li>
-              </ul>
+      
+                <a className="list-items" href="/api/user/1">Lebron</a>
+                <a className="list-items" href="/api/user//2">Curry</a>
+                <a className="list-items" href="/api/user/3">Anthony Edwards</a>
+            
             </div>
             <div className="col">
               <h2>Bugs</h2>
-              <ul>
-                <li href="">Runtime Error</li>
-                <li href="">Syntax Errors</li>
-                <li href="">Error 404</li>
-              </ul>
+                <a className="list-items" href="/api/bugs/1">Runtime Error</a>
+                <a className="list-items" href="/api/bugs/2">Syntax Errors</a>
+                <a className="list-items" href="/api/bugs/3">Error 404</a>
             </div>
           </div>
         </div>

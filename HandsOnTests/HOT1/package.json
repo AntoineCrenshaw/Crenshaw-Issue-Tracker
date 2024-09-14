@@ -1,0 +1,27 @@
+{
+  "name": "awd1111-exam-1",
+  "version": "1.0.0",
+  "description": "Server",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start-dev": "nodemon -r dotenv/config server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RankenTechnicalCollege/all-coursework-AntoineCrenshaw1.git#master"
+  },
+  "author": "Antoine Crenshaw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RankenTechnicalCollege/all-coursework-AntoineCrenshaw1/issues"
+  },
+  "homepage": "https://github.com/RankenTechnicalCollege/all-coursework-AntoineCrenshaw1/tree/master#readme",
+  "dependencies": {
+    "debug": "^4.3.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0"
+  }
+}
