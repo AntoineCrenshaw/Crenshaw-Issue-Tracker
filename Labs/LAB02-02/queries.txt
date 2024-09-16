@@ -1,0 +1,3 @@
+db.bugs.find()
+db.bugs.find({assignedTo: ObjectId('66e851a113a1c7894f3783c7')})
+db.bugs.find({ $and: [ { assignedTo: ObjectId('66e851a113a1c7894f3783c7'), {createdBy: ObjectId('66e851a113a1c7894f3783c7')}]}})
