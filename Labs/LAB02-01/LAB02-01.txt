@@ -54,3 +54,9 @@ db.movies.insertOne({
 });
 db.theaters.insertOne({ theaterId: 9999, location: { address: { street1: '4119 Oakland Ave', city: 'Hudson', state: 'TX', zipcode: '63090'}, geo: { type: 'Point', coordinates: [ -90.98977746612617, 38.53744266513183]}}})
 db.comments.insertOne({ name: 'Antoine Crenshaw', email: 'AntoineC@fakegmail.com', movie_id: 12345, text: 'Would watch again!', date: new Date()})
+db.movies.updateOne({ _id: ObjectId('573a1391f29313caabcd820b')},{ $set: { imdb: { rating: 3.6, votes: 233 } , "tomatoes.rating": 7.0 } }  )
+db.movies.updateOne( {_id: ObjectId('573a1391f29313caabcd820b')}, { $push: {country: "Russia" } })
+db.movies.updateOne( {_id: ObjectId('573a1391f29313caabcd820b')}, { $push: {genres: "fantasy" } })
+db.movies.updateOne( { _id: ObjectId('573a1391f29313caabcd820b')}, {$set: { actors: ["Thor", "Iron-Man", "John Travolta"]}})
+db.theaters.deleteOne({theaterId: 1026})
+db.users.deleteOne({name: "Antoine Crenshaw"})
