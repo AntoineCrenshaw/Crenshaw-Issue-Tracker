@@ -1,0 +1,9 @@
+db.users.insertOne({email: "Antoine_Crenshaw@ranken.edu", password: "abc4321",givenName:"Antoine",familyName:"Crenshaw", fullName:"Antoine Crenshaw", role:"Developer"})
+
+db.bugs.insertOne({title:"Slow performance on login", description:"All users having a terrible time logging in.", assignedTo: ObjectId('66e851a113a1c7894f3783c7')})
+
+db.edits.insertOne({editId: ObjectId('66e851a113a1c7894f3783c7'), changedDate: new Date(), changes: {}, editor: ObjectId('66e851a113a1c7894f3783c7') })
+
+db.testCases.insertOne({testCaseId: ObjectId('66e855a213a1c7894f3783c9'), status: "failed", addedBy: null })
+
+db.comments.insertOne({commentId: ObjectId('66e8530d13a1c7894f3783c8'), content:"I think I know the cause. I will begin working on it now.", createdOn: new Date() })
