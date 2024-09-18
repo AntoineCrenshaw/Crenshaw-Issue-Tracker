@@ -1,3 +1,30 @@
 db.bugs.find()
 db.bugs.find({assignedTo: ObjectId('66e851a113a1c7894f3783c7')})
-db.bugs.find({ $and: [ { assignedTo: ObjectId('66e851a113a1c7894f3783c7'), {createdBy: ObjectId('66e851a113a1c7894f3783c7')}]}})
+db.bugs.find({
+  $and: [
+    { assignedTo: ObjectId('66e851a113a1c7894f3783c7') },
+    { createdBy: ObjectId('66e851a113a1c7894f3783c7') }
+  ]
+})
+4. db.bugs.find({classification: 'unclassified'})
+5. db.bugs.find({testCases: ObjectId('66e851a113a1c7894f3783c7')}) //Refer back to 
+6. db.bugs.find({
+$and: [
+{ classification: 'approved'},
+{ $nor: [
+	{ testCases: 'closed' }]}
+]
+})
+
+7. db.bugs.find({
+ $and: [{stepsToReproduce: null, stepsToReproduce: { $exists: false } }
+]
+})
+
+8. db.bugs.find({ 
+testCases: {$exists: false}
+})
+
+9.db.bugs.find( { hoursLogged: []})
+
+10. db.bugs.find({ comments: []})
