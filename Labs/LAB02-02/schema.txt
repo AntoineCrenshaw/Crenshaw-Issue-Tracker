@@ -1,9 +1,26 @@
 db.users.insertOne({email: "Antoine_Crenshaw@ranken.edu", password: "abc4321",givenName:"Antoine",familyName:"Crenshaw", fullName:"Antoine Crenshaw", role:"Developer"})
+db.bugs.updateOne({_id: ObjectId('66eb658a13a1c7894f3783e8')}, {$set: {resolvedBy: ObjectId('66e851a113a1c7894f3783c7'), resolvedDate: new Date(), softwareVersion: '3.4.5'}})
 
 db.bugs.insertOne({title:"Slow performance on login", description:"All users having a terrible time logging in.", assignedTo: ObjectId('66e851a113a1c7894f3783c7')})
+db.bugs.updateOne({_id: ObjectId('66eb658a13a1c7894f3783e8')}, {$set: {resolvedBy: ObjectId('66e851a113a1c7894f3783c7'), resolvedDate: new Date(), softwareVersion: '3.4.5'}})
 
 db.edits.insertOne({editId: ObjectId('66e851a113a1c7894f3783c7'), changedDate: new Date(), changes: {}, editor: ObjectId('66e851a113a1c7894f3783c7') })
+db["edits"].insertOne({ editId: ObjectId('66e851a113a1c7894f3783c8'), changedDate: new Date(), changes: {}, editor: ObjectId('66e851a113a1c7894f3783c7')})
 
 db.testCases.insertOne({testCaseId: ObjectId('66e855a213a1c7894f3783c9'), status: "failed", addedBy: null })
+db.testCases.insertOne({testCaseId: ObjectId('66ea396b13a1c7894f3783ce'), status: "passed", addedBy: ObjectId('66e851a113a1c7894f3783c7')})
 
-db.comments.insertOne({commentId: ObjectId('66e8530d13a1c7894f3783c8'), content:"I think I know the cause. I will begin working on it now.", createdOn: new Date() })
+db.comments.insertMany([
+{commentId: ObjectId(),comment: "Under Review",createdOn: new Date()},
+{commentId: ObjectId(),comment: "Working On",createdOn: new Date()},
+{commentId: ObjectId(),comment: "Fixed it for you",createdOn: new Date()},
+{commentId: ObjectId(),comment: "Need more info",createdOn: new Date()},
+{commentId: ObjectId(),comment: "Fixed bugs",createdOn: new Date()},
+{commentId: ObjectId(),comment: "Good to deploy",createdOn: new Date()},
+])
+
+db.bugs.createIndex({ title: 1, classification: 1})
+db.edits.createIndex({ editId: 1, editor: 1})
+db.users.createIndex({ email: 1, password: 1})
+db.testCases.createIndex({ testCaseId: 1, status: 1})
+db.comments.createIndex({ commentId: 1, comment: 1 })
