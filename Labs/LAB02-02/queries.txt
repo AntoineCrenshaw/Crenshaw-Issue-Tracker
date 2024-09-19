@@ -28,3 +28,14 @@ testCases: {$exists: false}
 9.db.bugs.find( { hoursLogged: []})
 
 10. db.bugs.find({ comments: []})
+
+11. db.bugs.aggregate([
+  {
+    $lookup: {
+      from: "hoursLogged",
+      localField: "hoursLogged",
+      foreignField: "hoursLogged",
+      as: "comments"
+    }
+  }
+])
