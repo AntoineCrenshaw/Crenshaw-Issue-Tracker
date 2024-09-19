@@ -1,0 +1,47 @@
+db.users.insertOne({
+
+  "email": "Matt_D@ranken.edu",
+  "password": "1234Sdew",
+  "givenName": "Matt",
+  "familyName": "D'veli",
+  "fullName": "Matt D'veli",
+  "role": "Developer"
+})
+
+db.bugs.insertOne({
+  title: "Application freezes during data export",
+  description: "The application freezes when users try to export data to a CSV file, especially for large datasets.",
+  stepsToReproduce: "1. Login to the application.\n2. Go to the Reports section.\n3. Export a large dataset to CSV.\n4. Observe the freeze.",
+  author: ObjectId('66e851a113a1c7894f3783c7'), 
+  createdDate: new Date(),
+  classification: "unapproved"
+})
+
+db.bugs.updateOne({ _id: ObjectId('66e8530d13a1c7894f3783d1')}, {
+    $set: {
+    assignedTo: ObjectId('66ea221b13a1c7894f3783cd')
+    }
+})
+
+db.bugs.updateOne({_id: ObjectId('66eb658a13a1c7894f3783e8')}, 
+$set: {comments: [ObjectId('13ewd23edsws')]}
+)
+
+db.bugs.updateOne({_id: ObjectId('66eb658a13a1c7894f3783e8')}, 
+{$set: {comments: [ObjectId('66eb022713a1c7894f3783e5')]}}
+)
+
+db.testCases.updateOne({ _id:ObjectId('66e8576013a1c7894f3783ca')}, 
+{$set: {addedBy: ObjectId('66e851a113a1c7894f3783c7')}}
+)
+
+db.testCases.updateOne({ _id:ObjectId('66e8576013a1c7894f3783ca')}, 
+$set: {hours: [0,3]}}
+)
+
+db.bugs.updateOne({
+_id: ObjectId('66eb658a13a1c7894f3783e8')}, {
+$set: 
+{resolvedBy: ObjectId('66e851a113a1c7894f3783c7'), resolvedDate: new Date(), softwareVersion: '3.4.5'}
+}
+)
