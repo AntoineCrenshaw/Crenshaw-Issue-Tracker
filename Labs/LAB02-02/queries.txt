@@ -1,6 +1,6 @@
-db.bugs.find()
-db.bugs.find({assignedTo: ObjectId('66e851a113a1c7894f3783c7')})
-db.bugs.find({
+1. db.bugs.find()
+2. db.bugs.find({assignedTo: ObjectId('66e851a113a1c7894f3783c7')})
+3. db.bugs.find({
   $and: [
     { assignedTo: ObjectId('66e851a113a1c7894f3783c7') },
     { createdBy: ObjectId('66e851a113a1c7894f3783c7') }
@@ -22,12 +22,32 @@ $and: [
 })
 
 8. db.bugs.find({ 
-testCases: {$exists: false}
+    $and: [{testCases: null, testCases: {$exists: false}}
+]
 })
 
-9.db.bugs.find( { hoursLogged: []})
+9.db.bugs.aggregate([
+  {
+    $unwind: { path: "$hoursLogged"}}
+])
 
-10. db.bugs.find({ comments: []})
+10. db.bugs.aggregate([
+  {
+    $lookup: {
+      from: "comments",
+      localField: "comments",
+      foreignField: "_id",
+      as: "numberOfComments"
+    }
+  },
+  {
+    $project: {
+      title: 1,
+      description: 1,
+      numberOfComments: { $size: "$numberOfComments" }
+    }
+  }
+])
 
 11. db.bugs.aggregate([
   {
@@ -39,3 +59,16 @@ testCases: {$exists: false}
     }
   }
 ])
+
+12. db.bugs.aggregate( [
+   {
+     $lookup:
+       {
+         from: "testCases",
+         localField: "testCases",
+         foreignField: "_id",
+         as: "testCaseId"
+       }
+  },
+  {$match:{testCaseId: {$elemMatch:{status:"passed"}}}}
+] )
