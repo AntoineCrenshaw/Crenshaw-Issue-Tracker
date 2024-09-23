@@ -47,4 +47,6 @@
 "text": "Great movie! Highly recommend it."
  })
 
+ 11. db.comments.find({})
+
 
