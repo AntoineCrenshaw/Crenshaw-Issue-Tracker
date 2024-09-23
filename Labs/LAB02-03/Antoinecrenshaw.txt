@@ -1,0 +1,50 @@
+1. db.movies.insertOne( { 
+"title": "The super Mario Bros. Movie",
+"Year": "2023",
+"Genres": "Animation",
+"Directors": "[“Aaron Horvath”, “Michael Jelenic”]",
+"Cast": ["Jack Black", "Anya Taylor-Joy","Chris Pratt", "Charlie Day"]
+})
+
+3. db.movies.updateOne({ title: "The Lion King"}, 
+        {$set: {title: "The Lion King (1994)"}
+})
+
+4.db.movies.deleteOne({ title: "The Lion King (1994)"})
+
+5.db.users.insertOne({ 
+"Name": "John Doe",
+"Email": "johndoe@example.com",
+"Password": "123456"
+})
+
+6. db.users.find(
+  { }, 
+  { 
+    "_id": 0,   
+    "name": 1,  
+    "email": 1 
+  }
+).sort(
+  { 
+    "name": -1, 
+    "email": -1
+  }
+)
+
+
+7. db.users.updateOne(
+  { email: "johndoe@example.com" },
+  { $set: { "name": "John Smith" } }
+)
+
+8.db.user.updateOne({"email": "johndoe@example.com"}, { $set: { "password": "newpassword"}})
+
+9. db.users.deleteOne({ email: "johndoe@example.com" })
+
+10. db.comments.insertOne({
+"name": "Existing_UserName",
+"text": "Great movie! Highly recommend it."
+ })
+
+
