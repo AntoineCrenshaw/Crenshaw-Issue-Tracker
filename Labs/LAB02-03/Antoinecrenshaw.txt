@@ -6,6 +6,8 @@
 "Cast": ["Jack Black", "Anya Taylor-Joy","Chris Pratt", "Charlie Day"]
 })
 
+2.
+
 3. db.movies.updateOne({ title: "The Lion King"}, 
         {$set: {title: "The Lion King (1994)"}
 })
@@ -47,6 +49,42 @@
 "text": "Great movie! Highly recommend it."
  })
 
- 11. db.comments.find({})
+ 11. db.comments.aggregate({
+  $lookup: {}
+ })
+
+ 
+HINT** aggregate() with $lookup and $project
+
+([ { $lookup: { from: “CollectionToJoin”, localField: “FieldFromCurrentCollection”, foreignField: “FieldFromForeignCollection”, as: "movie" } }, { $project: { _id: 1, text: 1, "movie.title": 1 } }])
+
+
+
+
+
+12. Update the text of the comment with the ID ObjectId("COMMENT_ID") to "This movie is a masterpiece!"
+
+13. Delete the comment with the ID ObjectId("COMMENT_ID") from the "comments" collection.
+
+14. Retrieve all movies from the "movies" collection that have the genre "Comedy" listed in their genres array.
+
+15. Update the genre of the movie with the ID ObjectId("MOVIE_ID") to include "Drama" in addition to the existing genres.
+
+16. Delete all movies from the "movies" collection where the year is less than 2000.
+
+17. Retrieve the movies released between the years 2010 and 2020, sorted in descending order based on the movie's rating.
+
+18. Update the year of all movies released in 2015 to 2016.
+
+19. Delete all movies directed by "Christopher Nolan" from the "movies" collection.
+
+20. Add a user with the email address: admin@example.com
+
+21. Retrieve all users who have the word "admin" in their email address.
+Hint {$regex:/admin/}
+
+22. Delete all comments made by the user with the email "johndoe@example.com".
+
+
 
 
