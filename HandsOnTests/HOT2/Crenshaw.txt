@@ -48,7 +48,7 @@ numberOfListings: {$sum: 1}
 	}
 },
 {
-	$sort: {numberOfListing: -1}
+	$sort: {numberOfListings: -1}
 },
 {                     
 $limit: 5
