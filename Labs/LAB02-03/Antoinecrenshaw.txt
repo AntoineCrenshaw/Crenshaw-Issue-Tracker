@@ -49,42 +49,113 @@
 "text": "Great movie! Highly recommend it."
  })
 
- 11. db.comments.aggregate({
-  $lookup: {}
- })
-
- 
-HINT** aggregate() with $lookup and $project
-
-([ { $lookup: { from: “CollectionToJoin”, localField: “FieldFromCurrentCollection”, foreignField: “FieldFromForeignCollection”, as: "movie" } }, { $project: { _id: 1, text: 1, "movie.title": 1 } }])
-
-
+ 11. db.comments.aggregate([{
+  $lookup: {
+    from: "users",
+    localField: "_id",
+    foreignField: "_id",
+    as: "movie"
+  }},
+{$project: {
+    _id: 1,
+		name: 1,
+    text: 1,
+		email: 1,
+		movie_id: 1,
+		date: 1,
+		"movies.title": 1 // Change
+  }
+ }])
 
 
 
 12. Update the text of the comment with the ID ObjectId("COMMENT_ID") to "This movie is a masterpiece!"
+db.comments.updateOne(
+  { _id: ObjectId('5a9427648b0beebeb69579e7') },
+  { $set: { text: "This movie is a masterpiece!" } }
+)
+
+
+
 
 13. Delete the comment with the ID ObjectId("COMMENT_ID") from the "comments" collection.
+db.comments.deleteOne(
+  { _id: ObjectId('5a9427648b0beebeb69579e7') },
+   { text: "This movie is a masterpiece!" } 
+)
+
 
 14. Retrieve all movies from the "movies" collection that have the genre "Comedy" listed in their genres array.
+db.movies.find({ genres: "Comedy" })
+
 
 15. Update the genre of the movie with the ID ObjectId("MOVIE_ID") to include "Drama" in addition to the existing genres.
+db.movies.updateOne(
+  { _id: ObjectId('573a1391f29313caabcd8cf4') },
+  { $addToSet: { genres: "Drama" } }
+)
+
 
 16. Delete all movies from the "movies" collection where the year is less than 2000.
+db.movies.deleteMany({ year: { $lt: 2000 } })
+
 
 17. Retrieve the movies released between the years 2010 and 2020, sorted in descending order based on the movie's rating.
+db.movies.find({ year: { $gte: 2010, $lte: 2020 } }).sort({ rating: -1 })
+
 
 18. Update the year of all movies released in 2015 to 2016.
+db.movies.updateMany({ year: 2015 }, { $set: { year: 2016 } })
+
 
 19. Delete all movies directed by "Christopher Nolan" from the "movies" collection.
+db.movies.deleteMany({ director: "Christopher Nolan" })
 
 20. Add a user with the email address: admin@example.com
+db.users.insertOne({ name: "Admin", email: "admin@example.com", password: "admin" })
 
 21. Retrieve all users who have the word "admin" in their email address.
-Hint {$regex:/admin/}
+db.users.find({ email: { $regex: /admin/ } })
 
 22. Delete all comments made by the user with the email "johndoe@example.com".
 
+db.comments.deleteMany({ user: "johndoe@example.com" })
 
+23. Create an index on the "title" field of the "movies" collection.
+db.movies.createIndex({ title: 1 })
+
+24. Retrieve all movies where the title starts with the letter "A".
+db.movies.find({ title: { $regex: /^A/ } })
+
+25. Update the genre of all movies with the genre "Action" to "Adventure".
+
+db.movies.updateMany({ genres: "Action" }, { $set: { genres: "Adventure" } })
+
+26. 
+Update a user with a lastLogin property: 
+db.users.updateOne({name:'admin'},{$set:{lastLogin: new Date('December 17, 2024')}})
+
+Delete all users who have not logged in for the past 6 months. 
+db.users.deleteMany({ lastLogin: { $lt: new Date('2024-03-23') } })
+
+27. Retrieve the average rating of all movies in the "movies" collection.
+db.movies.aggregate([{ $group: { _id: null, avgRating: { $avg: "$rating" } } }])
+
+28. Update the rating of the movie with the ID ObjectId("MOVIE_ID") to 4.5.
+db.movies.updateOne({ _id: ObjectId('573a13b0f29313caabd3486a') }, { $set: { rating: 4.5 } })
+
+29. Insert a comment with a word “spoiler” in the text.
+db.comments.insertOne({_id: ObjectId()},
+{ text: 'spoiler ahead; avoid if you dont like spoilers.'})
+
+Delete all comments that contain the word "spoiler" in their text.
+db.comments.deleteMany({ text: { $regex: /spoiler/i } })
+
+30. Retrieve the count of movies for each genre in the "movies" collection.
+db.movies.aggregate([{ $unwind: "$genres" }, { $group: { _id: "$genres", count: { $sum: 1 } } }])
+
+
+31. Update the title of all movies to uppercase.
+db.movies.updateMany({}, { $set: { title: { $toUpper: "$title" } } })
 
 
