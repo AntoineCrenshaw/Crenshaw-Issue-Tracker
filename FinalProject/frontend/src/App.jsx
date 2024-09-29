@@ -29,7 +29,7 @@ function App() {
                 >
                   Bugs
                 </a>
-                <a className="nav-link" href="/api/user/list">
+                <a className="nav-link" href="/api/users">
                   Users
                 </a>
               </div>
@@ -43,17 +43,28 @@ function App() {
           <div className="row">
             <div className="col">
               <h2>Users</h2>
-      
-                <a className="list-items" href="/api/user/1">Lebron</a>
-                <a className="list-items" href="/api/user//2">Curry</a>
-                <a className="list-items" href="/api/user/3">Anthony Edwards</a>
-            
+
+              <a className="list-items" href="/api/users">
+                Lebron
+              </a>
+              <a className="list-items" href="/api/users">
+                Curry
+              </a>
+              <a className="list-items" href="/api/users">
+                Anthony Edwards
+              </a>
             </div>
             <div className="col">
               <h2>Bugs</h2>
-                <a className="list-items" href="/api/bugs/1">Runtime Error</a>
-                <a className="list-items" href="/api/bugs/2">Syntax Errors</a>
-                <a className="list-items" href="/api/bugs/3">Error 404</a>
+              <a className="list-items" href="/api/bugs/1">
+                Runtime Error
+              </a>
+              <a className="list-items" href="/api/bugs/2">
+                Syntax Errors
+              </a>
+              <a className="list-items" href="/api/bugs/3">
+                Error 404
+              </a>
             </div>
           </div>
         </div>
