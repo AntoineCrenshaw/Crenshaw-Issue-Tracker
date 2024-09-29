@@ -13,7 +13,7 @@ app.use(express.json());
 
 app.use(express.static('frontend/dist'));
 
-app.use('/api/user', userRouter);
+app.use('/api/users', userRouter);
 app.use('/api/bugs', bugRouter);
 
 
@@ -21,5 +21,4 @@ const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
     debugServer(`Server is running on http://localhost:${port}`);
-    console.log(`Server is running on http://localhost:${port}`);
 });
