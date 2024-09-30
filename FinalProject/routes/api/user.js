@@ -3,7 +3,7 @@ import express from "express";
 const router = express.Router();
 
 import debug from "debug";
-import { GetAllUsers, GetUserByEmail, GetUserById, createUser, loginUser } from "../../database.js";
+import { GetAllUsers, GetUserByEmail, GetUserById, createUser, loginUser, updateUser, deleteUser } from "../../database.js";
 const debugUser = debug("app:UserRouter");
 
 router.use(express.urlencoded({ extended: false }));
@@ -88,25 +88,25 @@ router.post("/register", async (req, res) => {
 //Login User
 router.post("/login", async (req, res) => {
     // Get user credentials from DB
-    const { userName, currentPassword } = req.body;
+    const { email, password } = req.body;
 
-    debugUser(`User: ${userName}`);
-    debugUser(`Password: ${currentPassword}`);
+    debugUser(`Email: ${email}`);
+    debugUser(`Password: ${password}`);
 
     // Check if user exists by checking email
     try {
-    const User = await GetUserByEmail(userName);
+    const User = await GetUserByEmail(email);
     if (JSON.stringify(User) === '{}' || User === null) {
       res.status(404).send("User not found");
       return;
     }
 
-    if (!userName || !currentPassword) {
+    if (!email || !password) {
       res.status(400).send("Please enter your login credentials");
       return;
     } else {
       // login user
-      const currentUser = await loginUser(userName, currentPassword);
+      const currentUser = await loginUser(email, password);
       if (currentUser) {
         res.status(200).json({ message: `Welcome back, ${currentUser.givenName}` });
       } else {
@@ -119,46 +119,55 @@ router.post("/login", async (req, res) => {
 });
 
 
-// Update User
-// router.patch("/:userId", (req, res) => {
-//   const userId = req.params.userId;
-//   debugUser(`User id: ${userId}`);
-//   const userToUpdate = usersArray.find((user) => user.userId == userId);
+//Update User
+router.patch("/:userId", async(req, res) => {
+  const userId = req.params.userId;
+  debugUser(`User id: ${userId}`);
+  const user = await GetUserById(userId);
+  debugUser(`User: ${JSON.stringify(user)}`);
+  const updatedUser = req.body;
 
-//   const updatedUser = req.body;
+  if(user) {
+    for(const key of Object.keys(updatedUser)){
+        user[key] = updatedUser[key];
+        debugUser(`Key: ${key}, Value: ${updatedUser[key]}`);
+        updatedUser.lastUpdated = new Date('MM-dd-yyyy');
+    }
+  }else{
+    res.status(404).send(`User ${userId} not found`);
+}
 
-//   if(userToUpdate) {
-//     for(const key in updatedUser){
-//         userToUpdate[key] = updatedUser[key];
-//     }
+try {
+  const result = await updateUser(userId, user);
+  debugUser(`User updated: ${JSON.stringify(result)}`);
+  res.status(200).json({message: `User ${userId} updated!`, userId});
+} catch (error) {
+  debugUser(`Error updating user: ${error.message}`);
+  res.status(500).json({message: 'Internal Server Error'});
+}
+});
 
-//       //save the updated user in the users array
-//     const index = usersArray.findIndex((user) => user.userId == userId);
-//     if(index != -1){
-//       usersArray[index] = userToUpdate;
-//     }
-//     res.status(200).json(`User ${userId} updated successfully`);
-//     res.status(200).json({message: `User ${userId} updated successfully`});
-//     res.status(404).send("User not found");
-//   }
+//Delete User
+router.delete("/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  debugUser(`User id: ${userId}`);
 
-// });
+  try {
+    const userToDelete = await GetUserById(userId);
+    debugUser(`User to delete: ${JSON.stringify(userToDelete)}`);
+    
+    if (JSON.stringify(userToDelete) === '{}' || userToDelete === null) {
+      res.status(404).send("User not found");
+      return;
+    }else{
+      const result = await deleteUser(userId);
+      debugUser(`User deleted: ${JSON.stringify(result)}`);
+      res.status(200).json({message: `User ${userId} deleted!`, userId});
+    }
+  } catch (err) {
+    res.status(500).send(err);
+    debugUser(`Error deleting user: ${err.message}`);
+  }
+});
 
-// router.delete("/:userId", async (req, res) => {
-//   const userId = req.params.userId;
-//   debugUser(`User id: ${userId}`);
-
-//   try {
-//     const userToDelete = await GetUserById(userId);
-//     // if (index != -1) {
-//     //   usersArray.splice(index, 1);
-//     //   res.status(200).json(`User ${userId} deleted successfully`);
-//     //   res.status(200).json({message: `User ${userId} deleted successfully`});
-//     //   res.status(404).send("User not found");
-//     // }
-//   } catch (err) {
-//     res.status(500).send(err);
-//   }
-// });
-
-export { router as userRouter, GetUserById, GetUserByEmail, GetAllUsers };
+export { router as userRouter, GetUserById, GetUserByEmail, GetAllUsers, updateUser, createUser, loginUser, deleteUser };
