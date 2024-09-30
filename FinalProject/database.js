@@ -65,7 +65,6 @@ async function GetAllUsers(){
 }
 
 async function GetUserById(userId){
-    debugDb(`User id: ${userId}`);
   const db = await connect();
   if(userId.length !== 24){
     debugDb(`Invalid user id: ${userId}`);
