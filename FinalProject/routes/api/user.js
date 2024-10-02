@@ -90,9 +90,6 @@ router.post("/login", async (req, res) => {
     // Get user credentials from DB
     const { email, password } = req.body;
 
-    debugUser(`Email: ${email}`);
-    debugUser(`Password: ${password}`);
-
     // Check if user exists by checking email
     try {
     const User = await GetUserByEmail(email);
@@ -122,27 +119,26 @@ router.post("/login", async (req, res) => {
 //Update User
 router.patch("/:userId", async(req, res) => {
   const userId = req.params.userId;
-  debugUser(`User id: ${userId}`);
   const user = await GetUserById(userId);
   debugUser(`User: ${JSON.stringify(user)}`);
   const updatedUser = req.body;
 
+  try {
   if(user) {
     for(const key of Object.keys(updatedUser)){
         user[key] = updatedUser[key];
         debugUser(`Key: ${key}, Value: ${updatedUser[key]}`);
-        updatedUser.lastUpdated = new Date('MM-dd-yyyy');
+        user.lastUpdated = new Date();
     }
   }else{
-    res.status(404).send(`User ${userId} not found`);
+    res.status(404).send(`User ${userId} not found.`);
 }
 
-try {
+
   const result = await updateUser(userId, user);
   debugUser(`User updated: ${JSON.stringify(result)}`);
   res.status(200).json({message: `User ${userId} updated!`, userId});
 } catch (error) {
-  debugUser(`Error updating user: ${error.message}`);
   res.status(500).json({message: 'Internal Server Error'});
 }
 });
