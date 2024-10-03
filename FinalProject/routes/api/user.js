@@ -6,7 +6,20 @@ import debug from "debug";
 import { GetAllUsers, GetUserByEmail, GetUserById, createUser, loginUser, updateUser, deleteUser } from "../../database.js";
 const debugUser = debug("app:UserRouter");
 
+import Joi from "joi";
+
 router.use(express.urlencoded({ extended: false }));
+
+const userSchema = Joi.object({
+  userId: Joi.number().integer().min(1).required(),
+  email: Joi.string().email().pattern(/^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/, 'email').required(),
+  password: Joi.string().min(8).required(),
+  givenName: Joi.string().required(),
+  familyName: Joi.string().required(),
+  role: Joi.string().required(),
+});
+
+
 
 // Get All Users
 router.get('', (req, res) => {
@@ -37,6 +50,15 @@ router.get("/:userId", async (req, res) => {
 router.post("/register", async (req, res) => {
   const newUser = req.body;
   debugUser(`New user: ${JSON.stringify(newUser)}`);
+
+const validateResult = userSchema.validate(req.body);
+console.log(JSON.stringify(validateResult));
+
+if(validateResult.error){
+  res.status(400).send(validateResult.error.details[0].message);
+}else {
+  res.status(200).json({message: "Good Data"});
+}
 
   const searchUser = await GetUserByEmail(newUser.email);
 
