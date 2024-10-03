@@ -31,29 +31,43 @@ async function ping(){
 // Bugs CRUD operations
 async function GetAllBugs(){
   const db = await connect();
-  return db.collection('bugs').find({}).toArray();
+  return await db.collection('bugs').find({}).toArray();
 }
 
 async function GetBugById(bugId){
   const db = await connect();
-  return db.collection('bugs').findOne({ _id: newId(bugId) });
+  const data = await db.collection('bugs').findOne({ _id: new ObjectId(bugId) });
+  return data;
 }
 
 async function createBug(bug){
   const db = await connect();
-  const dbResult = db.collection('bugs').insertOne(bug);
+  const dbResult = await db.collection('bugs').insertOne(bug);
   return dbResult;
 }
 
-async function updateBug(bugId){
+async function updateBug(updatedBug){
   const db = await connect();
-  const dbResult = db.collection('bugs').updateOne({ _id: new ObjectId(bugId) }, { $set: bugId });
+  const dbResult = await db.collection('bugs').updateOne({ _id: new ObjectId(updatedBug._id) }, { $set: updatedBug });
   return dbResult;
 }
 
-async function deleteBug(bugId){
+async function updateBugClassification(newClassification){
   const db = await connect();
-  const dbResult = db.collection('bugs').deleteOne({ _id: new ObjectId(bugId) });
+  const dbResult = await db.collection('bugs').updateOne({ _id: new ObjectId(newClassification._id) }, { $set: { classification: newClassification.classification } });
+  return dbResult;
+}
+
+async function closeBug(updatedBug){
+  const db = await connect();
+  const dbResult = await db.collection('bugs').updateOne(
+    { _id: new ObjectId(updatedBug._id) }, 
+    { $set: { 
+      closed: updatedBug.closed,
+      closedOn: updatedBug.closedOn,
+      lastUpdated: updatedBug.lastUpdated
+}});
+debugDb(`Bug: ${JSON.stringify(dbResult)}`);
   return dbResult;
 }
 
@@ -70,7 +84,7 @@ async function GetUserById(userId){
     debugDb(`Invalid user id: ${userId}`);
     return {}
   } else {
-  const user = db.collection('users').findOne({ _id: new ObjectId(userId) });
+  const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
   debugDb(`User: ${JSON.stringify(user)}`);
   return user;
     }
@@ -94,6 +108,22 @@ async function updateUser(userId, user){
   return dbResult;
 }
 
+async function updateAssignTo(bug){
+  const db = await connect();
+  debugDb(`Bug: ${JSON.stringify(bug)}`);
+  const dbResult = await db.collection('bugs').updateOne(
+    { _id: new ObjectId(bug._id) }, 
+    { $set: { 
+    assignedToUserId: bug.assignedToUserId,
+    assignedToUserName: bug.assignedToUserName,
+    assignedOn: bug.assignedOn,
+    lastUpdated: bug.lastUpdated
+   } 
+  }
+);
+  return dbResult;
+}
+
 async function deleteUser(userId){
   const db = await connect();
   const dbResult = db.collection('users').deleteOne({ _id: new ObjectId(userId) });
@@ -111,4 +141,4 @@ async function loginUser(email, password){
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById, createBug, updateBug, deleteBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, deleteUser, loginUser };
+export { GetAllBugs, GetBugById, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, deleteUser, loginUser };
