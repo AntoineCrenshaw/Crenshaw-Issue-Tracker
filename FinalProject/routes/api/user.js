@@ -148,15 +148,11 @@ router.patch("/:userId", validId('userId'), validBody(updateUserSchema), async (
   debugUser(`User: ${JSON.stringify(user)}`);
 
   try {
-    if (user) {
       for (const key of Object.keys(updatedUser)) {
         user[key] = updatedUser[key];
         debugUser(`Key: ${key}, Value: ${updatedUser[key]}`);
         user.lastUpdated = new Date();
       }
-    } else {
-      res.status(404).send(`User ${userId} not found.`);
-    }
 
     const result = await updateUser(userId, user);
     debugUser(`User updated: ${JSON.stringify(result)}`);
@@ -175,15 +171,11 @@ router.delete("/:userId", validId('userId'), async (req, res, next) => {
     const userToDelete = await GetUserById(userId);
     debugUser(`User to delete: ${JSON.stringify(userToDelete)}`);
 
-    if (JSON.stringify(userToDelete) === "{}" || userToDelete === null) {
-      res.status(404).send("User not found");
-      return;
-    } else {
       const result = await deleteUser(userId);
       debugUser(`User deleted: ${JSON.stringify(result)}`);
       res.status(200).json({ message: `User ${userId} deleted!`, userId });
     }
-  } catch (err) {
+   catch (err) {
     res.status(500).send(err);
     debugUser(`Error deleting user: ${err.message}`);
   }
