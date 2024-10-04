@@ -11,9 +11,25 @@ import {
   updateAssignTo,
   GetUserById,
 } from "../../database.js";
+import { validBody } from "../../middleware/validBody.js";
+import { validId } from "../../middleware/validid.js";
 const debugBug = debug("app:BugRouter");
 
+import Joi from "joi";
+
 router.use(express.urlencoded({ extended: false }));
+
+const newBugSchema = Joi.object({
+  title: Joi.string().min(3).max(100).required(),
+  bugDescription: Joi.string().min(10).max(500).required(),
+  stepsToReproduce: Joi.string().min(10).max(500).required(),
+});
+
+const updateBugSchema = Joi.object({
+  title: Joi.string().min(3).max(100),
+  bugDescription: Joi.string().min(10).max(500),
+  stepsToReproduce: Joi.string().min(10).max(500),
+});
 
 router.get("", async (req, res) => {
   GetAllBugs()
@@ -26,8 +42,8 @@ router.get("", async (req, res) => {
 });
 
 // Get Bug by ID
-router.get("/:bugId", async (req, res) => {
-  const bugId = req.params.bugId;
+router.get("/:bugId", validBody('bugId'), async (req, res, next) => {
+  const bugId = req.bugId;
   try {
     const bug = await GetBugById(bugId);
     debugBug(`Bug: ${JSON.stringify(bug)}`);

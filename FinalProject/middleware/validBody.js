@@ -1,0 +1,14 @@
+// Desc: Middleware to validate the request body against a schema
+const validBody = (schema) => { 
+    return(req, res, next) => {
+        const validationResult = schema.validate(req.body, {abourtEarly: false});
+        if(validationResult.error){
+           return res.status(400).json({error:validationResult.error.details});
+        }else {
+            req.body = validationResult.value;
+            next();
+        }
+    }
+}
+
+export {validBody};

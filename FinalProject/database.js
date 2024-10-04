@@ -36,7 +36,7 @@ async function GetAllBugs(){
 
 async function GetBugById(bugId){
   const db = await connect();
-  const data = await db.collection('bugs').findOne({ _id: new ObjectId(bugId) });
+  const data = await db.collection('bugs').findOne({ _id: bugId});
   return data;
 }
 
@@ -80,14 +80,11 @@ async function GetAllUsers(){
 
 async function GetUserById(userId){
   const db = await connect();
-  if(userId.length !== 24){
-    debugDb(`Invalid user id: ${userId}`);
-    return {}
-  } else {
-  const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+  
+  const user = await db.collection('users').findOne({ _id: userId });
   debugDb(`User: ${JSON.stringify(user)}`);
   return user;
-    }
+  
 }
 
 async function GetUserByEmail(email){
