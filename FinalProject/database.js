@@ -36,12 +36,8 @@ async function GetAllBugs(){
 
 async function GetBugById(bugId){
   const db = await connect();
-  try {
-  const data = await db.collection('bugs').findOne({ _id: new ObjectId(bugId)});
+  const data = await db.collection('bugs').findOne({ _id: bugId});
   return data;
-  } catch (err) {
-    debugDb(`Error: ${err}`);
-  }
 }
 
 async function createBug(bug){
@@ -84,13 +80,11 @@ async function GetAllUsers(){
 
 async function GetUserById(userId){
   const db = await connect();
-  try {
-  const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+  
+  const user = await db.collection('users').findOne({ _id: userId });
   debugDb(`User: ${JSON.stringify(user)}`);
   return user;
-  } catch (err) {
-    debugDb(`Error: ${err}`);
-  }
+  
 }
 
 async function GetUserByEmail(email){
