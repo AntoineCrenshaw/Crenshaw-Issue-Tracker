@@ -36,7 +36,7 @@ async function GetAllBugs(){
 
 async function GetBugById(bugId){
   const db = await connect();
-  const data = await db.collection('bugs').findOne({ _id: bugId});
+  const data = await db.collection('bugs').findOne({ _id: new ObjectId(bugId)});
   return data;
 }
 
@@ -81,7 +81,7 @@ async function GetAllUsers(){
 async function GetUserById(userId){
   const db = await connect();
   
-  const user = await db.collection('users').findOne({ _id: userId });
+  const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
   debugDb(`User: ${JSON.stringify(user)}`);
   return user;
   
@@ -102,7 +102,7 @@ async function createUser(newUser){
 async function updateUser(userId, user){
   const db = await connect();
   const dbResult = db.collection('users').updateOne({ _id: new ObjectId(userId) }, { $set: user });
-  return dbResult;
+  return dbResult; 
 }
 
 async function updateAssignTo(bug){
