@@ -16,6 +16,12 @@ app.use(express.static('frontend/dist'));
 app.use('/api/users', userRouter);
 app.use('/api/bugs', bugRouter);
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+    debugServer(`Error: ${err.message}`);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  });
+
 
 const port = process.env.PORT || 3000;
 
