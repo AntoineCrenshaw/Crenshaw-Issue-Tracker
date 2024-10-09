@@ -134,8 +134,50 @@ async function loginUser(email, password){
   return user;
 }
 
+//comments CRUD operations
+
+async function GetComment(commentId){
+  const db = await connect();
+  debugDb(`Comment id: ${JSON.stringify(commentId)}`);
+  return db.collection('comments').findOne({ _id: new ObjectId(commentId) });
+}
+
+async function createComment(comment){
+  const db = await connect();
+  const dbResult = db.collection('comments').insertOne(comment);
+  return dbResult;
+}
+
+//Tests CRUD operations
+async function GetTests(testsId){
+  const db = await connect();
+  debugDb(`Tests id: ${JSON.stringify(testsId)}`);
+  return db.collection('testCases').findOne({ _id: new ObjectId(testsId) });
+}
+
+async function CreateTests(tests){
+  const db = await connect();
+  const dbResult = db.collection('testCases').insertOne(tests);
+  return dbResult;
+}
+
+async function updateTests(updatedTests){
+  const db = await connect();
+  const dbResult = await db.collection('testCases').updateOne({ _id: new ObjectId(updatedTests._id) }, { $set: updatedTests });
+  return dbResult;
+};
+
+async function deleteTests(testsId){
+  const db = await connect();
+  debugDb(`Tests id: ${JSON.stringify(testsId)}`);
+  const dbResult = db.collection('testCases').deleteOne({ _id: new ObjectId(testsId) });
+  return dbResult;
+}
+  
+
+
 // test the database connection
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, deleteUser, loginUser };
+export { GetAllBugs, GetBugById, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
