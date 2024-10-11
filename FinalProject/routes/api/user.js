@@ -5,6 +5,8 @@ const router = express.Router();
 import debug from "debug";
 import {
   GetAllUsers,
+  GetAllUsersByRole,
+  GetAllUsersByAge,
   GetUserByEmail,
   GetUserById,
   createUser,
@@ -36,15 +38,15 @@ const newUserSchema = Joi.object({
 
 const updateUserSchema = Joi.object({
   email: Joi.string()
-  .email()
-  .pattern(
-    /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
-    "email"
-  ),
-password: Joi.string().min(6).max(30),
-givenName: Joi.string().min(3).max(20),
-familyName: Joi.string().min(3).max(20),
-role: Joi.string().min(3),
+    .email()
+    .pattern(
+      /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
+      "email"
+    ),
+  password: Joi.string().min(6).max(30),
+  givenName: Joi.string().min(3).max(20),
+  familyName: Joi.string().min(3).max(20),
+  role: Joi.string().min(3),
 });
 
 const loginUserSchema = Joi.object({
@@ -59,25 +61,54 @@ const loginUserSchema = Joi.object({
 });
 
 // Get All Users
-router.get("", (req, res) => {
-  GetAllUsers()
-    .then((users) => {
-      res.status(200).json(users);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    });
+router.get("", async (req, res) => {
+  try {
+    const { role, maxAge } = req.query;
+    debugUser(`Role: ${role}`);
+    debugUser(`Max Age: ${maxAge}`);
+
+    let query = {};
+
+    if (role) {
+      query.role = role;
+      try {
+        const users = await GetAllUsersByRole(role);
+        return res.status(200).json(users);
+      } catch (error) {
+        return res.status(500).json({ error: 'Failed to fetch users by role' });
+      }
+    }
+
+    if(maxAge) {
+      query.maxAge = maxAge;
+      try{
+      const users = await GetAllUsersByAge(maxAge);
+      debugUser(`Max Age: ${maxAge}`);
+      return res.status(200).json(users);
+      } catch (error) {
+        return res.status(500).json({ error: 'Failed to fetch users by age' });
+      }
+    }
+
+    
+
+
+    const users = await GetAllUsers(query);
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 // Get User by ID
-router.get("/:userId", validId('userId'), async (req, res, next) => {
+router.get("/:userId", validId("userId"), async (req, res, next) => {
   const userId = req.userId;
   debugUser(`User id: ${userId}`);
   try {
     const user = await GetUserById(userId);
     if (user) {
       res.status(200).json(user);
-    }else {
+    } else {
       res.status(404).send(`User ${userId} not found.`);
     }
   } catch (err) {
@@ -88,15 +119,14 @@ router.get("/:userId", validId('userId'), async (req, res, next) => {
 // Create New User
 router.post("/register", validBody(newUserSchema), async (req, res, next) => {
   const newUser = req.body;
-    debugUser(`New user: ${JSON.stringify(newUser)}`);
-    
+  debugUser(`New user: ${JSON.stringify(newUser)}`);
+
   const searchUser = await GetUserByEmail(newUser.email);
 
   if (searchUser) {
     res.status(400).send("Email already exists");
     return;
   } else {
-    
     // save the new user to the DB
     try {
       const result = await createUser(newUser);
@@ -120,50 +150,55 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
   try {
     const User = await GetUserByEmail(email);
 
-      // login user
-      const currentUser = await loginUser(email, password);
-      if (currentUser) {
-        res
-          .status(200)
-          .json({ message: `Welcome back, ${currentUser.givenName}` });
-      } else {
-        res
-          .status(400)
-          .send("Invalid login credentials provided. Please try again");
-      }
+    // login user
+    const currentUser = await loginUser(email, password);
+    if (currentUser) {
+      res
+        .status(200)
+        .json({ message: `Welcome back, ${currentUser.givenName}` });
+    } else {
+      res
+        .status(400)
+        .send("Invalid login credentials provided. Please try again");
+    }
   } catch (err) {
     res.status(500).send(err);
   }
 });
 
 //Update User
-router.patch("/:userId", validId('userId'), validBody(updateUserSchema), async (req, res, next) => {
-  const userId = req.userId;
-  
-  //New user data
-  const updatedUser = req.body;
+router.patch(
+  "/:userId",
+  validId("userId"),
+  validBody(updateUserSchema),
+  async (req, res, next) => {
+    const userId = req.userId;
 
-  //Search for user in DB
-  const user = await GetUserById(userId);
-  debugUser(`User: ${JSON.stringify(user)}`);
+    //New user data
+    const updatedUser = req.body;
 
-  try {
+    //Search for user in DB
+    const user = await GetUserById(userId);
+    debugUser(`User: ${JSON.stringify(user)}`);
+
+    try {
       for (const key of Object.keys(updatedUser)) {
         user[key] = updatedUser[key];
         debugUser(`Key: ${key}, Value: ${updatedUser[key]}`);
         user.lastUpdated = new Date();
       }
 
-    const result = await updateUser(userId, user);
-    debugUser(`User updated: ${JSON.stringify(result)}`);
-    res.status(200).json({ message: `User ${userId} updated!`, userId });
-  } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
+      const result = await updateUser(userId, user);
+      debugUser(`User updated: ${JSON.stringify(result)}`);
+      res.status(200).json({ message: `User ${userId} updated!`, userId });
+    } catch (error) {
+      res.status(500).json({ message: "Internal Server Error" });
+    }
   }
-});
+);
 
 //Delete User
-router.delete("/:userId", validId('userId'), async (req, res, next) => {
+router.delete("/:userId", validId("userId"), async (req, res, next) => {
   const userId = req.userId;
   debugUser(`User id: ${userId}`);
 
@@ -171,23 +206,15 @@ router.delete("/:userId", validId('userId'), async (req, res, next) => {
     const userToDelete = await GetUserById(userId);
     debugUser(`User to delete: ${JSON.stringify(userToDelete)}`);
 
-      const result = await deleteUser(userId);
-      debugUser(`User deleted: ${JSON.stringify(result)}`);
-      res.status(200).json({ message: `User ${userId} deleted!`, userId });
-    }
-   catch (err) {
+    const result = await deleteUser(userId);
+    debugUser(`User deleted: ${JSON.stringify(result)}`);
+    res.status(200).json({ message: `User ${userId} deleted!`, userId });
+  } catch (err) {
     res.status(500).send(err);
     debugUser(`Error deleting user: ${err.message}`);
   }
 });
 
 export {
-  router as userRouter,
-  GetUserById,
-  GetUserByEmail,
-  GetAllUsers,
-  updateUser,
-  createUser,
-  loginUser,
-  deleteUser,
+  router as userRouter
 };
