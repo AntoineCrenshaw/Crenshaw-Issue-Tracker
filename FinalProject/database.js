@@ -25,7 +25,7 @@ async function connect() {
 async function ping(){
   const db = await connect();
   const pong = await db.command({ ping: 1 });
-  debugDb(`Ping:, ${JSON.stringify(pong)}`);
+  debugDb(`Ping: ${JSON.stringify(pong)}`);
 }
 
 // Bugs CRUD operations
@@ -83,9 +83,28 @@ async function GetAllUsersByRole(role) {
   return db.collection('users').find({ role }).toArray();
 }
 
-async function GetAllUsersByAge(maxAge){
+async function GetAllUsersByMaxAge(maxAge){
   const db = await connect();
-  return db.collection('users').find({ createdDate: { $gte: maxAge }}).toArray();
+  debugDb(`Max Age: ${maxAge}`);
+  const queryDate = new Date(maxAge);
+  if(isNaN(queryDate.getTime())) {
+    return res.status(400).json({ error: 'Invalid date provided' });
+  }
+  const query = { createdDate: { $gte: queryDate } };
+  const results = await db.collection('users').find(query).toArray();
+  return results;
+}
+
+async function GetAllUsersByMinAge(minAge){
+  const db = await connect();
+  debugDb(`Min Age: ${minAge}`);
+  const queryDate = new Date(minAge);
+  if(isNaN(queryDate.getTime())) {
+    return res.status(400).json({ error: 'Invalid date provided' });
+  }
+  const query = { createdDate: { $lte: queryDate } };
+  const results = await db.collection('users').find(query).toArray();
+  return results;
 }
 
 async function GetUserById(userId){
@@ -190,4 +209,4 @@ async function deleteTests(testsId){
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById, GetAllUsersByRole, GetAllUsersByAge, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
+export { GetAllBugs, GetBugById, GetAllUsersByRole, GetAllUsersByMaxAge,GetAllUsersByMinAge, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
