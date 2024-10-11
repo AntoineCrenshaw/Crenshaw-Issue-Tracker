@@ -58,20 +58,20 @@ const newTestsSchema = Joi.object({
   addedBy: Joi.string().required(),
 });
 
-router.get("", async (req, res) => {
-  GetAllBugs()
-    .then((bugs) => {
-      res.status(200).json(bugs);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    });
-});
-
 const updateTestSchema = Joi.object({
   status: Joi.string().min(3),
   addedBy: Joi.string(),
 });
+
+router.get("", async (req, res) => {
+  try {
+    const bugs = await GetAllBugs();
+    res.status(200).json(bugs);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 
 // Get Bug by ID
 router.get("/:bugId", validId("bugId"), async (req, res, next) => {
