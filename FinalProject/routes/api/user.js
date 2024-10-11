@@ -6,7 +6,8 @@ import debug from "debug";
 import {
   GetAllUsers,
   GetAllUsersByRole,
-  GetAllUsersByAge,
+  GetAllUsersByMaxAge,
+  GetAllUsersByMinAge,
   GetUserByEmail,
   GetUserById,
   createUser,
@@ -62,11 +63,9 @@ const loginUserSchema = Joi.object({
 
 // Get All Users
 router.get("", async (req, res) => {
-  try {
-    const { role, maxAge } = req.query;
-    debugUser(`Role: ${role}`);
-    debugUser(`Max Age: ${maxAge}`);
+  const { role, maxAge, minAge, sortBy } = req.query;
 
+  try {
     let query = {};
 
     if (role) {
@@ -75,23 +74,61 @@ router.get("", async (req, res) => {
         const users = await GetAllUsersByRole(role);
         return res.status(200).json(users);
       } catch (error) {
-        return res.status(500).json({ error: 'Failed to fetch users by role' });
+        return res.status(500).json({ error: "Failed to fetch users by role" });
       }
     }
 
-    if(maxAge) {
+    if (maxAge) {
       query.maxAge = maxAge;
-      try{
-      const users = await GetAllUsersByAge(maxAge);
-      debugUser(`Max Age: ${maxAge}`);
-      return res.status(200).json(users);
+      try {
+        const users = await GetAllUsersByMaxAge(maxAge);
+        return res.status(200).json(users);
       } catch (error) {
-        return res.status(500).json({ error: 'Failed to fetch users by age' });
+        return res.status(500).json({ error: "Failed to fetch users by age" });
       }
     }
 
-    
+    if (minAge) {
+      query.minAge = minAge;
+      try {
+        const users = await GetAllUsersByMinAge(minAge);
+        return res.status(200).json(users);
+      } catch (error) {
+        return res.status(500).json({ error: "Failed to fetch users by age" });
+      }
+    }
 
+    if (sortBy) {
+      query.sort = sortBy;
+      try {
+        const allowedSorts = [
+          "givenName",
+          "familyName",
+          "role",
+          "newest",
+          "oldest",
+        ];
+        if (allowedSorts.includes(sortBy)) {
+          if (sortBy === "givenName") {
+            query.sort = { givenName: 1, familyName: 1, createdDate: -1 };
+          } else if (sortBy === "familyName") {
+            query.sort = { familyName: 1, givenName: 1, createdDate: 1 };
+          } else if (sortBy === "role") {
+            query.sort = { role: 1, givenName: 1, createdDate: 1 };
+          } else if (sortBy === "newest") {
+            query.sort = { createdDate: -1 };
+          } else if (sortBy === "oldest") {
+            query.sort = { createdDate: 1 };
+          } else {
+            query.sort = { [sortBy]: 1 };
+          }
+        } else {
+          return res.status(400).json({ error: "Invalid sort parameter" });
+        }
+      } catch (error) {
+        return res.status(500).json({ error: "Failed to sort users" });
+      }
+    }
 
     const users = await GetAllUsers(query);
     res.status(200).json(users);
@@ -215,6 +252,4 @@ router.delete("/:userId", validId("userId"), async (req, res, next) => {
   }
 });
 
-export {
-  router as userRouter
-};
+export { router as userRouter };
