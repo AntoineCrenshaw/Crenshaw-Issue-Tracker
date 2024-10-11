@@ -78,6 +78,16 @@ async function GetAllUsers(){
   return db.collection('users').find({}).toArray();
 }
 
+async function GetAllUsersByRole(role) {
+  const db = await connect();
+  return db.collection('users').find({ role }).toArray();
+}
+
+async function GetAllUsersByAge(maxAge){
+  const db = await connect();
+  return db.collection('users').find({ createdDate: { $gte: maxAge }}).toArray();
+}
+
 async function GetUserById(userId){
   const db = await connect();
   
@@ -180,4 +190,4 @@ async function deleteTests(testsId){
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
+export { GetAllBugs, GetBugById, GetAllUsersByRole, GetAllUsersByAge, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
