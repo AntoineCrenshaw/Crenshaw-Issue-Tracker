@@ -5,6 +5,9 @@ const router = express.Router();
 import debug from "debug";
 import {
   GetAllUsers,
+  GetAllUsersByRole,
+  GetAllUsersByMaxAge,
+  GetAllUsersByMinAge,
   GetUserByEmail,
   GetUserById,
   createUser,
@@ -60,76 +63,74 @@ const loginUserSchema = Joi.object({
 
 // Get All Users
 router.get("", async (req, res) => {
-  // try {
-  //   const users = await GetAllUsers();
-  //   res.status(200).json(users);
-  // } catch (err) {
-  //   res.status(500).send(err);
-  // }
+  const { role, maxAge, minAge, sortBy } = req.query;
 
   try {
-    const { role, maxAge, minAge, sortBy, pageSize, pageNumber } = req.query;
-
     let query = {};
-    let sort = {};
-    let page = {};
-    let size = {};
 
     if (role) {
       query.role = role;
-    }
-
-    if (maxAge) {
-      const queryDate = new Date(maxAge);
-      query.createdDate = { ...query.createdDate, $lte: queryDate };
-      debugBug(`Dates created on or before: ${maxAge}`);
-    }
-
-    if (minAge) {
-      const queryDate = new Date(minAge);
-      query.createdDate = { ...query.createdDate, $gte: queryDate };
-      debugBug(`Dates created on or after : ${minAge}`);
-    }
-
-    const allowedSorts = [
-      "givenName",
-      "familyName",
-      "role",
-      "newest",
-      "oldest",
-    ];
-    if (sortBy && allowedSorts.includes(sortBy)) {
-      if (sortBy === "givenName") {
-        sort = { givenName: 1, familyName: 1, createdDate: -1 };
-      } else if (sortBy === "familyName") {
-        sort = { familyName: 1, givenName: 1, createdDate: 1 };
-      } else if (sortBy === "role") {
-        sort = { role: 1, givenName: 1, createdDate: 1 };
-      } else if (sortBy === "newest") {
-        sort = { createdDate: -1 };
-      } else if (sortBy === "oldest") {
-        sort = { createdDate: 1 };
+      try {
+        const users = await GetAllUsersByRole(role);
+        return res.status(200).json(users);
+      } catch (error) {
+        return res.status(500).json({ error: "Failed to fetch users by role" });
       }
     }
 
-    if (pageSize || pageNumber) {
-    // validation
-    size = parseInt(pageSize) || 5; // Default to 5 if not provided
-    page = parseInt(pageNumber) || 1; // Default to 1 if not provided
+    if (maxAge) {
+      query.maxAge = maxAge;
+      try {
+        const users = await GetAllUsersByMaxAge(maxAge);
+        return res.status(200).json(users);
+      } catch (error) {
+        return res.status(500).json({ error: "Failed to fetch users by age" });
+      }
     }
 
-    // Check if page size and page number are valid
-    if (size <= 0) {
-      return res.status(400).json({ message: "Page Size must be a number greater than 0" });
+    if (minAge) {
+      query.minAge = minAge;
+      try {
+        const users = await GetAllUsersByMinAge(minAge);
+        return res.status(200).json(users);
+      } catch (error) {
+        return res.status(500).json({ error: "Failed to fetch users by age" });
+      }
     }
 
-    if (page <= 0) {
-      return res.status(400).json({ message: "Page Number must be greater than 0" });
+    if (sortBy) {
+      query.sort = sortBy;
+      try {
+        const allowedSorts = [
+          "givenName",
+          "familyName",
+          "role",
+          "newest",
+          "oldest",
+        ];
+        if (allowedSorts.includes(sortBy)) {
+          if (sortBy === "givenName") {
+            query.sort = { givenName: 1, familyName: 1, createdDate: -1 };
+          } else if (sortBy === "familyName") {
+            query.sort = { familyName: 1, givenName: 1, createdDate: 1 };
+          } else if (sortBy === "role") {
+            query.sort = { role: 1, givenName: 1, createdDate: 1 };
+          } else if (sortBy === "newest") {
+            query.sort = { createdDate: -1 };
+          } else if (sortBy === "oldest") {
+            query.sort = { createdDate: 1 };
+          } else {
+            query.sort = { [sortBy]: 1 };
+          }
+        } else {
+          return res.status(400).json({ error: "Invalid sort parameter" });
+        }
+      } catch (error) {
+        return res.status(500).json({ error: "Failed to sort users" });
+      }
     }
 
-    
-    const users = await GetAllUsers(query, sort, page , size);
-    debugUser(`Users: ${JSON.stringify(users)}`);
+    const users = await GetAllUsers(query);
     res.status(200).json(users);
   } catch (err) {
     res.status(500).send(err);
@@ -185,7 +186,6 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
   // Check if user exists by checking email
   try {
     const User = await GetUserByEmail(email);
-    debugUser(`Email: ${JSON.stringify(User)})`)
 
     // login user
     const currentUser = await loginUser(email, password);
