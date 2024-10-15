@@ -8,6 +8,9 @@ import {
   GetAllUsersByRole,
   GetAllUsersByMaxAge,
   GetAllUsersByMinAge,
+  GetAllUsersBySort,
+  GetAllUsersByPageSize,
+  GetAllUsersByPageNumber,
   GetUserByEmail,
   GetUserById,
   createUser,
@@ -63,74 +66,84 @@ const loginUserSchema = Joi.object({
 
 // Get All Users
 router.get("", async (req, res) => {
-  const { role, maxAge, minAge, sortBy } = req.query;
-
   try {
+    const { role, maxAge, minAge, sortBy, pageSize, pageNumber } = req.query;
     let query = {};
+    let sort = {};
 
     if (role) {
       query.role = role;
-      try {
-        const users = await GetAllUsersByRole(role);
-        return res.status(200).json(users);
-      } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch users by role" });
-      }
+      const users = await GetAllUsersByRole(role);
+      return res.status(200).json(users);
     }
 
     if (maxAge) {
       query.maxAge = maxAge;
-      try {
-        const users = await GetAllUsersByMaxAge(maxAge);
-        return res.status(200).json(users);
-      } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch users by age" });
-      }
+      const users = await GetAllUsersByMaxAge(maxAge);
+      return res.status(200).json(users);
     }
 
     if (minAge) {
       query.minAge = minAge;
-      try {
-        const users = await GetAllUsersByMinAge(minAge);
-        return res.status(200).json(users);
-      } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch users by age" });
-      }
+      const users = await GetAllUsersByMinAge(minAge);
+      return res.status(200).json(users);
     }
 
-    if (sortBy) {
-      query.sort = sortBy;
-      try {
-        const allowedSorts = [
-          "givenName",
-          "familyName",
-          "role",
-          "newest",
-          "oldest",
-        ];
-        if (allowedSorts.includes(sortBy)) {
-          if (sortBy === "givenName") {
-            query.sort = { givenName: 1, familyName: 1, createdDate: -1 };
-          } else if (sortBy === "familyName") {
-            query.sort = { familyName: 1, givenName: 1, createdDate: 1 };
-          } else if (sortBy === "role") {
-            query.sort = { role: 1, givenName: 1, createdDate: 1 };
-          } else if (sortBy === "newest") {
-            query.sort = { createdDate: -1 };
-          } else if (sortBy === "oldest") {
-            query.sort = { createdDate: 1 };
-          } else {
-            query.sort = { [sortBy]: 1 };
-          }
-        } else {
-          return res.status(400).json({ error: "Invalid sort parameter" });
-        }
-      } catch (error) {
-        return res.status(500).json({ error: "Failed to sort users" });
+    const allowedSorts = [
+      "givenName",
+      "familyName",
+      "role",
+      "newest",
+      "oldest",
+    ];
+    if (sortBy && allowedSorts.includes(sortBy)) {
+      if (sortBy === "givenName") {
+        sort = { givenName: 1, familyName: 1, createdDate: -1 };
+      } else if (sortBy === "familyName") {
+        sort = { familyName: 1, givenName: 1, createdDate: 1 };
+      } else if (sortBy === "role") {
+        sort = { role: 1, givenName: 1, createdDate: 1 };
+      } else if (sortBy === "newest") {
+        sort = { createdDate: -1 };
+      } else if (sortBy === "oldest") {
+        sort = { createdDate: 1 };
+      } else {
+        sort = { [sortBy]: 1 };
       }
+      const users = await GetAllUsersBySort(sort);
+      console.log(users);
+      return res.status(200).json(users);
     }
 
-    const users = await GetAllUsers(query);
+    // validation
+    const size = parseInt(pageSize) || 5; // Default to 5 if not provided
+    const page = parseInt(pageNumber) || 1; // Default to 1 if not provided
+
+    if (size <= 0) {
+      return res.status(400).json({ message: "Page Size must be a number greater than 0" });
+    }
+
+    if (page <= 0) {
+      return res.status(400).json({ message: "Page Number must be greater than 0" });
+    }
+
+    if (pageNumber) {
+
+      // Default pageNumber to 1 and pageSize to 5 if not provided
+      const pageNum = parseInt(pageNumber, 10) || 1;
+      const size = parseInt(pageSize, 10) || 5;
+
+      query.pageNumber = pageNum;
+      query.pageSize = size;
+
+      debugUser(`Page Number: ${query.pageNumber}, Page Size: ${query.pageSize}`);
+
+      // Fetch the paginated users
+      const user = await GetAllUsersByPageNumber(query.pageNumber, query.pageSize);
+      return res.status(200).json(user);
+    }
+
+    const users = await GetAllUsers(query, sort);
     res.status(200).json(users);
   } catch (err) {
     res.status(500).send(err);
@@ -186,6 +199,7 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
   // Check if user exists by checking email
   try {
     const User = await GetUserByEmail(email);
+    debugUser(`Email: ${JSON.stringify(User)})`)
 
     // login user
     const currentUser = await loginUser(email, password);
