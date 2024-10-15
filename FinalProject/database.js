@@ -73,68 +73,27 @@ debugDb(`Bug: ${JSON.stringify(dbResult)}`);
 
 //Users CRUD operations
 
-async function GetAllUsers(){
+async function GetAllUsers(query = {}, sort = {}, page = null, size = null ) {
   const db = await connect();
-  return db.collection('users').find({}).toArray();
-}
+  
+  // Skip and limit are used for pagination
+  let skip = 0;
+  let limit = 0;
 
-async function GetAllUsersByRole(role) {
-  const db = await connect();
-  return db.collection('users').find({ role }).toArray();
-}
-
-async function GetAllUsersByMaxAge(maxAge){
-  const db = await connect();
-  debugDb(`Max Age: ${JSON.stringify(maxAge)}`);
-  const queryDate = new Date(maxAge);
-  if(isNaN(queryDate.getTime())) {
-    return res.status(400).json({ error: 'Invalid date provided' });
+  if (page !== null && size !== null) {
+    skip = (page - 1) * size;
+    limit = size;
   }
-  const query = { createdDate: { $gte: queryDate } };
-  const results = await db.collection('users').find(query).toArray();
-  return results;
-}
 
-async function GetAllUsersByMinAge(minAge){
-  const db = await connect();
-  debugDb(`Min Age: ${JSON.stringify(minAge)}`);
-  const queryDate = new Date(minAge);
-  if(isNaN(queryDate.getTime())) {
-    return res.status(400).json({ error: 'Invalid date provided' });
-  }
-  const query = { createdDate: { $lte: queryDate } };
-  const results = await db.collection('users').find(query).toArray();
-  return results;
-}
 
-async function GetAllUsersBySort(sortBy){
-  const db = await connect();
-  debugDb(`Sort By: ${JSON.stringify(sortBy)}`);
-  const results = await db.collection('users').find().sort(sortBy).toArray();
-  return results;
-}
-
-async function GetAllUsersByPageSize(pageSize){
-  const db = await connect();
-  // Use .limit() to limit the number of results returned to the page size
-  const results = await db.collection('users').find().limit(pageSize).toArray();
-  return results;
-}
-
-async function GetAllUsersByPageNumber(pageNumber, pageSize) {
-  try {
-    const db = await connect();
-    debugDb(`Page Number: ${pageNumber}, Page Size: ${pageSize}`);
-    const results = await db.collection('users')
-      .find()
-      .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize)
-      .toArray();
-    return results;
-  } catch (error) {
-    console.error("Error fetching users from database:", error);
-    throw error;
-  }
+ const user = await db.collection('users')
+    .find(query)       // Apply filtering
+    .sort(sort)        // Apply sorting
+    .skip(skip)        // Skip documents for pagination
+    .limit(size)       // Limit the number of documents to page size
+    .toArray();        // Convert the result to an array
+    debugDb(`Users: ${JSON.stringify(user)}`);
+    return user;
 }
 
 async function GetUserById(userId){
@@ -238,4 +197,4 @@ async function deleteTests(testsId){
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById, GetAllUsersByRole, GetAllUsersByMaxAge,GetAllUsersByMinAge, GetAllUsersBySort, GetAllUsersByPageSize, GetAllUsersByPageNumber, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
+export { GetAllBugs, GetBugById, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};

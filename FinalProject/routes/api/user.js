@@ -5,12 +5,6 @@ const router = express.Router();
 import debug from "debug";
 import {
   GetAllUsers,
-  GetAllUsersByRole,
-  GetAllUsersByMaxAge,
-  GetAllUsersByMinAge,
-  GetAllUsersBySort,
-  GetAllUsersByPageSize,
-  GetAllUsersByPageNumber,
   GetUserByEmail,
   GetUserById,
   createUser,
@@ -66,27 +60,35 @@ const loginUserSchema = Joi.object({
 
 // Get All Users
 router.get("", async (req, res) => {
+  // try {
+  //   const users = await GetAllUsers();
+  //   res.status(200).json(users);
+  // } catch (err) {
+  //   res.status(500).send(err);
+  // }
+
   try {
     const { role, maxAge, minAge, sortBy, pageSize, pageNumber } = req.query;
+
     let query = {};
     let sort = {};
+    let page = {};
+    let size = {};
 
     if (role) {
       query.role = role;
-      const users = await GetAllUsersByRole(role);
-      return res.status(200).json(users);
     }
 
     if (maxAge) {
-      query.maxAge = maxAge;
-      const users = await GetAllUsersByMaxAge(maxAge);
-      return res.status(200).json(users);
+      const queryDate = new Date(maxAge);
+      query.createdDate = { ...query.createdDate, $lte: queryDate };
+      debugBug(`Dates created on or before: ${maxAge}`);
     }
 
     if (minAge) {
-      query.minAge = minAge;
-      const users = await GetAllUsersByMinAge(minAge);
-      return res.status(200).json(users);
+      const queryDate = new Date(minAge);
+      query.createdDate = { ...query.createdDate, $gte: queryDate };
+      debugBug(`Dates created on or after : ${minAge}`);
     }
 
     const allowedSorts = [
@@ -107,18 +109,16 @@ router.get("", async (req, res) => {
         sort = { createdDate: -1 };
       } else if (sortBy === "oldest") {
         sort = { createdDate: 1 };
-      } else {
-        sort = { [sortBy]: 1 };
       }
-      const users = await GetAllUsersBySort(sort);
-      console.log(users);
-      return res.status(200).json(users);
     }
 
+    if (pageSize || pageNumber) {
     // validation
-    const size = parseInt(pageSize) || 5; // Default to 5 if not provided
-    const page = parseInt(pageNumber) || 1; // Default to 1 if not provided
+    size = parseInt(pageSize) || 5; // Default to 5 if not provided
+    page = parseInt(pageNumber) || 1; // Default to 1 if not provided
+    }
 
+    // Check if page size and page number are valid
     if (size <= 0) {
       return res.status(400).json({ message: "Page Size must be a number greater than 0" });
     }
@@ -127,23 +127,9 @@ router.get("", async (req, res) => {
       return res.status(400).json({ message: "Page Number must be greater than 0" });
     }
 
-    if (pageNumber) {
-
-      // Default pageNumber to 1 and pageSize to 5 if not provided
-      const pageNum = parseInt(pageNumber, 10) || 1;
-      const size = parseInt(pageSize, 10) || 5;
-
-      query.pageNumber = pageNum;
-      query.pageSize = size;
-
-      debugUser(`Page Number: ${query.pageNumber}, Page Size: ${query.pageSize}`);
-
-      // Fetch the paginated users
-      const user = await GetAllUsersByPageNumber(query.pageNumber, query.pageSize);
-      return res.status(200).json(user);
-    }
-
-    const users = await GetAllUsers(query, sort);
+    
+    const users = await GetAllUsers(query, sort, page , size);
+    debugUser(`Users: ${JSON.stringify(users)}`);
     res.status(200).json(users);
   } catch (err) {
     res.status(500).send(err);
