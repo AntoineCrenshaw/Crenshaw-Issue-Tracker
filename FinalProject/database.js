@@ -85,7 +85,7 @@ async function GetAllUsersByRole(role) {
 
 async function GetAllUsersByMaxAge(maxAge){
   const db = await connect();
-  debugDb(`Max Age: ${maxAge}`);
+  debugDb(`Max Age: ${JSON.stringify(maxAge)}`);
   const queryDate = new Date(maxAge);
   if(isNaN(queryDate.getTime())) {
     return res.status(400).json({ error: 'Invalid date provided' });
@@ -97,7 +97,7 @@ async function GetAllUsersByMaxAge(maxAge){
 
 async function GetAllUsersByMinAge(minAge){
   const db = await connect();
-  debugDb(`Min Age: ${minAge}`);
+  debugDb(`Min Age: ${JSON.stringify(minAge)}`);
   const queryDate = new Date(minAge);
   if(isNaN(queryDate.getTime())) {
     return res.status(400).json({ error: 'Invalid date provided' });
@@ -107,13 +107,42 @@ async function GetAllUsersByMinAge(minAge){
   return results;
 }
 
+async function GetAllUsersBySort(sortBy){
+  const db = await connect();
+  debugDb(`Sort By: ${JSON.stringify(sortBy)}`);
+  const results = await db.collection('users').find().sort(sortBy).toArray();
+  return results;
+}
+
+async function GetAllUsersByPageSize(pageSize){
+  const db = await connect();
+  // Use .limit() to limit the number of results returned to the page size
+  const results = await db.collection('users').find().limit(pageSize).toArray();
+  return results;
+}
+
+async function GetAllUsersByPageNumber(pageNumber, pageSize) {
+  try {
+    const db = await connect();
+    debugDb(`Page Number: ${pageNumber}, Page Size: ${pageSize}`);
+    const results = await db.collection('users')
+      .find()
+      .skip((pageNumber - 1) * pageSize)
+      .limit(pageSize)
+      .toArray();
+    return results;
+  } catch (error) {
+    console.error("Error fetching users from database:", error);
+    throw error;
+  }
+}
+
 async function GetUserById(userId){
   const db = await connect();
   
   const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
   debugDb(`User: ${JSON.stringify(user)}`);
   return user;
-  
 }
 
 async function GetUserByEmail(email){
@@ -209,4 +238,4 @@ async function deleteTests(testsId){
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById, GetAllUsersByRole, GetAllUsersByMaxAge,GetAllUsersByMinAge, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
+export { GetAllBugs, GetBugById, GetAllUsersByRole, GetAllUsersByMaxAge,GetAllUsersByMinAge, GetAllUsersBySort, GetAllUsersByPageSize, GetAllUsersByPageNumber, createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
