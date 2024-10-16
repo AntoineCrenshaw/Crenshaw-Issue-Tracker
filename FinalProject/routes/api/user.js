@@ -5,9 +5,6 @@ const router = express.Router();
 import debug from "debug";
 import {
   GetAllUsers,
-  GetAllUsersByRole,
-  GetAllUsersByMaxAge,
-  GetAllUsersByMinAge,
   GetUserByEmail,
   GetUserById,
   createUser,
@@ -61,80 +58,66 @@ const loginUserSchema = Joi.object({
   password: Joi.string().min(6).max(30).required(),
 });
 
-// Get All Users
 router.get("", async (req, res) => {
-  const { role, maxAge, minAge, sortBy } = req.query;
+// Get All Users
+let users = await GetAllUsers();
+// Get users search query
+const { role, maxAge, minAge, sortBy, pageNumber, pageSize } = req.query;
 
-  try {
-    let query = {};
+// Filter users by role
+if (role) {
+  users = users.filter((user) => user.role === role);
+  debugUser(`Role: ${role}`);
+}
 
-    if (role) {
-      query.role = role;
-      try {
-        const users = await GetAllUsersByRole(role);
-        return res.status(200).json(users);
-      } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch users by role" });
-      }
-    }
-
+// Filter users by age of account
+if (maxAge || minAge) {
+  users = users.filter((user) => {
     if (maxAge) {
-      query.maxAge = maxAge;
-      try {
-        const users = await GetAllUsersByMaxAge(maxAge);
-        return res.status(200).json(users);
-      } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch users by age" });
-      }
+      return new Date(user.createdDate) <= new Date(maxAge);
     }
-
     if (minAge) {
-      query.minAge = minAge;
-      try {
-        const users = await GetAllUsersByMinAge(minAge);
-        return res.status(200).json(users);
-      } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch users by age" });
-      }
+      return new Date(user.createdDate) >= new Date(minAge);
     }
+  });
+  debugUser(`Max Age: ${maxAge}, Min Age: ${minAge}`);
+}
 
-    if (sortBy) {
-      query.sort = sortBy;
-      try {
-        const allowedSorts = [
-          "givenName",
-          "familyName",
-          "role",
-          "newest",
-          "oldest",
-        ];
-        if (allowedSorts.includes(sortBy)) {
-          if (sortBy === "givenName") {
-            query.sort = { givenName: 1, familyName: 1, createdDate: -1 };
-          } else if (sortBy === "familyName") {
-            query.sort = { familyName: 1, givenName: 1, createdDate: 1 };
-          } else if (sortBy === "role") {
-            query.sort = { role: 1, givenName: 1, createdDate: 1 };
-          } else if (sortBy === "newest") {
-            query.sort = { createdDate: -1 };
-          } else if (sortBy === "oldest") {
-            query.sort = { createdDate: 1 };
-          } else {
-            query.sort = { [sortBy]: 1 };
-          }
-        } else {
-          return res.status(400).json({ error: "Invalid sort parameter" });
-        }
-      } catch (error) {
-        return res.status(500).json({ error: "Failed to sort users" });
-      }
+// Sort users by date, role, name, or createdDate
+
+  const allowedSorts = ["newest", "givenName", "familyName", "role", "oldest"];
+  if (sortBy && allowedSorts.includes(sortBy)) {
+    switch (sortBy) {
+      case "newest":
+        users = users.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+        break;
+      case "oldest":
+        users = users.sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
+        break;
+      case "givenName":
+        users = users.sort((a, b) => a.givenName.localeCompare(b.givenName));
+        break;
+      case "familyName":
+        users = users.sort((a, b) => a.familyName.localeCompare(b.familyName));
+        break;
+      case "role":
+        users = users.sort((a, b) => a.role.localeCompare(b.role));
+        break;
     }
-
-    const users = await GetAllUsers(query);
-    res.status(200).json(users);
-  } catch (err) {
-    res.status(500).send(err);
   }
+
+  // Pagination
+
+  const page = parseInt(pageNumber) || 1;
+  const limit = parseInt(pageSize) || 5;
+  const skip = (pageNumber - 1) * pageSize;
+
+  users = users.slice(skip, skip + pageSize);
+  debugUser(`Page: ${page}, Page Size: ${limit}`);
+
+
+
+res.status(200).json(users);
 });
 
 // Get User by ID
