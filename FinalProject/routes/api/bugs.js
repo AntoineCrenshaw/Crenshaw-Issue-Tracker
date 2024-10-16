@@ -88,8 +88,8 @@ router.get("/:bugId", validId("bugId"), async (req, res, next) => {
 // Create New Bug
 router.post("/new", validBody(newBugSchema), async (req, res, next) => {
   const newBug = req.body;
-  debugBug(`New bug: ${newBug}`);
   newBug.createdDate = new Date();
+  debugBug(`New bug: ${JSON.stringify(newBug)}`);
 
   try {
     const dbResult = await createBug(newBug);
@@ -283,7 +283,7 @@ router.get("/:bugId/comments/:commentId", validId("bugId"), validId("commentId")
   };
 });
 
-// Get Bug Comment by Comment ID
+// Get Bug Comment by Comment ID to Create a Comment
 router.post("/:bugId/comments", validId("bugId"), validBody(commentSchema), async (req, res) => {
   const bugId = req.params.bugId;
   const newComment = req.body;
