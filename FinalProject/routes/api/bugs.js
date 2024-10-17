@@ -66,6 +66,23 @@ const updateTestSchema = Joi.object({
 router.get("", async (req, res) => {
   try {
     const bugs = await GetAllBugs();
+    // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
+    const { classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed } = req.query;
+    if (classification) {
+      bugs = bugs.filter((bug) => bug.classification === classification);
+      debugBug(`Classification: ${classification}`);
+    }
+    if (closed) {
+      bugs = bugs.filter((bug) => bug.closed === closed);
+      debugBug(`Closed: ${closed}`);
+    }
+    if (maxAge) {
+      bugs = bugs.filter((bug) => bug.createdDate <= new Date(maxAge));
+      debugBug(`Max Age: ${maxAge}`);
+    }
+    if(minAge){
+      bugs = bugs.filter((bug) => bug.createdDate >= new Date(maxAge));
+    }
     res.status(200).json(bugs);
   } catch (err) {
     res.status(500).send(err);
