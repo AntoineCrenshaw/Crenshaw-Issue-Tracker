@@ -30,8 +30,13 @@ async function ping(){
 
 // Bugs CRUD operations
 async function GetAllBugs(){
+  try {
   const db = await connect();
   return await db.collection('bugs').find({}).toArray();
+  } catch (error) {
+    console.error("Error fetching bugs:", error);
+    throw error;
+  }
 }
 
 async function GetBugById(bugId){

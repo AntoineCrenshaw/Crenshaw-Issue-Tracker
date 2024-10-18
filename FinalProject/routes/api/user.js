@@ -59,32 +59,33 @@ const loginUserSchema = Joi.object({
 });
 
 router.get("", async (req, res) => {
-// Get All Users
-let users = await GetAllUsers();
-// Get users search query
-const { role, maxAge, minAge, sortBy, pageNumber, pageSize } = req.query;
+  // Get All Users
+  let users = await GetAllUsers();
 
-// Filter users by role
-if (role) {
-  users = users.filter((user) => user.role === role);
-  debugUser(`Role: ${role}`);
-}
+  // Get users search query
+  const { role, maxAge, minAge, sortBy, pageNumber, pageSize } = req.query;
+  console.log("Received query parameters:", req.query);
 
-// Filter users by age of account
-if (maxAge || minAge) {
-  users = users.filter((user) => {
-    if (maxAge) {
-      return new Date(user.createdDate) <= new Date(maxAge);
-    }
-    if (minAge) {
-      return new Date(user.createdDate) >= new Date(minAge);
-    }
-  });
-  debugUser(`Max Age: ${maxAge}, Min Age: ${minAge}`);
-}
+  // Filter users by role
+  if (role) {
+    users = users.filter((user) => user.role === role);
+    debugUser(`Role: ${role}`);
+  }
 
-// Sort users by date, role, name, or createdDate
+  // Filter users by age of account
+  if (maxAge || minAge) {
+    users = users.filter((user) => {
+      if (maxAge) {
+        return new Date(user.createdDate) <= new Date(maxAge);
+      }
+      if (minAge) {
+        return new Date(user.createdDate) >= new Date(minAge);
+      }
+    });
+    debugUser(`Max Age: ${maxAge}, Min Age: ${minAge}`);
+  }
 
+  // Sort users by date, role, name, or createdDate
   const allowedSorts = ["newest", "givenName", "familyName", "role", "oldest"];
   if (sortBy && allowedSorts.includes(sortBy)) {
     switch (sortBy) {
@@ -107,18 +108,16 @@ if (maxAge || minAge) {
   }
 
   // Pagination
-
   const page = parseInt(pageNumber) || 1;
   const limit = parseInt(pageSize) || 5;
-  const skip = (pageNumber - 1) * pageSize;
+  const skip = (page - 1) * limit;
 
-  users = users.slice(skip, skip + pageSize);
+  users = users.slice(skip, skip + limit);
   debugUser(`Page: ${page}, Page Size: ${limit}`);
 
-
-
-res.status(200).json(users);
+  res.status(200).json(users);
 });
+
 
 // Get User by ID
 router.get("/:userId", validId("userId"), async (req, res, next) => {
