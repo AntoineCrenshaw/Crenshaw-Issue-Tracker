@@ -74,7 +74,7 @@ router.get("/name/:productName", async (req,res, next) => {
 })
 
 // Create new product
-router.post("", validBody(newProductSchema)), async (req,res, next) => {
+router.post("", validBody(newProductSchema), async (req,res, next) => {
   const newProduct = req.body;
   debugProducts(`New Product: ${JSON.stringify(newProduct)}`);
 
@@ -83,12 +83,12 @@ router.post("", validBody(newProductSchema)), async (req,res, next) => {
     debugProducts(`Product Created: ${JSON.stringify(results)}`);
     newProduct.createdOn = new Date();
     newProduct.lastUpdatedOn = new Date();
-    res.status(200).json({ message: `New product registered!, ${newProduct._id}`});
+    res.status(200).json({ message: `New product registered!, ${results.insertedId}`});
     debugProducts(`New product rote hit!`)
   } catch (err){
     res.status(500).send(err.message);
   }
-}
+});
 
 // Update Product by ID
 router.patch("/:productId", validId("productId"), validBody(updateProductSchema), async (req,res, next) => {
@@ -102,7 +102,7 @@ router.patch("/:productId", validId("productId"), validBody(updateProductSchema)
     if (product) {
       const results = await updateProduct(productId, updatedProduct);
       debugProducts(`Product Updated: ${JSON.stringify(results)}`);
-      res.status(200).json({ message: `Product Updated!, ${updatedProduct.name}`});
+      res.status(200).json({ message: `Product Updated!, ${results,productId}`});
       debugProducts(`Product Update rote hit!`)
     } else {
       res.status(400).json(` Product ${productId} not found}`)
@@ -122,7 +122,7 @@ router.delete("/:productId", validId("productId"), async (req,res, next) => {
     if (product) {
       const results = await deleteProduct(productId);
       debugProducts(`Product Deleted: ${JSON.stringify(results)}`);
-      res.status(200).json({ message: `Product Deleted!, ${product.name}`});
+      res.status(200).json({ message: `Product Deleted!, ${productId}`});
       debugProducts(`Product Delete rote hit!`)
     } else {
       res.status(400).json(` Product ${productId} not found}`)
