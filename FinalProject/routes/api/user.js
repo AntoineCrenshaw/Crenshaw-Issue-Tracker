@@ -11,12 +11,16 @@ import {
   loginUser,
   updateUser,
   deleteUser,
+  saveAuditLog,
 } from "../../database.js";
 import { validBody } from "../../middleware/validBody.js";
 import { validId } from "../../middleware/validid.js";
 const debugUser = debug("app:UserRouter");
 
 import Joi from "joi";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { isLoggedIn } from "@merlin4/express-auth";
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -31,7 +35,7 @@ const newUserSchema = Joi.object({
   password: Joi.string().min(6).max(30).required(),
   givenName: Joi.string().min(3).max(20).required(),
   familyName: Joi.string().min(3).max(20).required(),
-  role: Joi.string().min(3).required(),
+  role: Joi.string().min(3).optional(),
 });
 
 const updateUserSchema = Joi.object({
@@ -58,9 +62,32 @@ const loginUserSchema = Joi.object({
   password: Joi.string().min(6).max(30).required(),
 });
 
+async function issueAuthToken(user) {
+  const token = jwt.sign(
+    { _id: user._id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+  return token;
+}
+
+async function issueAuthCookie(res, token) {
+  const cookieOptions = {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60,
+    sameSite: "strict",
+    secure: true,
+  };
+  res.cookie("authToken", token, cookieOptions);
+}
+
 router.get("", async (req, res) => {
   // Get All Users
   let users = await GetAllUsers();
+
+  if (req.auth) {
+    debugUser(rq.auth.email);
+  }
 
   // Get users search query
   const { role, maxAge, minAge, sortBy, pageNumber, pageSize } = req.query;
@@ -90,10 +117,14 @@ router.get("", async (req, res) => {
   if (sortBy && allowedSorts.includes(sortBy)) {
     switch (sortBy) {
       case "newest":
-        users = users.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+        users = users.sort(
+          (a, b) => new Date(b.createdDate) - new Date(a.createdDate)
+        );
         break;
       case "oldest":
-        users = users.sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
+        users = users.sort(
+          (a, b) => new Date(a.createdDate) - new Date(b.createdDate)
+        );
         break;
       case "givenName":
         users = users.sort((a, b) => a.givenName.localeCompare(b.givenName));
@@ -118,7 +149,6 @@ router.get("", async (req, res) => {
   res.status(200).json(users);
 });
 
-
 // Get User by ID
 router.get("/:userId", validId("userId"), async (req, res, next) => {
   const userId = req.userId;
@@ -135,6 +165,7 @@ router.get("/:userId", validId("userId"), async (req, res, next) => {
   }
 });
 
+
 // Create New User
 router.post("/register", validBody(newUserSchema), async (req, res, next) => {
   const newUser = req.body;
@@ -148,14 +179,38 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
   } else {
     // save the new user to the DB
     try {
+      //Create hashed password
+      newUser.password = await bcrypt.hash(newUser.password, 10);
+      debugUser(`Hashed password: ${newUser.password}`);
+
       const result = await createUser(newUser);
       debugUser(`User created: ${JSON.stringify(result)}`);
-      newUser.createdDate = new Date();
-      res
-        .status(200)
-        .json({ message: `New user registered!, ${newUser.givenName}` });
+      newUser.createdOn = new Date();
+      newUser.role = "developer";
+      const log = {
+        timestamp: new Date(),
+        collection: "users",
+        operation: "insert",
+        target: newUser._id,
+        update: JSON.stringify(newUser),
+      }
+      await saveAuditLog(log);
+      
+        // Issue JWT token
+        const jwtToken = await issueAuthToken(newUser);
+
+        // Create auth cookie
+        await issueAuthCookie(res, jwtToken);
+        return res
+          .status(200)
+          .json({
+            message: `New user registered!`,
+            newUser,
+            authToken: jwtToken,
+          });
+       
     } catch (error) {
-      res.status(500).send(error);
+      return res.status(500).send(error.message);
     }
   }
 });
@@ -168,17 +223,41 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
   // Check if user exists by checking email
   try {
     const User = await GetUserByEmail(email);
+    debugUser(`User: ${JSON.stringify(User)}`);
 
-    // login user
-    const currentUser = await loginUser(email, password);
-    if (currentUser) {
-      res
-        .status(200)
-        .json({ message: `Welcome back, ${currentUser.givenName}` });
+    if (!User) {
+      res.status(400).send("User does not exist. Please register.");
+      return;
+    }
+
+    // Check if user exists and password matches
+    if (User && (await bcrypt.compare(password, User.password))) {
+    debugUser(`User email and password verified`);
+    
+        // Issue JWT token
+        const jwtToken = await issueAuthToken(User);
+        await issueAuthCookie(res, jwtToken);
+
+        return res
+          .status(200)
+          .json({ message: `Welcome back!`, User, authToken: jwtToken });
+    }
+  } catch (error) {
+    debugUser(`Error: ${error.message}`);
+    return res.status(500).send(error.message);
+  }
+});
+
+// Users can edit their own profile
+router.get("/me", isLoggedIn(), validBody(loginUserSchema), async (req, res, next) => {
+  const userId = req.body;
+  debugUser(`User id: ${userId}`);
+  try {
+    const user = await GetUserById(userId);
+    if (user) {
+      res.status(200).json(user);
     } else {
-      res
-        .status(400)
-        .send("Invalid login credentials provided. Please try again");
+      res.status(404).send(`User ${userId} not found.`);
     }
   } catch (err) {
     res.status(500).send(err);

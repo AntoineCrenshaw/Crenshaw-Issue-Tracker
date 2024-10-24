@@ -86,7 +86,6 @@ async function GetAllUsers(){
 
 async function GetUserById(userId){
   const db = await connect();
-  
   const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
   debugDb(`User: ${JSON.stringify(user)}`);
   return user;
@@ -178,6 +177,12 @@ async function deleteTests(testsId){
   const dbResult = db.collection('testCases').deleteOne({ _id: new ObjectId(testsId) });
   return dbResult;
 }
+
+async function saveAuditLog(log){
+  const db = await connectToDatabase();
+  const dbResult = await db.collection('AuditLog').insertOne(log);
+  return dbResult;
+}
   
 
 
@@ -185,4 +190,4 @@ async function deleteTests(testsId){
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById,createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests};
+export { GetAllBugs, GetBugById,createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests, saveAuditLog };
