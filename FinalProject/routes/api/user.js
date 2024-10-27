@@ -8,7 +8,6 @@ import {
   GetUserByEmail,
   GetUserById,
   createUser,
-  loginUser,
   updateUser,
   deleteUser,
   saveAuditLog,
@@ -81,12 +80,12 @@ async function issueAuthCookie(res, token) {
   res.cookie("authToken", token, cookieOptions);
 }
 
-router.get("", async (req, res) => {
+router.get("", isLoggedIn(), async (req, res) => {
   // Get All Users
   let users = await GetAllUsers();
 
   if (req.auth) {
-    debugUser(rq.auth.email);
+    debugUser(req.auth.email);
   }
 
   // Get users search query
@@ -150,7 +149,7 @@ router.get("", async (req, res) => {
 });
 
 // Get User by ID
-router.get("/:userId", validId("userId"), async (req, res, next) => {
+router.get("/:userId", isLoggedIn(), validId("userId"), async (req, res, next) => {
   const userId = req.userId;
   debugUser(`User id: ${userId}`);
   try {
@@ -187,6 +186,7 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
       debugUser(`User created: ${JSON.stringify(result)}`);
       newUser.createdOn = new Date();
       newUser.role = "developer";
+      debugUser(`New user: ${JSON.stringify(newUser)}`);
       const log = {
         timestamp: new Date(),
         collection: "users",
@@ -248,21 +248,31 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
   }
 });
 
-// Users can edit their own profile
-router.get("/me", isLoggedIn(), validBody(loginUserSchema), async (req, res, next) => {
-  const userId = req.body;
-  debugUser(`User id: ${userId}`);
+// Users can view their account information
+router.get("/me", isLoggedIn(), validId("userId"), async (req, res) => {
+  if (!req.auth) {
+    // If user is not authenticated, return 401 error
+    return res.status(401).json({ message: 'You are not authenticated' });
+  }
+
+  // Retrieve the userId from the authenticated request
+  const userId = req.auth._id; 
+  
   try {
+    // Query the database to fetch user details
     const user = await GetUserById(userId);
+
     if (user) {
-      res.status(200).json(user);
+      res.status(200).json(user); 
     } else {
-      res.status(404).send(`User ${userId} not found.`);
+      res.status(404).json({ message: `User ${userId} not found.` });
     }
   } catch (err) {
-    res.status(500).send(err);
+    // Send 500 error if database query fails
+    res.status(500).json({ message: err.message });
   }
 });
+
 
 //Update User
 router.patch(
