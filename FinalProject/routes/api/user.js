@@ -249,7 +249,7 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
 });
 
 // Users can view their account information
-router.get("/me", isLoggedIn(), validId("userId"), async (req, res) => {
+router.get("/me", isLoggedIn(), async (req, res) => {
   if (!req.auth) {
     // If user is not authenticated, return 401 error
     return res.status(401).json({ message: 'You are not authenticated' });
@@ -257,6 +257,10 @@ router.get("/me", isLoggedIn(), validId("userId"), async (req, res) => {
 
   // Retrieve the userId from the authenticated request
   const userId = req.auth._id; 
+
+   if (!ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Invalid user ID format" });
+  }
   
   try {
     // Query the database to fetch user details
@@ -273,6 +277,46 @@ router.get("/me", isLoggedIn(), validId("userId"), async (req, res) => {
   }
 });
 
+router.put("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userId"), async (req, res, next) => {
+  const userId = req.userId;
+  const updatedUser = req.body;
+
+  try {
+    const user = await GetUserById(userId);
+    if (user) {
+      for (const key of Object.keys(updatedUser)) {
+        user[key] = updatedUser[key];
+        user.lastUpdatedOn = new Date();
+        user.lastUpdatedBy = req.auth._id;
+      }
+
+      if (updatedUser.password) {
+        user.password = await bcrypt.hash(updatedUser.password, 10);
+      }
+
+      // issue a new token if the user is updating their own account
+      if (req.auth._id === userId) {
+        const jwtToken = await issueAuthToken(user);
+        await issueAuthCookie(res, jwtToken);
+      }
+
+      const result = await updateUser(userId, user);
+      const log = {
+        timestamp: new Date(),
+        collection: "users",
+        operation: "update",
+        target: user._id,
+        update: JSON.stringify(user),
+      }
+      await saveAuditLog(log);
+      res.status(200).json({ message: `User ${userId} updated!`, userId });
+    } else {
+      res.status(404).send(`User ${userId} not found.`);
+    }
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
 
 //Update User
 router.patch(
