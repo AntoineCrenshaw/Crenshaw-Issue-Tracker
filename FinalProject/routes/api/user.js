@@ -281,6 +281,8 @@ router.put("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userI
   const userId = req.userId;
   const updatedUser = req.body;
 
+  //Updates but gets an error
+
   try {
     const user = await GetUserById(userId);
     if (user) {
@@ -299,7 +301,6 @@ router.put("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userI
         const jwtToken = await issueAuthToken(user);
         await issueAuthCookie(res, jwtToken);
       }
-
       const result = await updateUser(userId, user);
       const log = {
         timestamp: new Date(),
@@ -309,7 +310,7 @@ router.put("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userI
         update: JSON.stringify(user),
       }
       await saveAuditLog(log);
-      res.status(200).json({ message: `User ${userId} updated!`, userId });
+      return res.status(200).json({ message: `User ${userId} updated!`, userId });
     } else {
       res.status(404).send(`User ${userId} not found.`);
     }
@@ -350,7 +351,7 @@ router.patch(
 );
 
 //Delete User
-router.delete("/:userId", validId("userId"), async (req, res, next) => {
+router.delete("/:userId", isLoggedIn(), validId("userId"), async (req, res, next) => {
   const userId = req.userId;
   debugUser(`User id: ${userId}`);
 
@@ -360,6 +361,14 @@ router.delete("/:userId", validId("userId"), async (req, res, next) => {
 
     const result = await deleteUser(userId);
     debugUser(`User deleted: ${JSON.stringify(result)}`);
+    const log = {
+      timestamp: new Date(),
+      collection: "users",
+      operation: "delete",
+      target: userId,
+      update: JSON.stringify(userToDelete),
+    }
+    await saveAuditLog(log);
     res.status(200).json({ message: `User ${userId} deleted!`, userId });
   } catch (err) {
     res.status(500).send(err);
