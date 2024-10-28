@@ -179,7 +179,7 @@ async function deleteTests(testsId){
 }
 
 async function saveAuditLog(log){
-  const db = await connectToDatabase();
+  const db = await connect();
   const dbResult = await db.collection('AuditLog').insertOne(log);
   return dbResult;
 }
