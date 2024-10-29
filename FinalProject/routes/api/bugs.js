@@ -16,6 +16,7 @@ import {
   CreateTests,
   updateTests,
   deleteTests,
+  saveAuditLog,
 } from "../../database.js";
 import { validBody } from "../../middleware/validBody.js";
 import { validId } from "../../middleware/validid.js";
@@ -67,6 +68,7 @@ const updateTestSchema = Joi.object({
 router.get("", isLoggedIn(), async (req, res) => {
   try {
     let bugs = await GetAllBugs();
+
     // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
     const {
       classification,
@@ -171,6 +173,20 @@ router.post("/new", isLoggedIn(), validBody(newBugSchema), async (req, res, next
 
   try {
     const dbResult = await createBug(newBug);
+    dbResult.createdOn = new Date();
+    dbResult.createdBy = req.auth._id;
+    dbResult.classification = "unclassified";
+    dbResult.closed = false;
+
+    const log = {
+      timestamp : new Date(),
+      collection : "bugs",
+      operation : "insert",
+      target: dbResult._id,
+      update: dbResult,
+      auth: req.auth,
+    }
+    await saveAuditLog(log);
     res.status(200).json(`Bug created successfully`);
   } catch (err) {
     res.status(500).send(err);
@@ -211,8 +227,7 @@ router.patch(
 //Update Bug Classification/Priority
 router.patch(
   "/:bugId/classify",
-  isLoggedIn(),
-  validId("bugId"),
+  validId("bugId"), isLoggedIn(),
   validBody(classifyBugSchema),
   async (req, res, next) => {
     const bugId = req.params.bugId;
@@ -221,6 +236,8 @@ router.patch(
 
     try {
       const currentClassification = await GetBugById(bugId);
+      currentClassification.classifiedOn = new Date();
+      currentClassification.classifiedBy = req.auth._id;
 
       for (const key of Object.keys(newClassification)) {
         currentClassification[key] = newClassification[key];
@@ -229,6 +246,15 @@ router.patch(
       }
 
       const result = await updateBug(currentClassification);
+      const log = {
+        timestamp : new Date(),
+        collection : "bugs",
+        operation : "update",
+        target: bugId,
+        update: result,
+        auth: req.auth,
+      }
+      await saveAuditLog(log);
       res.status(200).json({ message: `Bug ${bugId} classified!`, bugId });
     } catch (err) {
       res.status(500).send(err);
@@ -239,8 +265,7 @@ router.patch(
 //update assigned to
 router.patch(
   "/:bugId/assign",
-  isLoggedIn(),
-  validId("bugId"),
+  validId("bugId"), isLoggedIn(),
   validBody(assignBugSchema),
   async (req, res, next) => {
     const bugId = req.params.bugId;
@@ -251,6 +276,8 @@ router.patch(
     try {
       // Query the database to get the bug by id
       const bug = await GetBugById(bugId);
+      debugBug(`Bug: ${JSON.stringify(bug)}`);
+      bug.assignedBy = req.auth._id;
 
       // Query the database to get the user by id
       const assignedToUser = await GetUserById(assignedToUserId);
@@ -262,6 +289,15 @@ router.patch(
       bug.lastUpdated = new Date();
 
       const result = await updateAssignTo(bug);
+      debugBug(`Bug updated: ${JSON.stringify(result)}`);
+      const log = {
+        timestamp : new Date(),
+        collection : "bugs",
+        operation : "update",
+        target: bugId,
+        update: result,
+        auth: req.auth,
+      };
       res
         .status(200)
         .json(
@@ -277,8 +313,7 @@ router.patch(
 //close bug
 router.put(
   "/:bugId/close",
-  isLoggedIn(),
-  validId("bugId"),
+  validId("bugId"), isLoggedIn(),
   validBody(closeBugSchema),
   async (req, res, next) => {
     const bugId = req.params.bugId;
@@ -286,11 +321,27 @@ router.put(
 
     try {
       const bug = await GetBugById(bugId);
+        //Set to null if bug is reopened
+      if (closed === false) {
+        bug.closedOn
+        bug.closedBy = null;
+      }
       bug.closed = closed;
-      bug.closedOn = new Date();
+      bug.closedOn = new Date(); 
+      bug.closedBy = req.auth._id;
       bug.lastUpdated = new Date();
 
       const result = await closeBug(bug);
+      debugBug(`Bug closed: ${JSON.stringify(result)}`);
+      const log = {
+        timestamp : new Date(),
+        collection : "bugs",
+        operation : "update",
+        target: bugId,
+        update: result,
+        auth: req.auth,
+      }
+      await saveAuditLog(log);
       res.status(200).json({ message: `Bug ${bugId} closed!`, bugId });
     } catch (err) {
       res.status(500).send(err);
@@ -357,6 +408,10 @@ router.post(
   async (req, res) => {
     const bugId = req.params.bugId;
     const newComment = req.body;
+
+    if (req.auth) {
+      debugBug(`User: ${JSON.stringify(req.auth)}`);
+    }
 
     try {
       // Get the bug by id
@@ -447,9 +502,22 @@ router.post(
       }
 
       const result = await CreateTests(newTests);
+      result.lastUpdated = new Date();
+      result.lastUpdatedBy = req.auth._id;
+      debugBug(`Tests created: ${JSON.stringify(result)}`);
 
       bug.testCases.push(result.insertedId);
       const updateResult = await updateBug(bug);
+      debugBug(`Bug updated: ${JSON.stringify(updateResult)}`);
+      const log = {
+        timestamp : new Date(),
+        collection : "bugs",
+        operation : "update",
+        target: bugId,
+        update: updateResult,
+        auth: req.auth,
+      }
+      await saveAuditLog(log);
       return res.status(200).json(`Tests added to bug ${bugId}`);
     } catch (err) {
       return res.status(500).send(err);
@@ -488,6 +556,19 @@ router.patch(
 
       // Save the updated test details back to the database
       const updateResult = await updateTests(tests);
+      debugBug(`Tests updated: ${JSON.stringify(updateResult)}`);
+      updateResult.lastUpdatedOn = new Date();
+      updateResult.lastUpdatedBy = req.auth._id;
+
+      const log = {
+        timestamp : new Date(),
+        collection : "testCases",
+        operation : "update",
+        target: testsId,
+        update: updateResult,
+        auth: req.auth,
+      };
+      await saveAuditLog(log);
       return res.status(200).json(`Tests updated for bug ${bugId}`);
     } catch (err) {
       res.status(500).send(err);
@@ -519,6 +600,16 @@ router.delete(
       }
 
       const deleteResult = await deleteTests(testsId);
+      debugBug(`Tests deleted: ${JSON.stringify(deleteResult)}`);
+      const log = {
+        timestamp : new Date(),
+        collection : "testCases",
+        operation : "delete",
+        target: testsId,
+        update: deleteResult,
+        auth: req.auth,
+      };
+      await saveAuditLog(log);
       return res.status(200).json(`Tests deleted for bug ${bugId}`);
     } catch (err) {
       res.status(500).send(err);
