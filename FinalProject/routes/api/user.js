@@ -11,6 +11,7 @@ import {
   updateUser,
   deleteUser,
   saveAuditLog,
+  findRoleByName,
 } from "../../database.js";
 import { validBody } from "../../middleware/validBody.js";
 import { validId } from "../../middleware/validid.js";
@@ -19,7 +20,9 @@ const debugUser = debug("app:UserRouter");
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { isLoggedIn } from "@merlin4/express-auth";
+import { isLoggedIn , hasPermission} from "@merlin4/express-auth";
+import { fetchRoles } from "@merlin4/express-auth";
+import { mergePermissions } from "@merlin4/express-auth";
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -62,11 +65,17 @@ const loginUserSchema = Joi.object({
 });
 
 async function issueAuthToken(user) {
+
+  const roles = await fetchRoles(user, role => findRoleByName(role));
+
+ const permissions = mergePermissions(user, roles);
+
   const token = jwt.sign(
-    { _id: user._id, email: user.email },
+    { _id: user._id, email: user.email, role: user.role, permissions: permissions },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
+
   return token;
 }
 
@@ -80,7 +89,7 @@ async function issueAuthCookie(res, token) {
   res.cookie("authToken", token, cookieOptions);
 }
 
-router.get("", isLoggedIn(), async (req, res) => {
+router.get("",  isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
   // Get All Users
   let users = await GetAllUsers();
 
@@ -95,7 +104,6 @@ router.get("", isLoggedIn(), async (req, res) => {
   // Filter users by role
   if (role) {
     users = users.filter((user) => user.role === role);
-    debugUser(`Role: ${role}`);
   }
 
   // Filter users by age of account
@@ -143,7 +151,6 @@ router.get("", isLoggedIn(), async (req, res) => {
   const skip = (page - 1) * limit;
 
   users = users.slice(skip, skip + limit);
-  debugUser(`Page: ${page}, Page Size: ${limit}`);
 
   res.status(200).json(users);
 });
@@ -151,7 +158,6 @@ router.get("", isLoggedIn(), async (req, res) => {
 // Get User by ID
 router.get("/:userId", isLoggedIn(), validId("userId"), async (req, res, next) => {
   const userId = req.userId;
-  debugUser(`User id: ${userId}`);
   try {
     const user = await GetUserById(userId);
     if (user) {
@@ -164,11 +170,9 @@ router.get("/:userId", isLoggedIn(), validId("userId"), async (req, res, next) =
   }
 });
 
-
 // Create New User
 router.post("/register", validBody(newUserSchema), async (req, res, next) => {
   const newUser = req.body;
-  debugUser(`New user: ${JSON.stringify(newUser)}`);
 
   const searchUser = await GetUserByEmail(newUser.email);
 
@@ -180,13 +184,10 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
     try {
       //Create hashed password
       newUser.password = await bcrypt.hash(newUser.password, 10);
-      debugUser(`Hashed password: ${newUser.password}`);
-
-      const result = await createUser(newUser);
-      debugUser(`User created: ${JSON.stringify(result)}`);
       newUser.createdOn = new Date();
-      newUser.role = "developer";
-      debugUser(`New user: ${JSON.stringify(newUser)}`);
+      newUser.role = ["customer"];
+      const result = await createUser(newUser);
+    
       const log = {
         timestamp: new Date(),
         collection: "users",
@@ -223,7 +224,6 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
   // Check if user exists by checking email
   try {
     const User = await GetUserByEmail(email);
-    debugUser(`User: ${JSON.stringify(User)}`);
 
     if (!User) {
       res.status(400).send("User does not exist. Please register.");
@@ -277,7 +277,9 @@ router.get("/me", isLoggedIn(), async (req, res) => {
   }
 });
 
-router.put("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userId"), async (req, res, next) => {
+//Admins can update user information
+//If user is updating their own account, issue a new token
+router.patch("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userId"), async (req, res, next) => {
   const userId = req.userId;
   const updatedUser = req.body;
 
@@ -297,7 +299,7 @@ router.put("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userI
       // issue a new token if the user is updating their own account
       if (req.auth._id === userId) {
         const jwtToken = await issueAuthToken(user);
-        await issueAuthCookie(res, jwtToken);
+        return await issueAuthCookie(res, jwtToken);
       }
 
       const result = await updateUser(userId, user);
@@ -318,52 +320,19 @@ router.put("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userI
   }
 });
 
-//Update User
-router.patch(
-  "/:userId",
-  validId("userId"),
-  validBody(updateUserSchema),
-  async (req, res, next) => {
-    const userId = req.userId;
-
-    //New user data
-    const updatedUser = req.body;
-
-    //Search for user in DB
-    const user = await GetUserById(userId);
-    debugUser(`User: ${JSON.stringify(user)}`);
-
-    try {
-      for (const key of Object.keys(updatedUser)) {
-        user[key] = updatedUser[key];
-        debugUser(`Key: ${key}, Value: ${updatedUser[key]}`);
-        user.lastUpdated = new Date();
-      }
-
-      const result = await updateUser(userId, user);
-      debugUser(`User updated: ${JSON.stringify(result)}`);
-      res.status(200).json({ message: `User ${userId} updated!`, userId });
-    } catch (error) {
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  }
-);
 
 //Delete User
-router.delete("/:userId", validId("userId"), async (req, res, next) => {
+router.delete("/:userId", isLoggedIn(), validId("userId"), async (req, res, next) => {
   const userId = req.userId;
-  debugUser(`User id: ${userId}`);
 
   try {
     const userToDelete = await GetUserById(userId);
     debugUser(`User to delete: ${JSON.stringify(userToDelete)}`);
 
     const result = await deleteUser(userId);
-    debugUser(`User deleted: ${JSON.stringify(result)}`);
     res.status(200).json({ message: `User ${userId} deleted!`, userId });
   } catch (err) {
     res.status(500).send(err);
-    debugUser(`Error deleting user: ${err.message}`);
   }
 });
 

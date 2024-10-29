@@ -22,6 +22,7 @@ import { validId } from "../../middleware/validid.js";
 const debugBug = debug("app:BugRouter");
 
 import Joi from "joi";
+import { isLoggedIn } from "@merlin4/express-auth";
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -63,7 +64,7 @@ const updateTestSchema = Joi.object({
   addedBy: Joi.string(),
 });
 
-router.get("", async (req, res) => {
+router.get("", isLoggedIn(), async (req, res) => {
   try {
     let bugs = await GetAllBugs();
     // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
@@ -153,11 +154,10 @@ router.get("", async (req, res) => {
 });
 
 // Get Bug by ID
-router.get("/:bugId", validId("bugId"), async (req, res, next) => {
+router.get("/:bugId", isLoggedIn(), validId("bugId"), async (req, res, next) => {
   const bugId = req.bugId;
   try {
     const bug = await GetBugById(bugId);
-    debugBug(`Bug: ${JSON.stringify(bug)}`);
     res.status(200).json(bug);
   } catch (err) {
     res.status(500).send(err);
@@ -165,14 +165,12 @@ router.get("/:bugId", validId("bugId"), async (req, res, next) => {
 });
 
 // Create New Bug
-router.post("/new", validBody(newBugSchema), async (req, res, next) => {
+router.post("/new", isLoggedIn(), validBody(newBugSchema), async (req, res, next) => {
   const newBug = req.body;
   newBug.createdDate = new Date();
-  debugBug(`New bug: ${JSON.stringify(newBug)}`);
 
   try {
     const dbResult = await createBug(newBug);
-    debugBug(`Bug created: ${JSON.stringify(dbResult)}`);
     res.status(200).json(`Bug created successfully`);
   } catch (err) {
     res.status(500).send(err);
@@ -183,39 +181,37 @@ router.post("/new", validBody(newBugSchema), async (req, res, next) => {
 router.patch(
   "/:bugId",
   validId("bugId"),
+  isLoggedIn(),
   validBody(updateBugSchema),
   async (req, res) => {
     const bugId = req.params.bugId;
-    debugBug(`Bug id: ${bugId}`);
 
     const getBug = await GetBugById(bugId);
-    debugBug(`Result from GetBugById: ${JSON.stringify(getBug)}`);
 
     if (!getBug) {
       return res.status(404).json({ message: `Bug ${bugId} not found` });
     }
 
     const updatedBug = req.body;
-    debugBug(`Updated bug: ${JSON.stringify(updatedBug)}`);
 
     for (const key of Object.keys(updatedBug)) {
       getBug[key] = updatedBug[key];
-      debugBug(`Key: ${key} Value: ${updatedBug[key]}`);
     }
     getBug.lastUpdated = new Date();
 
     try {
       const result = await updateBug(getBug);
-      debugBug(`Bug updated: ${JSON.stringify(result)}`);
       res.status(200).json({ message: `Bug ${bugId} updated!`, bugId });
     } catch (err) {
       res.status(500).send(err);
     }
   }
 );
+
 //Update Bug Classification/Priority
 router.patch(
   "/:bugId/classify",
+  isLoggedIn(),
   validId("bugId"),
   validBody(classifyBugSchema),
   async (req, res, next) => {
@@ -225,19 +221,14 @@ router.patch(
 
     try {
       const currentClassification = await GetBugById(bugId);
-      debugBug(
-        `Current Classification: ${JSON.stringify(currentClassification)}`
-      );
 
       for (const key of Object.keys(newClassification)) {
         currentClassification[key] = newClassification[key];
-        debugBug(`Key: ${key} Value: ${newClassification[key]}`);
         currentClassification.classifiedOn = new Date();
         currentClassification.lastUpdated = new Date();
       }
 
       const result = await updateBug(currentClassification);
-      debugBug(`Bug updated: ${JSON.stringify(result)}`);
       res.status(200).json({ message: `Bug ${bugId} classified!`, bugId });
     } catch (err) {
       res.status(500).send(err);
@@ -248,11 +239,11 @@ router.patch(
 //update assigned to
 router.patch(
   "/:bugId/assign",
+  isLoggedIn(),
   validId("bugId"),
   validBody(assignBugSchema),
   async (req, res, next) => {
     const bugId = req.params.bugId;
-    debugBug(`Bug id: ${bugId}`);
 
     //read from the request body
     const { assignedToUserId } = req.body;
@@ -260,11 +251,9 @@ router.patch(
     try {
       // Query the database to get the bug by id
       const bug = await GetBugById(bugId);
-      debugBug(`Bug: ${JSON.stringify(bug)}`);
 
       // Query the database to get the user by id
       const assignedToUser = await GetUserById(assignedToUserId);
-      debugBug(`Assigned to user: ${JSON.stringify(assignedToUser)}`);
 
       // Update the bug's assignment details
       bug.assignedToUserId = assignedToUserId;
@@ -273,7 +262,6 @@ router.patch(
       bug.lastUpdated = new Date();
 
       const result = await updateAssignTo(bug);
-      debugBug(`Bug updated: ${JSON.stringify(result)}`);
       res
         .status(200)
         .json(
@@ -287,14 +275,13 @@ router.patch(
 );
 
 //close bug
-
 router.put(
   "/:bugId/close",
+  isLoggedIn(),
   validId("bugId"),
   validBody(closeBugSchema),
   async (req, res, next) => {
     const bugId = req.params.bugId;
-    debugBug(`Bug id: ${bugId}`);
     const { closed } = req.body;
 
     try {
@@ -302,10 +289,8 @@ router.put(
       bug.closed = closed;
       bug.closedOn = new Date();
       bug.lastUpdated = new Date();
-      debugBug(`Bug: ${JSON.stringify(bug)}`);
 
       const result = await closeBug(bug);
-      debugBug(`Bug closed: ${JSON.stringify(result)}`);
       res.status(200).json({ message: `Bug ${bugId} closed!`, bugId });
     } catch (err) {
       res.status(500).send(err);
@@ -313,13 +298,12 @@ router.put(
   }
 );
 
-// Get comments by bug id
-router.get("/:bugId/comments", validId("bugId"), async (req, res) => {
+// Get comments for specific bug
+router.get("/:bugId/comments", isLoggedIn(), validId("bugId"), async (req, res) => {
   const bugId = req.params.bugId;
 
   try {
     const bug = await GetBugById(bugId);
-    debugBug(`Bug Comments: ${JSON.stringify(bug.comments)}`);
     if (JSON.stringify(bug) === "{}" || bug === null) {
       res.status(404).send("Bug not found");
     } else {
@@ -327,7 +311,6 @@ router.get("/:bugId/comments", validId("bugId"), async (req, res) => {
 
       for (let i = 0; i < bug.comments.length; i++) {
         const bugComment = await GetComment(bug.comments[i]);
-        debugBug(`Bug Comment: ${JSON.stringify(bugComment)}`);
         detailedComments.push(bugComment);
       }
 
@@ -338,8 +321,10 @@ router.get("/:bugId/comments", validId("bugId"), async (req, res) => {
   }
 });
 
+// Get specific comment for a bug
 router.get(
   "/:bugId/comments/:commentId",
+  isLoggedIn(),
   validId("bugId"),
   validId("commentId"),
   async (req, res) => {
@@ -349,14 +334,12 @@ router.get(
     try {
       // Get the bug by id
       const bug = await GetBugById(bugId);
-      debugBug(`Bug Comments: ${JSON.stringify(bug.comments)}`);
       // Check if the bug exists
       if (JSON.stringify(bug) === "{}" || bug === null) {
         res.status(404).send("Bug not found");
       } else {
         // Get the comment by id
         const bugComment = await GetComment(commentId);
-        debugBug(`Bug Comment: ${JSON.stringify(bugComment)}`);
         res.status(200).json(bugComment);
       }
     } catch (err) {
@@ -365,33 +348,29 @@ router.get(
   }
 );
 
-// Get Bug Comment by Comment ID to Create a Comment
+// Get Bug Comment by ID to Create a Comment
 router.post(
   "/:bugId/comments",
+  isLoggedIn(),
   validId("bugId"),
   validBody(commentSchema),
   async (req, res) => {
     const bugId = req.params.bugId;
     const newComment = req.body;
-    debugBug(`Bug id: ${bugId}`);
-    debugBug(`New comment: ${newComment}`);
 
     try {
       // Get the bug by id
       const bug = await GetBugById(bugId);
-      debugBug(`Bug Comments: ${JSON.stringify(bug.comments)}`);
       // Check if the bug exists
       if (JSON.stringify(bug) === "{}" || bug === null) {
         res.status(404).send("Bug not found");
       } else {
         // Create the new comment
         const result = await createComment(newComment);
-        debugBug(`Comment created: ${JSON.stringify(result)}`);
         // Add the comment id to the bug's comments array
         bug.comments.push(result.insertedId);
         // Update the bug with the new comment
         const updateResult = await updateBug(bug);
-        debugBug(`Bug updated: ${JSON.stringify(updateResult)}`);
         res.status(200).json(`Comment added to bug ${bugId}`);
       }
     } catch (err) {
@@ -401,13 +380,12 @@ router.post(
 );
 
 // List tests by Bug ID
-router.get("/:bugId/tests", validId("bugId"), async (req, res) => {
+router.get("/:bugId/tests", isLoggedIn(), validId("bugId"), async (req, res) => {
   const bugId = req.bugId;
   debugBug(`Bug: ${bugId}`);
 
   try {
     const bug = await GetBugById(bugId);
-    debugBug(`Bug Test Cases: ${JSON.stringify(bug.testCases)}`);
 
     if (!bug) {
       return res.status(404).send("Bug not found");
@@ -417,7 +395,6 @@ router.get("/:bugId/tests", validId("bugId"), async (req, res) => {
 
     for (let i = 0; i < bug.testCases.length; i++) {
       const testsList = await GetTests(bug.testCases[i]);
-      debugBug(`Tests: ${JSON.stringify(testsList)}`);
       detailedTestCases.push(testsList);
     }
     res.status(200).json(detailedTestCases);
@@ -427,8 +404,10 @@ router.get("/:bugId/tests", validId("bugId"), async (req, res) => {
   }
 });
 
+// Retrieve a specific test case for a bug
 router.get(
   "/:bugId/tests/:testsId",
+  isLoggedIn(),
   validId("bugId"),
   validId("testsId"),
   async (req, res) => {
@@ -437,14 +416,12 @@ router.get(
 
     try {
       const bug = await GetBugById(bugId);
-      debugBug(`Bug Test Cases: ${JSON.stringify(bug.testCases)}`);
 
       if (!bug) {
         return res.status(404).send("Bug not found");
       }
 
       const testsListById = await GetTests(testsId);
-      debugBug(`Tests: ${JSON.stringify(testsListById)}`);
       res.status(200).json(testsListById);
     } catch (err) {
       res.status(500).send(err);
@@ -452,8 +429,10 @@ router.get(
   }
 );
 
+// Create new test case for a bug
 router.post(
   "/:bugId/tests/new",
+  isLoggedIn(),
   validId("bugId"),
   validBody(newTestsSchema),
   async (req, res) => {
@@ -462,18 +441,15 @@ router.post(
 
     try {
       const bug = await GetBugById(bugId);
-      debugBug(`Bug: ${JSON.stringify(bug)}`);
 
       if (!bug) {
         return res.status(404).send("Bug not found");
       }
 
       const result = await CreateTests(newTests);
-      debugBug(`Tests created: ${JSON.stringify(result)}`);
 
       bug.testCases.push(result.insertedId);
       const updateResult = await updateBug(bug);
-      debugBug(`Bug updated: ${JSON.stringify(updateResult)}`);
       return res.status(200).json(`Tests added to bug ${bugId}`);
     } catch (err) {
       return res.status(500).send(err);
@@ -481,9 +457,10 @@ router.post(
   }
 );
 
-// Update Tests
+// Update specific test case for a bug
 router.patch(
   "/:bugId/tests/:testsId",
+  isLoggedIn(),
   validId("bugId"),
   validId("testsId"),
   validBody(updateTestSchema),
@@ -494,14 +471,12 @@ router.patch(
 
     try {
       const bug = await GetBugById(bugId);
-      debugBug(`Bug: ${JSON.stringify(bug)}`);
 
       if (!bug) {
         return res.status(404).send("Bug not found");
       }
 
       const tests = await GetTests(testsId);
-      debugBug(`Tests: ${JSON.stringify(tests)}`);
 
       if (!tests) {
         return res.status(404).send("Tests not found");
@@ -509,12 +484,10 @@ router.patch(
 
       for (const key of Object.keys(updatedTests)) {
         tests[key] = updatedTests[key];
-        debugBug(`Key: ${key} Value: ${updatedTests[key]}`);
       }
 
       // Save the updated test details back to the database
       const updateResult = await updateTests(tests);
-      debugBug(`Tests updated: ${JSON.stringify(updateResult)}`);
       return res.status(200).json(`Tests updated for bug ${bugId}`);
     } catch (err) {
       res.status(500).send(err);
@@ -522,8 +495,10 @@ router.patch(
   }
 );
 
+// Delete specific test case for a bug
 router.delete(
   "/:bugId/tests/:testsId",
+  isLoggedIn(),
   validId("bugId"),
   validId("testsId"),
   async (req, res) => {
@@ -532,21 +507,18 @@ router.delete(
 
     try {
       const bug = await GetBugById(bugId);
-      debugBug(`Bug: ${JSON.stringify(bug)}`);
 
       if (!bug) {
         return res.status(404).send("Bug not found");
       }
 
       const tests = await GetTests(testsId);
-      debugBug(`Tests: ${JSON.stringify(tests)}`);
 
       if (!tests) {
         return res.status(404).send("Tests not found");
       }
 
       const deleteResult = await deleteTests(testsId);
-      debugBug(`Tests deleted: ${JSON.stringify(deleteResult)}`);
       return res.status(200).json(`Tests deleted for bug ${bugId}`);
     } catch (err) {
       res.status(500).send(err);

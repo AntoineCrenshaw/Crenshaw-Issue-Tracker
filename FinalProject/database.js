@@ -179,9 +179,16 @@ async function deleteTests(testsId){
 }
 
 async function saveAuditLog(log){
-  const db = await connectToDatabase();
+  const db = await connect();
   const dbResult = await db.collection('AuditLog').insertOne(log);
   return dbResult;
+}
+
+async function findRoleByName(roleName){
+  debugDb(`Role name: ${roleName}`);
+  const db = await connect();
+  const role = db.collection('Role').findOne({ name: roleName });
+  return role;
 }
   
 
@@ -190,4 +197,4 @@ async function saveAuditLog(log){
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById,createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests, saveAuditLog };
+export { GetAllBugs, GetBugById,createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests, saveAuditLog, findRoleByName };
