@@ -255,12 +255,14 @@ router.get("/me", isLoggedIn(), async (req, res) => {
     return res.status(401).json({ message: 'You are not authenticated' });
   }
 
+  if (req.auth) {
+    debugUser(`User: ${req.auth.email}`);
+  }
+
   // Retrieve the userId from the authenticated request
   const userId = req.auth._id; 
+  debugUser(`User ID: ${userId}`);
 
-   if (!ObjectId.isValid(userId)) {
-    return res.status(400).json({ message: "Invalid user ID format" });
-  }
   
   try {
     // Query the database to fetch user details
@@ -309,7 +311,7 @@ router.patch("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("use
         collection: "users",
         operation: "update",
         target: user._id,
-        update: JSON.stringify(user),
+        update: updatedUser,
       }
       await saveAuditLog(log);
       return res.status(200).json({ message: `User ${userId} updated!`, userId });
@@ -337,7 +339,7 @@ router.delete("/:userId", isLoggedIn(), validId("userId"), async (req, res, next
       collection: "users",
       operation: "delete",
       target: userId,
-      update: JSON.stringify(userToDelete),
+      update: result,
     }
     await saveAuditLog(log);
     res.status(200).json({ message: `User ${userId} deleted!`, userId });
