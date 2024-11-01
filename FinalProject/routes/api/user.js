@@ -156,7 +156,7 @@ router.get("",  isLoggedIn(), hasPermission('canViewData'), async (req, res) => 
 });
 
 // Get User by ID
-router.get("/:userId", isLoggedIn(), validId("userId"), async (req, res, next) => {
+router.get("/:userId",  validId("userId"), isLoggedIn(), hasPermission('canViewData'), async (req, res, next) => {
   const userId = req.userId;
   try {
     const user = await GetUserById(userId);
