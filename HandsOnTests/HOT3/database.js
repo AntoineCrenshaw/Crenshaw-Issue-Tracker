@@ -62,6 +62,60 @@ async function deleteProduct(productId){
   return results;
 }
 
+/* Users */
+
+async function getAllUsers(){
+  const db = await connect();
+  const results = await db.collection('Users').find({}).toArray();
+  return results;
+}
+
+async function createUser(newUser){
+  const db = await connect();
+  debugDB(`Creating new user: ${JSON.stringify(newUser)}`);
+  const results = await db.collection('Users').insertOne(newUser);
+  return results;
+}
+
+async function getUserById(userId){
+  const db = await connect();
+  const results = await db.collection('Users').findOne({_id: new ObjectId(userId)});
+  return results;
+}
+
+async function getUserByEmail(email){
+  const db = await connect();
+  const results = await db.collection('Users').findOne({email: email});
+  return results;
+}
+
+async function updateUser(userId, updatedUser){
+  const db = await connect();
+  const results = await db.collection('Users').updateOne({_id: new ObjectId(userId)}, {$set: updatedUser});
+  return results;
+}
+
+async function saveAuditLog(log){
+  const db = await connect();
+  const results = await db.collection('AuditLog').insertOne(log);
+  return results;
+}
+
+async function findRoleByName(roleName){
+  try {
+    const db = await connect();
+    const results = await db.collection('Roles').findOne({ name: roleName });
+    
+    if (!results) {
+      console.log(`No role found for name: ${roleName}`);
+    }
+
+    return results;
+  } catch (error) {
+    console.error("Error finding role by name:", error);
+}
+}
+
 ping();
 
-export {getAllProducts, deleteProduct, getProductById, createProduct, getProductByName, updateProduct};
+export {getAllProducts, deleteProduct, getProductById, createProduct, getProductByName, updateProduct, getAllUsers, createUser, getUserById, saveAuditLog, updateUser, getUserByEmail, findRoleByName};
