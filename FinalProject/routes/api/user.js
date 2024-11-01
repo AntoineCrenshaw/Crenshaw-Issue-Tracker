@@ -19,7 +19,7 @@ const debugUser = debug("app:UserRouter");
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { isLoggedIn } from "@merlin4/express-auth";
+import { isLoggedIn, hasRole, hasPermission } from "@merlin4/express-auth";
 
 router.use(express.urlencoded({ extended: false }));
 
