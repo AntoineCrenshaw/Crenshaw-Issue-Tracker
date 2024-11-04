@@ -30,13 +30,9 @@ async function ping(){
 
 // Bugs CRUD operations
 async function GetAllBugs(){
-  try {
   const db = await connect();
-  return await db.collection('bugs').find({}).toArray();
-  } catch (error) {
-    console.error("Error fetching bugs:", error);
-    throw error;
-  }
+  const results = await db.collection('bugs').find({}).toArray();
+  return results;
 }
 
 async function GetBugById(bugId){
@@ -59,7 +55,7 @@ async function updateBug(updatedBug){
 
 async function updateBugClassification(newClassification){
   const db = await connect();
-  const dbResult = await db.collection('bugs').updateOne({ _id: new ObjectId(newClassification._id) }, { $set: { classification: newClassification.classification } });
+  const dbResult = await db.collection('bugs').updateOne({ _id: new ObjectId(newClassification._id) }, { $set: { classification: newClassification } });
   return dbResult;
 }
 
@@ -72,7 +68,6 @@ async function closeBug(updatedBug){
       closedOn: updatedBug.closedOn,
       lastUpdated: updatedBug.lastUpdated
 }});
-debugDb(`Bug: ${JSON.stringify(dbResult)}`);
   return dbResult;
 }
 
@@ -87,7 +82,6 @@ async function GetAllUsers(){
 async function GetUserById(userId){
   const db = await connect();
   const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
-  debugDb(`User: ${JSON.stringify(user)}`);
   return user;
 }
 
@@ -111,7 +105,6 @@ async function updateUser(userId, user){
 
 async function updateAssignTo(bug){
   const db = await connect();
-  debugDb(`Bug: ${JSON.stringify(bug)}`);
   const dbResult = await db.collection('bugs').updateOne(
     { _id: new ObjectId(bug._id) }, 
     { $set: { 
@@ -183,6 +176,13 @@ async function saveAuditLog(log){
   const dbResult = await db.collection('AuditLog').insertOne(log);
   return dbResult;
 }
+
+async function findRoleByName(roleName){
+  debugDb(`Role name: ${roleName}`);
+  const db = await connect();
+  const role = db.collection('Role').findOne({ name: roleName });
+  return role;
+}
   
 
 
@@ -190,4 +190,4 @@ async function saveAuditLog(log){
 ping();
 
 // export functions
-export { GetAllBugs, GetBugById,createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests, saveAuditLog };
+export { GetAllBugs, GetBugById,createBug, updateBug, closeBug, GetAllUsers, GetUserByEmail, GetUserById, createUser, updateUser, updateBugClassification, updateAssignTo, updateTests, deleteUser, deleteTests, loginUser, GetComment, createComment, GetTests, CreateTests, saveAuditLog, findRoleByName };
