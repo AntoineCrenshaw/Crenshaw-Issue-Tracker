@@ -621,7 +621,7 @@ router.patch(
 );
 
 // Delete specific test case for a bug
-router.delete(
+router.put(
   "/:bugId/tests/:testsId",
   isLoggedIn(),
   validId("bugId"),
