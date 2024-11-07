@@ -281,7 +281,7 @@ router.get("/me", isLoggedIn(), async (req, res) => {
 
 //Admins can update user information
 //If user is updating their own account, issue a new token
-router.patch("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userId"), async (req, res, next) => {
+router.patch("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userId"), hasPermission('canEditAnyUser'), async (req, res, next) => {
   const userId = req.userId;
   const updatedUser = req.body;
 
@@ -323,9 +323,45 @@ router.patch("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("use
   }
 });
 
+router.patch("/me", isLoggedIn(), validBody(updateUserSchema), async (req, res, next) => {
+  const userId = req.auth._id;
+  const updatedUser = req.body;
+
+  try {
+    const user = await GetUserById(userId);
+    if (user) {
+      for (const key of Object.keys(updatedUser)) {
+        user[key] = updatedUser[key];
+        user.lastUpdatedOn = new Date();
+        user.lastUpdatedBy = req.auth._id;
+      }
+
+      if (updatedUser.password) {
+        user.password = await bcrypt.hash(updatedUser.password, 10);
+      }
+
+      const result = await updateUser(userId, user);
+      const log = {
+        timestamp: new Date(),
+        collection: "users",
+        operation: "update",
+        target: user._id,
+        update: updatedUser,
+        auth : req.auth,
+      }
+      await saveAuditLog(log);
+      return res.status(200).json({ message: `User ${userId} updated!`, userId });
+    } else {
+      res.status(404).send(`User ${userId} not found.`);
+    }
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 
 //Delete User
-router.delete("/:userId", isLoggedIn(), validId("userId"), async (req, res, next) => {
+router.delete("/:userId", isLoggedIn(), validId("userId"), hasPermission('canEditAnyUser'), async (req, res, next) => {
   const userId = req.userId;
 
   try {

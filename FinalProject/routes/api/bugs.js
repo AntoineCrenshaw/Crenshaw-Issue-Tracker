@@ -24,7 +24,7 @@ import { validId } from "../../middleware/validid.js";
 const debugBug = debug("app:BugRouter");
 
 import Joi from "joi";
-import { isLoggedIn } from "@merlin4/express-auth";
+import { hasPermission, isLoggedIn } from "@merlin4/express-auth";
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -66,7 +66,7 @@ const updateTestSchema = Joi.object({
   addedBy: Joi.string(),
 });
 
-router.get("", async (req, res) => {
+router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
   try {
     let bugs = await GetAllBugs();
     // debugBug(`Bugs: ${JSON.stringify(bugs)}`);
@@ -194,9 +194,9 @@ router.post(
   validBody(newBugSchema),
   async (req, res, next) => {
     const newBug = req.body;
-    newBug.createdDate = new Date();
 
     try {
+      newBug.createdDate = new Date();
       newBug.createdOn = new Date();
       newBug.createdBy = req.auth._id;
       newBug.classification = "unclassified";
@@ -239,10 +239,20 @@ router.patch(
     for (const key of Object.keys(updatedBug)) {
       getBug[key] = updatedBug[key];
     }
-    getBug.lastUpdated = new Date();
 
     try {
+      getBug.lastUpdated = new Date();
+      getBug.lastUpdatedBy = req.auth._id;
       const result = await updateBug(getBug);
+      const log = {
+        timestamp: new Date(),
+        collection: "bugs",
+        operation: "update",
+        target: bugId,
+        update: getBug,
+        auth: req.auth,
+      };
+      await saveAuditLog(log);
       res.status(200).json({ message: `Bug ${bugId} updated!`, bugId });
     } catch (err) {
       res.status(500).send(err);
@@ -260,17 +270,16 @@ router.patch(
     const bugId = req.bugId;
     const newClassification = req.body;
 
-      const currentClassification = await GetBugById(bugId);
-      console.log(currentClassification);
-      if (currentClassification) {
-        for (const key of Object.keys(newClassification)) {
-          currentClassification[key] = newClassification[key];
-          currentClassification.classifiedBy = req.auth._id;
-          currentClassification.classifiedOn = new Date();
-          currentClassification.lastUpdated = new Date();
-        }
-        const result = await updateBugClassification(currentClassification);
-       debugBug(result);
+      const currentBug = await GetBugById(bugId);
+      console.log(currentBug);
+      
+        currentBug.classification.classification = newClassification.classification;
+        debugBug(`Bug classification updated: ${(currentBug)}`);
+          currentBug.classifiedBy = req.auth._id;
+          currentBug.classifiedOn = new Date();
+          currentBug.lastUpdated = new Date();
+        const result = await updateBugClassification(currentBug);
+      //  debugBug(result);
         const log = {
           timestamp: new Date(),
           collection: "bugs",
@@ -282,10 +291,6 @@ router.patch(
         console.log(log)
         await saveAuditLog(log);
         return res.status(200).json({ message: `Bug ${bugId} classified!`, bugId });
-      } else {
-        res.status(404).send(`Bug ${bugId} not found.`);
-      }
-  
   }
 );
 
