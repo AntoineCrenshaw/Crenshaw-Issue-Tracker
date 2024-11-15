@@ -1,76 +1,52 @@
-import "./App.css";
-
+import Navbar from "./navbar.tsx";
+import "bootswatch/dist/journal/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import SignInForm from "../components/SignInForm.jsx";
+import { Routes, Route } from "react-router-dom";
 function App() {
   return (
     <>
-      <header>
-        <nav className="navbar navbar-expand-lg bg-body-tertiary">
-          <div className="container-fluid">
-            <a className="navbar-brand" href="#">
-              Issue Tracker
-            </a>
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarNavAltMarkup"
-              aria-controls="navbarNavAltMarkup"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
-              <div className="navbar-nav">
-                <a
-                  className="nav-link active"
-                  aria-current="page"
-                  href="/api/bugs/list"
-                >
-                  Bugs
-                </a>
-                <a className="nav-link" href="/api/users">
-                  Users
-                </a>
-              </div>
-            </div>
-          </div>
-        </nav>
-      </header>
-
-      <main>
-        <div className="container text-center">
+      <div className="container">
+        <header>
+          <Navbar />
+        </header>
+        <main>
+          <Routes>
+            <Route path="/" element={<SignInForm />} />
+            <Route path="/login" element={<SignInForm />} />
+          </Routes>
+        </main>
+      </div>
+      {/* <main>
+        <div className=" flex flex-col container pt-[1rem] gap-x-8 gap-y-10">
           <div className="row">
-            <div className="col">
-              <h2>Users</h2>
+            <h2>Users</h2>
+            <a className="list-items" href="/api/users">
+              Lebron
+            </a>
+            <a className="list-items" href="/api/users">
+              Curry
+            </a>
+            <a className="list-items" href="/api/users">
+              Anthony Edwards
+            </a>
+          </div>
 
-              <a className="list-items" href="/api/users">
-                Lebron
-              </a>
-              <a className="list-items" href="/api/users">
-                Curry
-              </a>
-              <a className="list-items" href="/api/users">
-                Anthony Edwards
-              </a>
-            </div>
-            <div className="col">
-              <h2>Bugs</h2>
-              <a className="list-items" href="/api/bugs/1">
-                Runtime Error
-              </a>
-              <a className="list-items" href="/api/bugs/2">
-                Syntax Errors
-              </a>
-              <a className="list-items" href="/api/bugs/3">
-                Error 404
-              </a>
-            </div>
+          <div className="row">
+            <h2>Bugs</h2>
+            <a className="list-items" href="/api/bugs/1">
+              Runtime Error
+            </a>
+            <a className="list-items" href="/api/bugs/2">
+              Syntax Errors
+            </a>
+            <a className="list-items" href="/api/bugs/3">
+              Error 404
+            </a>
           </div>
         </div>
-      </main>
-
-      <footer> &copy; 2024 Antoine Crenshaw</footer>
+      </main> */}
     </>
   );
 }

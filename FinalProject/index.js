@@ -9,6 +9,8 @@ import { authMiddleware } from '@merlin4/express-auth';
 import { userRouter } from './routes/api/user.js';
 import { bugRouter } from './routes/api/bugs.js';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 
@@ -31,6 +33,12 @@ app.use((err, req, res, next) => {
   res.status(err.status).json({error: err.message});
 });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'));
+});
 
 const port = process.env.PORT || 3000;
 

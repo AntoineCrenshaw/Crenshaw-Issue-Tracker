@@ -94,6 +94,7 @@ a {
 }
 a:hover {
   color: #535bf2;
+  cursor: pointer;
 }
 
 .nav-link {
@@ -109,6 +110,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: rgba(255, 255, 255, 0.607);
 }
 
 h1 {
@@ -166,6 +168,8 @@ button:focus-visible {
   width: 100%;
   margin: 0 auto;
   text-align: center;
+  position: fixed;
+  top: 0;
 }
 
 .navbar {
@@ -173,6 +177,7 @@ button:focus-visible {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
+  background: lightgrey;
 }
 
 ul,
@@ -190,12 +195,13 @@ ul li,
 
 /* stick to the top of the viewport */
 header {
-  position: fixed;
+  /* position: fixed; */
   width: 100%;
   top: 0;
   background-color: #f8f9fa;
   padding: 1rem;
   text-align: center;
+  margin-bottom: 5rem;
 }
 
 footer {

@@ -20,7 +20,7 @@ const debugUser = debug("app:UserRouter");
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { isLoggedIn , hasPermission} from "@merlin4/express-auth";
+import { isLoggedIn , hasPermission, hasRole} from "@merlin4/express-auth";
 import { fetchRoles } from "@merlin4/express-auth";
 import { mergePermissions } from "@merlin4/express-auth";
 
@@ -50,7 +50,7 @@ const updateUserSchema = Joi.object({
   password: Joi.string().min(6).max(30),
   givenName: Joi.string().min(3).max(20),
   familyName: Joi.string().min(3).max(20),
-  role: Joi.string().min(3),
+  role: Joi.array().items(Joi.string().min(3))
 });
 
 const loginUserSchema = Joi.object({
@@ -155,18 +155,28 @@ router.get("",  isLoggedIn(), hasPermission('canViewData'), async (req, res) => 
   res.status(200).json(users);
 });
 
-// Get User by ID
-router.get("/:userId",  validId("userId"), isLoggedIn(), hasPermission('canViewData'), async (req, res, next) => {
-  const userId = req.userId;
+
+// Users can view their account information
+router.get("/me", isLoggedIn(), async (req, res) => {
+    debugUser(`User: ${req.auth.email}`);
+
+  // Retrieve the userId from the authenticated request
+  const userId = req.auth._id; 
+  debugUser(`User ID: ${userId}`);
+
+  
   try {
+    // Query the database to fetch user details
     const user = await GetUserById(userId);
+
     if (user) {
-      res.status(200).json(user);
+      res.status(200).json(user); 
     } else {
-      res.status(404).send(`User ${userId} not found.`);
+      res.status(404).json({ message: `User ${userId} not found.` });
     }
   } catch (err) {
-    res.status(500).send(err);
+    // Send 500 error if database query fails
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -185,7 +195,7 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
       //Create hashed password
       newUser.password = await bcrypt.hash(newUser.password, 10);
       newUser.createdOn = new Date();
-      newUser.role = ["customer"];
+      newUser.role = ["Customer"]
       const result = await createUser(newUser);
     
       const log = {
@@ -226,7 +236,7 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
     const User = await GetUserByEmail(email);
 
     if (!User) {
-      res.status(400).send("User does not exist. Please register.");
+      res.status(400).json({message: `User not found`});
       return;
     }
 
@@ -242,50 +252,70 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
           .status(200)
           .json({ message: `Welcome back!`, User, authToken: jwtToken });
     }
-  } catch (error) {
-    debugUser(`Error: ${error.message}`);
-    return res.status(500).send(error.message);
+  } catch (e) {
+    debugUser(e);
+    return res.status(500).json({message: `Error logging in user`});
   }
 });
 
-// Users can view their account information
-router.get("/me", isLoggedIn(), async (req, res) => {
-  if (!req.auth) {
-    // If user is not authenticated, return 401 error
-    return res.status(401).json({ message: 'You are not authenticated' });
-  }
+//Users can update their own account information
+router.patch("/me", isLoggedIn(), validBody(updateUserSchema), async (req, res, next) => {
+  const userId = req.auth._id;
+  const updatedUser = req.body;
 
-  if (req.auth) {
-    debugUser(`User: ${req.auth.email}`);
-  }
-
-  // Retrieve the userId from the authenticated request
-  const userId = req.auth._id; 
-  debugUser(`User ID: ${userId}`);
-
-  
   try {
-    // Query the database to fetch user details
     const user = await GetUserById(userId);
-
     if (user) {
-      res.status(200).json(user); 
+      for (const key of Object.keys(updatedUser)) {
+        user[key] = updatedUser[key];
+      }
+        user.lastUpdatedOn = new Date();
+        user.lastUpdatedBy = req.auth._id;
+    
+
+      if (updatedUser.password) {
+        user.password = await bcrypt.hash(updatedUser.password, 10);
+      }
+
+      const result = await updateUser(userId, user);
+      const log = {
+        timestamp: new Date(),
+        collection: "users",
+        operation: "update",
+        target: user._id,
+        update: updatedUser,
+        auth : req.auth,
+      }
+      await saveAuditLog(log);
+      return res.status(200).json({ message: `User ${userId} updated!`, user });
     } else {
-      res.status(404).json({ message: `User ${userId} not found.` });
+      res.status(404).send(`User ${userId} not found.`);
     }
   } catch (err) {
-    // Send 500 error if database query fails
-    res.status(500).json({ message: err.message });
+    res.status(500).send(err.message);
   }
 });
 
-//Admins can update user information
+// Get User by ID
+router.get("/:userId",  validId("userId"), isLoggedIn(), hasPermission('canViewData'), async (req, res, next) => {
+  const userId = req.userId;
+  try {
+    const user = await GetUserById(userId);
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).send(`User ${userId} not found.`);
+    }
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+//Admins and TM's can update user information
 //If user is updating their own account, issue a new token
 router.patch("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("userId"), hasPermission('canEditAnyUser'), async (req, res, next) => {
   const userId = req.userId;
   const updatedUser = req.body;
-
-  //Updates but gets an error
 
   try {
     const user = await GetUserById(userId);
@@ -312,42 +342,6 @@ router.patch("/:userId", isLoggedIn(), validBody(updateUserSchema), validId("use
         operation: "update",
         target: user._id,
         update: updatedUser,
-      }
-      await saveAuditLog(log);
-      return res.status(200).json({ message: `User ${userId} updated!`, userId });
-    } else {
-      res.status(404).send(`User ${userId} not found.`);
-    }
-  } catch (err) {
-    res.status(500).send(err);
-  }
-});
-
-router.patch("/me", isLoggedIn(), validBody(updateUserSchema), async (req, res, next) => {
-  const userId = req.auth._id;
-  const updatedUser = req.body;
-
-  try {
-    const user = await GetUserById(userId);
-    if (user) {
-      for (const key of Object.keys(updatedUser)) {
-        user[key] = updatedUser[key];
-        user.lastUpdatedOn = new Date();
-        user.lastUpdatedBy = req.auth._id;
-      }
-
-      if (updatedUser.password) {
-        user.password = await bcrypt.hash(updatedUser.password, 10);
-      }
-
-      const result = await updateUser(userId, user);
-      const log = {
-        timestamp: new Date(),
-        collection: "users",
-        operation: "update",
-        target: user._id,
-        update: updatedUser,
-        auth : req.auth,
       }
       await saveAuditLog(log);
       return res.status(200).json({ message: `User ${userId} updated!`, userId });

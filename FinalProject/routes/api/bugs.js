@@ -24,7 +24,7 @@ import { validId } from "../../middleware/validid.js";
 const debugBug = debug("app:BugRouter");
 
 import Joi from "joi";
-import { hasPermission, isLoggedIn } from "@merlin4/express-auth";
+import { hasPermission, isLoggedIn , hasAnyRole} from "@merlin4/express-auth";
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -66,6 +66,7 @@ const updateTestSchema = Joi.object({
   addedBy: Joi.string(),
 });
 
+// List all bugs
 router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
   try {
     let bugs = await GetAllBugs();
@@ -175,6 +176,7 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
 router.get(
   "/:bugId",
   isLoggedIn(),
+  hasPermission('canViewData'),
   validId("bugId"),
   async (req, res, next) => {
     const bugId = req.bugId;
@@ -191,6 +193,8 @@ router.get(
 router.post(
   "/new",
   isLoggedIn(),
+  hasAnyRole(),
+  hasPermission('canCreateBug'),
   validBody(newBugSchema),
   async (req, res, next) => {
     const newBug = req.body;
@@ -222,6 +226,7 @@ router.post(
 // Update Bug
 router.patch(
   "/:bugId",
+  hasPermission('canEditAnyBug', 'CanEditMyBug', 'canEditIfAssignedTo'),
   validId("bugId"),
   isLoggedIn(),
   validBody(updateBugSchema),
@@ -249,7 +254,7 @@ router.patch(
         collection: "bugs",
         operation: "update",
         target: bugId,
-        update: getBug,
+        update: udpatedBug,
         auth: req.auth,
       };
       await saveAuditLog(log);
@@ -264,21 +269,25 @@ router.patch(
 router.patch(
   "/:bugId/classify",
   validId("bugId"),
+  hasPermission('canClassifyAnyBug'),
   isLoggedIn(),
   validBody(classifyBugSchema),
   async (req, res, next) => {
     const bugId = req.bugId;
-    const newClassification = req.body;
+    const  newClassification  = req.body;
 
       const currentBug = await GetBugById(bugId);
       console.log(currentBug);
       
-        currentBug.classification.classification = newClassification.classification;
+        currentBug.classification = newClassification;
+        currentBug.classifiedOn = new Date();
+        currentBug.lastUpdated = new Date();
+        currentBug.classifiedBy = req.auth._id
         debugBug(`Bug classification updated: ${(currentBug)}`);
-          currentBug.classifiedBy = req.auth._id;
-          currentBug.classifiedOn = new Date();
-          currentBug.lastUpdated = new Date();
-        const result = await updateBugClassification(currentBug);
+       
+        const result = await updateBugClassification(newClassification);
+        debugBug(`Bug classification updated: ${JSON.stringify(result)}`);
+        
       //  debugBug(result);
         const log = {
           timestamp: new Date(),
@@ -298,6 +307,7 @@ router.patch(
 router.patch(
   "/:bugId/assign",
   validId("bugId"),
+  hasPermission('canReassignIfAssignedTo'),
   isLoggedIn(),
   validBody(assignBugSchema),
   async (req, res, next) => {
@@ -346,6 +356,7 @@ router.patch(
 router.put(
   "/:bugId/close",
   validId("bugId"),
+  hasPermission('canCloseAnyBug'),
   isLoggedIn(),
   validBody(closeBugSchema),
   async (req, res, next) => {
@@ -385,8 +396,9 @@ router.put(
 
 // Get comments for specific bug
 router.get(
-  "/:bugId/comments",
+  "/:bugId/comment/list",
   isLoggedIn(),
+  hasPermission('canViewData'),
   validId("bugId"),
   async (req, res) => {
     const bugId = req.params.bugId;
@@ -413,10 +425,11 @@ router.get(
 
 // Get specific comment for a bug
 router.get(
-  "/:bugId/comments/:commentId",
+  "/:bugId/comment/:commentId",
   isLoggedIn(),
   validId("bugId"),
   validId("commentId"),
+  hasPermission('canViewData'),
   async (req, res) => {
     const bugId = req.params.bugId;
     const commentId = req.params.commentId;
@@ -440,8 +453,9 @@ router.get(
 
 // Get Bug Comment by ID to Create a Comment
 router.post(
-  "/:bugId/comments",
+  "/:bugId/comment/new",
   isLoggedIn(),
+  hasPermission('canAddComment'),
   validId("bugId"),
   validBody(commentSchema),
   async (req, res) => {
@@ -475,9 +489,10 @@ router.post(
 
 // List tests by Bug ID
 router.get(
-  "/:bugId/tests",
+  "/:bugId/test/list",
   isLoggedIn(),
   validId("bugId"),
+  hasPermission('canViewData'),
   async (req, res) => {
     const bugId = req.bugId;
     debugBug(`Bug: ${bugId}`);
@@ -507,6 +522,7 @@ router.get(
 router.get(
   "/:bugId/tests/:testsId",
   isLoggedIn(),
+  hasPermission('canViewData'),
   validId("bugId"),
   validId("testsId"),
   async (req, res) => {
@@ -530,8 +546,9 @@ router.get(
 
 // Create new test case for a bug
 router.post(
-  "/:bugId/tests/new",
+  "/:bugId/tests",
   isLoggedIn(),
+  hasPermission('canAddTestCase'),
   validId("bugId"),
   validBody(newTestsSchema),
   async (req, res) => {
@@ -573,6 +590,7 @@ router.post(
 router.patch(
   "/:bugId/tests/:testsId",
   isLoggedIn(),
+  hasPermission('canEditTestCase'),
   validId("bugId"),
   validId("testsId"),
   validBody(updateTestSchema),
@@ -609,7 +627,7 @@ router.patch(
         collection: "testCases",
         operation: "update",
         target: testsId,
-        update: updateResult,
+        update: updateTests,
         auth: req.auth,
       };
       await saveAuditLog(log);
@@ -621,9 +639,10 @@ router.patch(
 );
 
 // Delete specific test case for a bug
-router.put(
+router.delete(
   "/:bugId/tests/:testsId",
   isLoggedIn(),
+  hasPermission('canDeleteTestCase'),
   validId("bugId"),
   validId("testsId"),
   async (req, res) => {
