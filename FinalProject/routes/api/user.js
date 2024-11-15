@@ -152,7 +152,7 @@ router.get("",  isLoggedIn(), hasPermission('canViewData'), async (req, res) => 
 
   users = users.slice(skip, skip + limit);
 
-  res.status(200).json(users);
+   res.status(200).json({ users, message: "Users retrieved successfully" });
 });
 
 
