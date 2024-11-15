@@ -1,0 +1,41 @@
+.users-container {
+  display: flex;
+  align-items: start;
+  justify-content: left;
+  min-height: 90vh;
+  width: 90%;
+  max-width: 1300px;
+}
+
+.users-form {
+  display: flex;
+  flex-direction: row;
+  gap: 0.2rem;
+}
+
+.users-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: black;
+}
+
+.users-box {
+  background-color: rgb(241, 241, 241, 0.5);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
