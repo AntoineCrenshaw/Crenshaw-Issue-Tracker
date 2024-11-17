@@ -89,7 +89,7 @@ async function issueAuthCookie(res, token) {
   res.cookie("authToken", token, cookieOptions);
 }
 
-router.get("",  isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
+router.get("",  async (req, res) => {
   // Get All Users
   let users = await GetAllUsers();
 
