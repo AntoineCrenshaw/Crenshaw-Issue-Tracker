@@ -77,7 +77,6 @@ const SignInForm = () => {
                     className="form-control input-field"
                     required
                   />
-                  <span className="input-group-text"></span>
                 </div>
                 <div className="invalid-feedback">
                   Please enter a valid email.
