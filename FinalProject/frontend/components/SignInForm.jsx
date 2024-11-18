@@ -1,12 +1,16 @@
 import "../components/SignInForm.css";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
 
-const SignInForm = () => {
+const SignInForm = ({ showSuccess, showError, setAuth }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Example starter JavaScript for disabling form submissions if there are invalid fields
@@ -43,7 +47,17 @@ const SignInForm = () => {
         { email, password },
         { withCredentials: true }
       );
-      setMessage(response.data.message);
+      if (response.status === 200) {
+        if (response.data.message === "Invalid email or password") {
+          setAuth(null);
+          setMessage(response.data.message);
+          showError(response.data.message);
+        } else {
+          setAuth(response.data.existingUser);
+          showSuccess(response.data.message);
+          navigate("/");
+        }
+      }
     } catch (e) {
       setMessage(e.response.data.message);
     }
@@ -118,6 +132,10 @@ const SignInForm = () => {
             <button type="submit" className="btn btn-primary">
               Sign In
             </button>
+
+            <div>
+              <a href="/register">Don&apos;t have an account? Register here</a>
+            </div>
             <div className="text-primary">{message}</div>
           </form>
         </div>
