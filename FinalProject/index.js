@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 dotenv.config();
 import debug from 'debug';
 const debugServer = debug('app:server');
@@ -17,7 +18,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('frontend/dist'));
-
+app.use(cors());
 app.use(cookieParser());
 
 app.use(authMiddleware(process.env.JWT_SECRET, 'authToken', {
