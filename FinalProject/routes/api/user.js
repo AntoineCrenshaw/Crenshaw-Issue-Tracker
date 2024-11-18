@@ -240,7 +240,6 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
     if (!passwordMatch) {
       debugUser(`Invalid email or password`);
       return res.status(200).json({ message: `Invalid email or password` });
-      
     }
 
     debugUser(`User email and password verified`);
@@ -251,7 +250,7 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ message: `Welcome back!`, existingUser, authToken: jwtToken });
+      .json({ message: `Welcome back!`, role: existingUser.role, email: existingUser.email });
   } catch (e) {
     debugUser(e);
     return res.status(500).json({ message: `Error logging in user` });
