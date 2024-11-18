@@ -1,6 +1,6 @@
 import { AiFillBug } from "react-icons/ai";
 
-const Navbar = () => {
+const Navbar = ({ auth }) => {
   return (
     <nav className="navbar navbar-expand-lg bg-light" data-bs-theme="light">
       <div className="container-fluid">
@@ -35,11 +35,26 @@ const Navbar = () => {
                 Bugs
               </a>
             </li>
-            <li className="nav-item">
-              <a className="nav-link" href="/login">
-                Sign In
-              </a>
-            </li>
+            {auth ? (
+              <>
+                <li>
+                  <a className="nav-link" href="#">
+                    Welcome {auth.email}
+                  </a>
+                </li>
+                <li>
+                  <a className="nav-link" href="#">
+                    Logout
+                  </a>
+                </li>
+              </>
+            ) : (
+              <li>
+                <a className="nav-link" href="#">
+                  Log In
+                </a>
+              </li>
+            )}
           </ul>
         </div>
       </div>
