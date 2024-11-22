@@ -12,9 +12,12 @@ const ListUsers = () => {
     try {
       const { data } = await axios.get("http://localhost:2024/api/users");
       setUsers(data.users || []);
-      setMessage(data.message || "No users found");
+      setMessage(data.message || "You must be signed in to view users");
     } catch (e) {
-      setMessage(e.response?.data?.message || "Error fetching users");
+      setMessage(
+        e.response?.data?.message ||
+          "Error fetching users. You must be signed in to view users"
+      );
     }
   };
 
@@ -28,7 +31,7 @@ const ListUsers = () => {
   return (
     <>
       {isLoading ? (
-        <div className="users-container">
+        <div className="users-container mt-5">
           <table className="users-table skeletonWrapper">
             <caption>Current Users</caption>
             <thead>
@@ -51,7 +54,7 @@ const ListUsers = () => {
         </div>
       ) : (
         <div>
-          <div className="users-container">
+          <div className="users-container mt-5">
             {users.length > 0 ? (
               <table className="users-table">
                 <caption>Current Users</caption>
