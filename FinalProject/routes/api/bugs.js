@@ -38,7 +38,7 @@ const updateBugSchema = Joi.object({
   title: Joi.string().min(3).max(100),
   bugDescription: Joi.string().min(10).max(500),
   stepsToReproduce: Joi.string().min(10).max(500),
-});
+}).unknown(true);
 
 const classifyBugSchema = Joi.object({
   classification: Joi.string().min(3).required(),
@@ -166,7 +166,7 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
     const skip = (page - 1) * limit;
 
     bugs = bugs.slice(skip, skip + limit);
-    res.status(200).json(bugs);
+    res.status(200).json({bugs, message: "Bugs successfully fetched"});
   } catch (err) {
     res.status(500).send(err);
   }
@@ -182,7 +182,11 @@ router.get(
     const bugId = req.bugId;
     try {
       const bug = await GetBugById(bugId);
-      res.status(200).json(bug);
+      if (bug) {
+        res.status(200).json(bug);
+      } else {
+        res.status(200).json({ message: `Bug ${bugId} not found` });
+      }
     } catch (err) {
       res.status(500).send(err);
     }
@@ -236,7 +240,7 @@ router.patch(
     const getBug = await GetBugById(bugId);
 
     if (!getBug) {
-      return res.status(404).json({ message: `Bug ${bugId} not found` });
+      return res.status(400).json({ message: `Bug ${bugId} not found` });
     }
 
     const updatedBug = req.body;
@@ -254,7 +258,7 @@ router.patch(
         collection: "bugs",
         operation: "update",
         target: bugId,
-        update: udpatedBug,
+        update: updatedBug,
         auth: req.auth,
       };
       await saveAuditLog(log);
