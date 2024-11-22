@@ -185,10 +185,10 @@ router.get("/me", isLoggedIn(), async (req, res) => {
 router.post("/register", validBody(newUserSchema), async (req, res, next) => {
   const newUser = req.body;
 
-  const searchUser = await GetUserByEmail(newUser.email);
+  const exsistingUser = await GetUserByEmail(newUser.email);
 
-  if (searchUser) {
-    res.status(400).send("Email already exists");
+  if (exsistingUser) {
+    res.status(200).json({message:"Email already exists"});
     return;
   } else {
     // save the new user to the DB
@@ -257,6 +257,11 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
   }
 });
 
+router.post("/logout", isLoggedIn(), async (req, res, next) => {
+  res.clearCookie("authToken");
+  res.status(200).json({ message: "Logged out successfully" });
+});
+
 //Users can update their own account information
 router.patch(
   "/me",
@@ -314,7 +319,7 @@ router.get(
       if (user) {
         res.status(200).json(user);
       } else {
-        res.status(404).send(`User ${userId} not found.`);
+        res.status(200).json({message: `User ${userId} not found.`});
       }
     } catch (err) {
       res.status(500).send(err);
