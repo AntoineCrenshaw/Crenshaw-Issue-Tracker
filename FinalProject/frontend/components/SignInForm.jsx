@@ -2,12 +2,12 @@ import "../components/SignInForm.css";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 
 const SignInForm = ({ showSuccess, showError, setAuth }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
@@ -48,18 +48,20 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
         { withCredentials: true }
       );
       if (response.status === 200) {
+        console.log(response.data);
         if (response.data.message === "Invalid email or password") {
           setAuth(null);
-          setMessage(response.data.message);
+          // setMessage(response.data.message);
           showError(response.data.message);
         } else {
-          setAuth(response.data.existingUser);
+          setAuth(response.data);
           showSuccess(response.data.message);
-          navigate("/");
+          localStorage.setItem("auth", JSON.stringify(response.data));
+          navigate("/bugs");
         }
       }
     } catch (e) {
-      setMessage(e.response.data.message);
+      console.log(`catch block: ${e.response.data}`);
     }
   };
 
@@ -133,10 +135,9 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
               Sign In
             </button>
 
-            <div>
-              <a href="/register">Don&apos;t have an account? Register here</a>
-            </div>
-            <div className="text-primary">{message}</div>
+            <NavLink to="/register">
+              Don&apos;t have an account? Register here
+            </NavLink>
           </form>
         </div>
       </div>
