@@ -13,6 +13,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect, useState } from "react";
 import BugEditor from "../components/BugEditor.jsx";
+import UserEditor from "../components/UserEditor.jsx";
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -90,7 +91,11 @@ function App() {
                 />
               }
             />
-            <Route path="/users" element={<ListUsers />} />
+            <Route
+              path="/users"
+              element={<ListUsers showSuccess={showSuccess} />}
+            />
+            <Route path="/users/:id" element={<UserEditor />} />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>
         </main>
