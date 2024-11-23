@@ -1,0 +1,48 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  margin-top: 2rem;
+}
+
+label {
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+button {
+  margin-top: 1rem;
+  font-size: inherit;
+  font-family: inherit;
+}
+/* 
+input[type="text"],
+.editEmail input#email {
+  width: 300px;
+}
+
+input:active {
+  border-color: rebeccapurple;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+form {
+  display: flex;
+  justify-content: start;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+form.editorForm {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+} */
