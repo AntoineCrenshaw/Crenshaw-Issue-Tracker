@@ -72,7 +72,8 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
       <div className="container mt-5">
         <h1>Edit Bug - {id}</h1>
         <div className="row">
-          <div className="col-md-6">
+          {/* First Row */}
+          <div className="col-12">
             <form onSubmit={(e) => onBugUpdate(e)}>
               <div className="mb-3">
                 <label htmlFor="title" className="form-label">
@@ -97,6 +98,14 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
               </div>
+            </form>
+          </div>
+        </div>
+
+        <div className="row mt-3">
+          {/* Second Row */}
+          <div className="col-12">
+            <form onSubmit={(e) => onBugUpdate(e)}>
               <div className="mb-3">
                 <label htmlFor="stepsToReproduce" className="form-label">
                   Steps to Reproduce
