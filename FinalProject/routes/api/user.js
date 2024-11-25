@@ -64,6 +64,17 @@ const loginUserSchema = Joi.object({
   password: Joi.string().min(6).max(30).required(),
 }).unknown(true);
 
+const updatePasswordSchema = Joi.object({
+  email: Joi.string()
+  .email()
+  .pattern(
+    /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
+    "email"
+  ).optional(),
+  currentPassword: Joi.string().min(6).max(30).required(),
+  newPassword: Joi.string().min(6).max(30).required(),
+}).unknown(true);
+
 async function issueAuthToken(user) {
   const roles = await fetchRoles(user, (role) => findRoleByName(role));
 
@@ -296,9 +307,9 @@ router.patch(
         await saveAuditLog(log);
         return res
           .status(200)
-          .json({ message: `User ${userId} updated!`, user });
+          .json({ message: `User  updated!` });
       } else {
-        res.status(404).send(`User ${userId} not found.`);
+        res.status(404).send(`User not found.`);
       }
     } catch (err) {
       res.status(500).send(err.message);
@@ -321,7 +332,7 @@ router.get(
       if (user) {
         res.status(200).json(user);
       } else {
-        res.status(200).json({message: `User ${userId} not found.`});
+        res.status(200).json({message: `User not found.`});
       }
     } catch (err) {
       res.status(500).send(err);
@@ -349,22 +360,11 @@ router.patch(
           user.lastUpdatedOn = new Date();
           user.lastUpdatedBy = req.auth._id;
         }
-
+        // If given a password, hash it
         if (updatedUser.password) {
           user.password = await bcrypt.hash(updatedUser.password, 10);
         }
-
-        if (updatedUser.role) {
-          if (Array.isArray(updatedUser.role)) {
-            user.role = updatedUser.role; // Directly assign if it's already an array
-          } else if (typeof updatedUser.role === "string") {
-            user.role = updatedUser.role.split(",").map((role) => role.trim()); // Convert comma-separated string to array
-          } else {
-            return res.status(400).send({ message: "Invalid role format" });
-          }
-        }
         
-
         // issue a new token if the user is updating their own account
         if (req.auth._id === userId) {
           const jwtToken = await issueAuthToken(user);
@@ -381,7 +381,7 @@ router.patch(
         await saveAuditLog(log);
         return res
           .status(200)
-          .json({ message: `User ${userId} updated!`, userId });
+          .json({ message: `User updated!` });
       } else {
         res.status(404).send(`User ${userId} not found.`);
       }
@@ -390,6 +390,7 @@ router.patch(
     }
   }
 );
+
 
 //Delete User
 router.delete(

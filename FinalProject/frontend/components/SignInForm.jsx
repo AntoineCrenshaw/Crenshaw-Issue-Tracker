@@ -91,6 +91,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="form-control input-field"
+                    autoComplete="email"
                     required
                   />
                 </div>
@@ -101,7 +102,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
             </div>
             <div className="input-group">
               <div className="mb-3">
-                <label htmlFor="password" className="form-label">
+                <label htmlFor="password" className="form-label" aria-autocomplete="current-password">
                   Password
                 </label>
                 <div className="input-group">
@@ -116,6 +117,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                     minLength={6}
                     className="form-control input-field"
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
                     required
                   />
                   <span onClick={() => setShowPassword(!showPassword)}>
@@ -136,7 +138,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
             </button>
 
             <NavLink to="/register">
-              Don&apos;t have an account? Register here
+              <span>Don&apos;t have an account? Register here</span>
             </NavLink>
           </form>
         </div>

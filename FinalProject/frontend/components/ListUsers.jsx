@@ -49,9 +49,7 @@ const ListUsers = ({ showSuccess }) => {
 
   useEffect(() => {
     getUsers();
-    setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
   }, []);
 
   return (

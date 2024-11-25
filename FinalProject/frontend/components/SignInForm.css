@@ -30,15 +30,23 @@
 #password,
 #email {
   width: 100%;
-  padding: 0.5rem 0.75rem 0.5rem 2.5rem;
   border: 1px solid black;
   border-radius: 4px;
   font-size: 1rem;
-  transition: border-color 0.4s ease;
+  transition: border-color 2s ease;
 }
 
 .input-icon {
   color: black;
+}
+
+@keyframes border-color {
+  from {
+    border-color: black;
+  }
+  to {
+    border-color: red;
+  }
 }
 
 @keyframes fadeIn {

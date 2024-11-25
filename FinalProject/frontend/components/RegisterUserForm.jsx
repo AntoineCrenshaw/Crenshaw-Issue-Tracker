@@ -2,7 +2,6 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
-import _ from "lodash";
 
 export default function RegisterUserForm({ showSuccess, showError, setAuth }) {
   const [email, setEmail] = useState("");
