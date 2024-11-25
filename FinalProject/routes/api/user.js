@@ -47,11 +47,11 @@ const updateUserSchema = Joi.object({
       /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
       "email"
     ),
-  password: Joi.string().min(6).max(30),
-  givenName: Joi.string().min(3).max(20),
-  familyName: Joi.string().min(3).max(20),
-  role: Joi.array().items(Joi.string().min(3)),
-});
+  password: Joi.string().min(6).max(30).optional(),
+  givenName: Joi.string().min(3).max(20).optional(),
+  familyName: Joi.string().min(3).max(20).optional(),
+  role: Joi.string().min(3).optional(),
+}).unknown(true);
 
 const loginUserSchema = Joi.object({
   email: Joi.string()
@@ -351,6 +351,17 @@ router.patch(
         if (updatedUser.password) {
           user.password = await bcrypt.hash(updatedUser.password, 10);
         }
+
+        if (updatedUser.role) {
+          if (Array.isArray(updatedUser.role)) {
+            user.role = updatedUser.role; // Directly assign if it's already an array
+          } else if (typeof updatedUser.role === "string") {
+            user.role = updatedUser.role.split(",").map((role) => role.trim()); // Convert comma-separated string to array
+          } else {
+            return res.status(400).send({ message: "Invalid role format" });
+          }
+        }
+        
 
         // issue a new token if the user is updating their own account
         if (req.auth._id === userId) {

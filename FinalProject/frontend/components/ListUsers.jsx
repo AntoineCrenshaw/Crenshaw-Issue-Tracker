@@ -39,6 +39,7 @@ const ListUsers = ({ showSuccess }) => {
       showSuccess("User deleted successfully");
       console.log(data);
       setDeleteCounter(deleteCounter + 1);
+      setShowModal(false);
       navigate("/users");
     } catch (e) {
       console.log(e);
