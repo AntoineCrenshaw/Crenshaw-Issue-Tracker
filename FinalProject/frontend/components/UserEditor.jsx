@@ -37,6 +37,13 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
     e.preventDefault();
     console.log("Updating user");
 
+    // Ensure the role input is added to the array
+    const updatedRole = Array.isArray(user.role)
+      ? [...user.role, role].filter(
+          (item, index, arr) => arr.indexOf(item) === index
+        ) // Prevent duplicates
+      : [role]; // If role isn't an array, start fresh with a single role
+
     const updatedUser = {
       ...user,
       firstName,
@@ -44,7 +51,7 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
       fullName,
       password,
       email,
-      role,
+      role: updatedRole, // Update the role field as an array
     };
 
     delete updatedUser._id;
@@ -71,10 +78,17 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
     }
   };
 
+  const cancelEdit = (e) => {
+    e.preventDefault();
+    // Redirect to the users page
+    console.log("Cancelling edit and returning to users page");
+    navigate("/users");
+  };
+
   return (
     <div className="parent">
       <h1 className="text-center">Edit User</h1>
-      <form onSubmit={onUserUpdate} className="editorForm">
+      <form onSubmit={(e) => onUserUpdate(e)} className="editorForm">
         <div className="form-group editEmail">
           <label htmlFor="email">Email</label>
           <input
@@ -137,6 +151,13 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
         </div>
         <button type="submit" className="btn btn-primary">
           Update
+        </button>
+        <button
+          type="button"
+          className="btn btn-warning text-black"
+          onClick={(e) => cancelEdit(e)}
+        >
+          Cancel
         </button>
       </form>
     </div>
