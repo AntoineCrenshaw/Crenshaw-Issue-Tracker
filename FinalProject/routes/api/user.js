@@ -37,8 +37,8 @@ const newUserSchema = Joi.object({
   password: Joi.string().min(6).max(30).required(),
   givenName: Joi.string().min(3).max(20).required(),
   familyName: Joi.string().min(3).max(20).required(),
-  role: Joi.string().min(3).optional(),
-});
+  role: Joi.array().items(Joi.string().min(3)).unique().optional(),
+}).unknown(true);
 
 const updateUserSchema = Joi.object({
   email: Joi.string()
@@ -46,11 +46,11 @@ const updateUserSchema = Joi.object({
     .pattern(
       /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
       "email"
-    ),
+    ).optional(),
   password: Joi.string().min(6).max(30).optional(),
   givenName: Joi.string().min(3).max(20).optional(),
   familyName: Joi.string().min(3).max(20).optional(),
-  role: Joi.string().min(3).optional(),
+  role: Joi.array().items(Joi.string().min(3)).unique().optional(),
 }).unknown(true);
 
 const loginUserSchema = Joi.object({
@@ -62,7 +62,7 @@ const loginUserSchema = Joi.object({
     )
     .required(),
   password: Joi.string().min(6).max(30).required(),
-});
+}).unknown(true);
 
 async function issueAuthToken(user) {
   const roles = await fetchRoles(user, (role) => findRoleByName(role));
@@ -313,8 +313,10 @@ router.get(
   isLoggedIn(),
   hasPermission("canViewData"),
   async (req, res, next) => {
+    // Get User by ID
     const userId = req.userId;
     try {
+      // If user is found, return user details
       const user = await GetUserById(userId);
       if (user) {
         res.status(200).json(user);
