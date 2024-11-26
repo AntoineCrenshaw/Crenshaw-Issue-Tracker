@@ -11,7 +11,6 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
   const [bugDescription, setDescription] = useState("");
   const [stepsToReproduce, setStepsToReproduce] = useState("");
   const [assignedToUserName, setAssignedToUserName] = useState("");
-  const [message, setMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -53,12 +52,10 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
       if (response.status === 200) {
         setBug(response.data.bugs);
         showSuccess(response.data.message);
-        setMessage(response.data.message);
         setAuth(response.data);
         localStorage.setItem("auth", JSON.stringify(response.data));
         navigate("/bugs");
       } else {
-        setMessage(response.data.message);
         showError(response.data.message);
         setAuth(null);
       }
@@ -145,7 +142,6 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
               >
                 Cancel
               </button>
-              <div>{message}</div>
             </form>
           </div>
         </div>
