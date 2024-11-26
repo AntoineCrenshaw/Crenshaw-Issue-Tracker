@@ -61,9 +61,20 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
         showError(response.data.message);
         setAuth(null);
       }
-    } catch (e) {
-      console.log(`catch block: ${JSON.stringify(e.response.data)}`);
-    }
+    } catch (err) {
+      if (err.response) {
+          // Error from the server (HTTP status code, response data, etc.)
+          console.log(`Server Error: ${err.response.status} - ${err.response.statusText}`);
+          console.log(`Details: ${JSON.stringify(err.response.data)}`);
+      } else if (err.request) {
+          // Error with the request itself, no response received
+          console.log('Network Error: No response received');
+          console.log(`Request: ${err.request}`);
+      } else {
+          // Some other error occurred
+          console.log(`Unexpected Error: ${err.message}`);
+      }
+  }  
   };
 
   const cancelEdit = (e) => {
