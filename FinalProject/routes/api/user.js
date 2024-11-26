@@ -47,10 +47,10 @@ const updateUserSchema = Joi.object({
       /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
       "email"
     ).optional(),
-  password: Joi.string().min(6).max(30).optional(),
+  // password: Joi.string().min(6).max(30).optional(),
   givenName: Joi.string().min(3).max(20).optional(),
   familyName: Joi.string().min(3).max(20).optional(),
-  role: Joi.array().items(Joi.string().min(3)).unique().optional(),
+  // role: Joi.array().items(Joi.string().min(3)).unique().optional(),
 }).unknown(true);
 
 const loginUserSchema = Joi.object({
@@ -280,9 +280,9 @@ router.patch(
         user.lastUpdatedOn = new Date();
         user.lastUpdatedBy = req.auth._id;
 
-        if (updatedUser.password) {
-          user.password = await bcrypt.hash(updatedUser.password, 10);
-        }
+        // if (updatedUser.password) {
+        //   user.password = await bcrypt.hash(updatedUser.password, 10);
+        // }
 
         const result = await updateUser(userId, user);
         const log = {
@@ -350,9 +350,9 @@ router.patch(
           user.lastUpdatedBy = req.auth._id;
         }
 
-        if (updatedUser.password) {
-          user.password = await bcrypt.hash(updatedUser.password, 10);
-        }
+        // if (updatedUser.password) {
+        //   user.password = await bcrypt.hash(updatedUser.password, 10);
+        // }
 
         // issue a new token if the user is updating their own account
         if (req.auth._id === userId) {
