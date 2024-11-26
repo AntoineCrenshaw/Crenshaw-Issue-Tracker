@@ -17,32 +17,3 @@ button {
   font-size: inherit;
   font-family: inherit;
 }
-/* 
-input[type="text"],
-.editEmail input#email {
-  width: 300px;
-}
-
-input:active {
-  border-color: rebeccapurple;
-}
-
-main {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-}
-
-form {
-  display: flex;
-  justify-content: start;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-form.editorForm {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 10px;
-} */
