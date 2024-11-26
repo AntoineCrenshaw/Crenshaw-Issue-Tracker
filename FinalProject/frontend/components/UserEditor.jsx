@@ -10,10 +10,7 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [fullName, setFullName] = useState("");
-  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
-
   const navigate = useNavigate();
 
   // Display the user details on open of the page
@@ -27,8 +24,6 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
         setLastName(response.data.familyName);
         setFullName(response.data.fullName);
         setEmail(response.data.email);
-        setPassword(response.data.password);
-        setRole(response.data.role);
       })
       .catch((error) => console.log(error));
   }, []);
@@ -36,22 +31,15 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
   const onUserUpdate = async (e) => {
     e.preventDefault();
     console.log("Updating user");
-
-    // Ensure the role input is added to the array
-    const updatedRole = Array.isArray(user.role)
-      ? [...user.role, role].filter(
-          (item, index, arr) => arr.indexOf(item) === index
-        ) // Prevent duplicates
-      : [role]; // If role isn't an array, start fresh with a single role
+    console.log("Fetched user data:", user);
 
     const updatedUser = {
       ...user,
       firstName,
       lastName,
       fullName,
-      password,
       email,
-      role: updatedRole, // Update the role field as an array
+      role: user.role || [],
     };
 
     delete updatedUser._id;
@@ -73,8 +61,8 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
         showError(response.data.message);
         setAuth(null);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (e) {
+      console.log(`catch block: ${JSON.stringify(e.response.data)}`);
     }
   };
 
@@ -99,7 +87,7 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="form-group editFullName">
+        <div className="form-group">
           <label htmlFor="fullName">Full Name</label>
           <input
             type="text"
@@ -109,7 +97,7 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
             onChange={(e) => setFullName(e.target.value)}
           />
         </div>
-        <div className="form-group editFirstName">
+        <div className="form-group">
           <label htmlFor="firstName">First Name</label>
           <input
             type="text"
@@ -119,7 +107,7 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
             onChange={(e) => setFirstName(e.target.value)}
           />
         </div>
-        <div className="form-group editLastName">
+        <div className="form-group">
           <label htmlFor="lastName">Last Name</label>
           <input
             type="text"
@@ -127,26 +115,6 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
             id="lastName"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-        <div className="form-group editPassword">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div className="form-group editRole">
-          <label htmlFor="role">Role</label>
-          <input
-            type="text"
-            className="form-control"
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
           />
         </div>
         <button type="submit" className="btn btn-primary">
