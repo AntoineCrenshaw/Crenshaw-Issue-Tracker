@@ -76,8 +76,8 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
   return (
     <div className="parent">
       <h1 className="text-center">Edit User</h1>
-      <form onSubmit={(e) => onUserUpdate(e)} className="editorForm">
-        <div className="form-group editEmail">
+      <form onSubmit={(e) => onUserUpdate(e)}>
+        <div className="form-group ">
           <label htmlFor="email">Email</label>
           <input
             type="email"
@@ -87,7 +87,7 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="form-group">
+        <div className="form-group ">
           <label htmlFor="fullName">Full Name</label>
           <input
             type="text"
