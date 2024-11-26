@@ -67,6 +67,13 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
     }
   };
 
+  const cancelEdit = (e) => {
+    e.preventDefault();
+    // Redirect to the users page
+    console.log("Cancelling edit and returning to users page");
+    navigate("/bugs");
+  };
+
   return (
     <>
       <div className="container mt-5">
@@ -130,6 +137,13 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
               </div>
               <button type="submit" className="btn btn-primary">
                 Save
+              </button>
+              <button
+                type="button"
+                className="btn btn-warning text-black"
+                onClick={(e) => cancelEdit(e)}
+              >
+                Cancel
               </button>
               <div>{message}</div>
             </form>
