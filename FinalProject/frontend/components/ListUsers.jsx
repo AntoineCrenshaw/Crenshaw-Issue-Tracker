@@ -14,19 +14,21 @@ const ListUsers = ({ showSuccess }) => {
   const navigate = useNavigate();
 
   const getUsers = async () => {
+    setIsLoading(true);
     try {
-      const { data } = await axios.get("http://localhost:2024/api/users", {
+      const response = await axios.get("http://localhost:2024/api/users", {
         withCredentials: true,
       });
-      console.log(data);
-      setUsers(data.users || []);
-      setMessage(data.message || "You must be signed in to view users");
+      console.log(response.data);
+      setUsers(response.data.users || []);
+      setMessage(response.data.message || "You must be signed in to view users");
     } catch (e) {
       setMessage(
         e.response?.data?.message ||
           "Error fetching users. You must be signed in to view users"
       );
     }
+    setIsLoading(false);
   };
 
   function handleConfirmDelete(e, id) {
@@ -39,7 +41,6 @@ const ListUsers = ({ showSuccess }) => {
       showSuccess("User deleted successfully");
       setDeleteCounter(deleteCounter + 1);
       setUsers((prevUsers) => prevUsers.filter((user) => user._id !== id));
-      console.log(data);
       setShowModal(false);
       navigate("/users");
     } catch (e) {
@@ -49,7 +50,6 @@ const ListUsers = ({ showSuccess }) => {
 
   useEffect(() => {
     getUsers();
-      setIsLoading(false);
   }, []);
 
   return (
@@ -68,6 +68,7 @@ const ListUsers = ({ showSuccess }) => {
             <tbody>
               {users.map((user) => (
                 <tr key={user.id}>
+                  <td>{<Skeleton />}</td>
                   <td>{<Skeleton />}</td>
                   <td>{<Skeleton />}</td>
                   <td>{<Skeleton />}</td>
