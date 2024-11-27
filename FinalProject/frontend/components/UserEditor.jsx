@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import Select from "react-select";
 import "react-toastify/dist/ReactToastify.css";
 import "./UserEditor.css";
 
@@ -11,6 +12,8 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
   const [lastName, setLastName] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [roles, setRoles] = useState([]); // State to hold roles
+  const [selectedRole, setSelectedRole] = useState(""); // State for selected role
   const navigate = useNavigate();
 
   // Display the user details on open of the page
@@ -19,11 +22,18 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
       .get(`http://localhost:2024/api/users/${id}`, { withCredentials: true })
       .then((response) => {
         console.log(response.data.users);
+        console.log("Roles from API:", response.data.role);
+
         setUser(response.data);
         setFirstName(response.data.givenName);
         setLastName(response.data.familyName);
         setFullName(response.data.fullName);
         setEmail(response.data.email);
+        const rolesData = Array.isArray(response.data.role)
+          ? response.data.role
+          : [];
+        setRoles(rolesData);
+        setSelectedRole(response.data.role);
       })
       .catch((error) => console.log(error));
   }, []);
@@ -39,7 +49,7 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
       lastName,
       fullName,
       email,
-      role: user.role || [],
+      role: selectedRole,
     };
 
     delete updatedUser._id;
@@ -63,18 +73,20 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
       }
     } catch (err) {
       if (err.response) {
-          // Error from the server (HTTP status code, response data, etc.)
-          console.log(`Server Error: ${err.response.status} - ${err.response.statusText}`);
-          console.log(`Details: ${JSON.stringify(err.response.data)}`);
+        // Error from the server (HTTP status code, response data, etc.)
+        console.log(
+          `Server Error: ${err.response.status} - ${err.response.statusText}`
+        );
+        console.log(`Details: ${JSON.stringify(err.response.data)}`);
       } else if (err.request) {
-          // Error with the request itself, no response received
-          console.log('Network Error: No response received');
-          console.log(`Request: ${err.request}`);
+        // Error with the request itself, no response received
+        console.log("Network Error: No response received");
+        console.log(`Request: ${err.request}`);
       } else {
-          // Some other error occurred
-          console.log(`Unexpected Error: ${err.message}`);
+        // Some other error occurred
+        console.log(`Unexpected Error: ${err.message}`);
       }
-  }  
+    }
   };
 
   const cancelEdit = (e) => {
@@ -128,6 +140,23 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
             onChange={(e) => setLastName(e.target.value)}
           />
         </div>
+        <div className="form-group">
+          <label htmlFor="role">Role</label>
+          <select
+            className="form-control"
+            id="role"
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
+          >
+            <option value="">Select...</option>
+            {roles.map((role, index) => (
+              <option key={index} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
+        </div>
+        <br />
         <button type="submit" className="btn btn-primary">
           Update
         </button>
