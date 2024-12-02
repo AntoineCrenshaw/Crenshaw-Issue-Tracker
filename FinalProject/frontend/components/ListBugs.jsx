@@ -5,7 +5,8 @@ import "./ListBugs.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { NavLink, useNavigate } from "react-router-dom";
 
-const ListBugs = ({showSuccess}) => {
+const ListBugs = ({ showSuccess, showError }) => {
+  const [selectedBug, setSelectedBug] = useState({});
   const [bugs, setBugs] = useState([]);
   const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -32,22 +33,33 @@ const ListBugs = ({showSuccess}) => {
     setIsLoading(false);
   };
 
-  function handleConfirmDelete(e, id) {
+  async function updateCloseStatus(e, id) {
     e.preventDefault();
     console.log(id);
     try {
-      const data = axios.put(`http://localhost:2024/api/bugs/${id}/close`, {
-        withCredentials: true,
-      });
-      showSuccess("Bug deleted successfully");
-      setDeleteCounter(deleteCounter + 1);
-      setBugs((prevBugs) => prevBugs.filter((bug) => bug._id !== id));
-      setShowModal(false);
-      navigate("/users");
+      const response = await axios.put(
+        `http://localhost:2024/api/bugs/${id}/close`,
+        {
+          closed: true,
+        }
+      );
+      if (response.status === 200) {
+        showSuccess("Bug closed successfully");
+        setDeleteCounter(deleteCounter + 1);
+        setShowModal(false);
+        navigate("/bugs");
+      } else {
+        showError(response.data.message);
+      }
     } catch (e) {
       console.log(e);
     }
   }
+
+  const handleBugClick = (bug) => {
+    setSelectedBug(bug);
+    setShowModal(true);
+  };
 
   useEffect(() => {
     getBugs();
@@ -109,10 +121,13 @@ const ListBugs = ({showSuccess}) => {
                                 <i className="bi bi-pencil"></i>
                               </NavLink>
                             </button>
-                              <button className="btn btn-link" onClick={() => setShowModal(true)}>
-                                <i className="bi bi-trash3"></i>
-                                </button>
-                                {showModal && (
+                            <button
+                              className="btn btn-link"
+                              onClick={() => handleBugClick(bug)}
+                            >
+                              <i className="bi bi-trash3"></i>
+                            </button>
+                            {showModal && selectedBug._id === bug._id && (
                               <div className="modal show d-block" tabIndex="-1">
                                 <div className="modal-dialog">
                                   <div className="modal-content">
@@ -130,7 +145,9 @@ const ListBugs = ({showSuccess}) => {
                                     </div>
                                     <div className="modal-body">
                                       <p className="fs-4">
-                                        Are you sure you want to delete this bug? 
+                                        Are you sure you want to close this bug?
+                                        <br />
+                                        {bug.title}
                                       </p>
                                     </div>
                                     <div className="modal-footer">
@@ -145,7 +162,7 @@ const ListBugs = ({showSuccess}) => {
                                         type="button"
                                         className="btn btn-danger"
                                         onClick={(e) =>
-                                          handleConfirmDelete(e, bug._id)
+                                          updateCloseStatus(e, bug._id)
                                         }
                                       >
                                         Delete
