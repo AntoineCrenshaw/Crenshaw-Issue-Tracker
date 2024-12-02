@@ -109,6 +109,12 @@ async function GetUserByEmail(email) {
   return user;
 }
 
+async function GetRoles() {
+  const db = await connect();
+  const roles = await db.collection("Role").find({}).toArray();
+  return roles;
+}
+
 async function createUser(newUser) {
   const db = await connect();
   const dbResult = db.collection("users").insertOne(newUser);
@@ -156,10 +162,11 @@ async function loginUser(email, password) {
   return user;
 }
 
-async function GetRoles(userId) {
+async function findRoleByName(roleName) {
+  debugDb(`Role name: ${roleName}`);
   const db = await connect();
-  const results = await db.collection("roles").find({}).toArray();
-  return results;
+  const role = await db.collection("Role").findOne({ name: roleName });
+  return role;
 }
 
 //comments CRUD operations
@@ -212,13 +219,6 @@ async function saveAuditLog(log) {
   return dbResult;
 }
 
-async function findRoleByName(roleName) {
-  debugDb(`Role name: ${roleName}`);
-  const db = await connect();
-  const role = db.collection("Role").findOne({ name: roleName });
-  return role;
-}
-
 // test the database connection
 ping();
 
@@ -232,6 +232,8 @@ export {
   GetAllUsers,
   GetUserByEmail,
   GetUserById,
+  GetRoles,
+  findRoleByName,
   createUser,
   updateUser,
   updateBugClassification,
@@ -245,5 +247,4 @@ export {
   GetTests,
   CreateTests,
   saveAuditLog,
-  findRoleByName,
 };

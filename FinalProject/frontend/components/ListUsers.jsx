@@ -4,9 +4,10 @@ import "./ListUsers.css";
 import Skeleton from "react-loading-skeleton";
 import { NavLink, useNavigate } from "react-router-dom";
 
-const ListUsers = ({ showSuccess }) => {
+const ListUsers = ({ showSuccess, showError }) => {
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState("");
+  const [selectedUser, setSelectedUser] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [deleteCounter, setDeleteCounter] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,21 +22,24 @@ const ListUsers = ({ showSuccess }) => {
       });
       console.log(response.data);
       setUsers(response.data.users || []);
-      setMessage(response.data.message || "You must be signed in to view users");
+      setMessage(
+        response.data.message || "You must be signed in to view users"
+      );
     } catch (e) {
       setMessage(
         e.response?.data?.message ||
           "Error fetching users. You must be signed in to view users"
       );
+      showError(message);
     }
     setIsLoading(false);
   };
 
-  function handleConfirmDelete(e, id) {
+  async function handleConfirmDelete(e, id) {
     e.preventDefault();
     console.log(id);
     try {
-      const data = axios.delete(`http://localhost:2024/api/users/${id}`, {
+      await axios.delete(`http://localhost:2024/api/users/${id}`, {
         withCredentials: true,
       });
       showSuccess("User deleted successfully");
@@ -47,6 +51,11 @@ const ListUsers = ({ showSuccess }) => {
       console.log(e);
     }
   }
+
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setShowModal(true);
+  };
 
   useEffect(() => {
     getUsers();
@@ -108,11 +117,11 @@ const ListUsers = ({ showSuccess }) => {
                             </button>
                             <button
                               className="btn btn-link"
-                              onClick={() => setShowModal(true)}
+                              onClick={() => handleUserClick(user)}
                             >
                               <i className="bi bi-trash3"></i>
                             </button>
-                            {showModal && (
+                            {showModal && selectedUser._id === user._id && (
                               <div className="modal show d-block" tabIndex="-1">
                                 <div className="modal-dialog">
                                   <div className="modal-content">
@@ -146,7 +155,10 @@ const ListUsers = ({ showSuccess }) => {
                                         type="button"
                                         className="btn btn-danger"
                                         onClick={(e) =>
-                                          handleConfirmDelete(e, user.id)
+                                          handleConfirmDelete(
+                                            e,
+                                            selectedUser._id
+                                          )
                                         }
                                       >
                                         Delete

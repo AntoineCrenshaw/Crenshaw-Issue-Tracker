@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "./UserEditor.css";
 
@@ -140,25 +141,38 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="role">Role</label>
-          <select
-            className="form-control"
-            id="role"
-            value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
-          >
-            <option value="">Select...</option>
+          <label htmlFor="role">Choose your roles:</label>
+          <div id="role">
             {roles.map((role, index) => (
-              <option key={index} value={role}>
-                {role}
-              </option>
+              <div key={index} className="form-check">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`role-${index}`}
+                  value={role}
+                  checked={selectedRole.includes(role)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedRole([...selectedRole, role]); // Add role to selected list
+                    } else {
+                      setSelectedRole(selectedRole.filter((r) => r !== role)); // Remove role from selected list
+                    }
+                  }}
+                />
+                <label htmlFor={`role-${index}`} className="form-check-label">
+                  {role}
+                </label>
+              </div>
             ))}
-          </select>
+          </div>
         </div>
+
         <br />
-        <button type="submit" className="btn btn-primary">
-          Update
-        </button>
+        <NavLink to="/users">
+          <button type="submit" className="btn btn-primary">
+            Update
+          </button>
+        </NavLink>
         <button
           type="button"
           className="btn btn-warning text-black"
