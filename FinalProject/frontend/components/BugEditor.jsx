@@ -67,14 +67,14 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
   const cancelEdit = (e) => {
     e.preventDefault();
     // Redirect to the users page
-    console.log("Cancelling edit and returning to users page");
+    console.log("Cancelling edit and returning to bugs page");
     navigate("/bugs");
   };
 
   return (
     <>
       <div className="container mt-5">
-        <h1>Edit Bug - {id}</h1>
+        <h1>Edit Bug - {bug.title}</h1>
         <div className="row">
           {/* First Row */}
           <div className="col-12">
