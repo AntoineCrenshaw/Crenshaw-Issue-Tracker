@@ -60,8 +60,12 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
           navigate("/bugs");
         }
       }
-    } catch (e) {
-      console.log(`catch block: ${e.response.data}`);
+    } catch (err) {
+      // Error from the server (HTTP status code, response data, etc.)
+      // showError(
+      //   `Server Error: ${err.response.status} - ${err.response.statusText}`
+      // );
+      showError(`Details: ${JSON.stringify(err?.response?.data?.error)}`);
     }
   };
 
@@ -95,6 +99,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                     required
                   />
                 </div>
+                <div className="valid-feedback">Looks good!</div>
                 <div className="invalid-feedback">
                   Please enter a valid email.
                 </div>
@@ -102,7 +107,11 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
             </div>
             <div className="input-group">
               <div className="mb-3">
-                <label htmlFor="password" className="form-label" aria-autocomplete="current-password">
+                <label
+                  htmlFor="password"
+                  className="form-label"
+                  aria-autocomplete="current-password"
+                >
                   Password
                 </label>
                 <div className="input-group">
