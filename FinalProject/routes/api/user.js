@@ -261,7 +261,7 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ message: `Welcome back!`, role: existingUser.role, email: existingUser.email });
+      .json({ message: `Welcome back!`, role: existingUser.role, email: existingUser.email, "authToken": jwtToken });
   } catch (e) {
     debugUser(e);
     return res.status(500).json({ message: `Error logging in user` });
@@ -290,10 +290,6 @@ router.patch(
         }
         user.lastUpdatedOn = new Date();
         user.lastUpdatedBy = req.auth._id;
-
-        // if (updatedUser.password) {
-        //   user.password = await bcrypt.hash(updatedUser.password, 10);
-        // }
 
         const result = await updateUser(userId, user);
         const log = {
@@ -360,10 +356,6 @@ router.patch(
           user.lastUpdatedOn = new Date();
           user.lastUpdatedBy = req.auth._id;
         }
-
-        // if (updatedUser.password) {
-        //   user.password = await bcrypt.hash(updatedUser.password, 10);
-        // }
 
         // issue a new token if the user is updating their own account
         if (req.auth._id === userId) {
