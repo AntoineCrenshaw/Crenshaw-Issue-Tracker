@@ -48,7 +48,7 @@ function App() {
     if (auth) {
       setAuth(auth);
     }
-  }, []);
+  }, [auth]);
 
   return (
     <>
@@ -80,7 +80,12 @@ function App() {
                 />
               }
             />
-            <Route path="/bugs" element={<ListBugs />} />
+            <Route
+              path="/bugs"
+              element={
+                <ListBugs showSuccess={showSuccess} showError={showError} />
+              }
+            />
             <Route
               path="/bugs/:id"
               element={
@@ -93,9 +98,20 @@ function App() {
             />
             <Route
               path="/users"
-              element={<ListUsers showSuccess={showSuccess} />}
+              element={
+                <ListUsers showSuccess={showSuccess} showError={showError} />
+              }
             />
-            <Route path="/users/:id" element={<UserEditor />} />
+            <Route
+              path="/users/:id"
+              element={
+                <UserEditor
+                  showSuccess={showSuccess}
+                  showError={showError}
+                  setAuth={setAuth}
+                />
+              }
+            />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>
         </main>
