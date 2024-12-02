@@ -63,6 +63,7 @@ const ListUsers = ({ showSuccess }) => {
                 <th></th>
                 <th></th>
                 <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -88,7 +89,7 @@ const ListUsers = ({ showSuccess }) => {
                     <th>Email</th>
                     <th>Full Name</th>
                     <th>Role</th>
-                    <th>Actions</th>
+                    <th rowSpan={2}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -130,7 +131,7 @@ const ListUsers = ({ showSuccess }) => {
                                     <div className="modal-body">
                                       <p>
                                         Are you sure you want to delete{" "}
-                                        {user.fullName}?
+                                        {user.email}?
                                       </p>
                                     </div>
                                     <div className="modal-footer">
@@ -145,7 +146,7 @@ const ListUsers = ({ showSuccess }) => {
                                         type="button"
                                         className="btn btn-danger"
                                         onClick={(e) =>
-                                          handleConfirmDelete(e, user._id)
+                                          handleConfirmDelete(e, user.id)
                                         }
                                       >
                                         Delete

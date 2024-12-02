@@ -32,22 +32,20 @@ const ListBugs = ({showSuccess}) => {
     setIsLoading(false);
   };
 
-  function handleConfirmDelete(e, id) {
+  const handleConfirmDelete = async (e, id) => {
     e.preventDefault();
     console.log(id);
     try {
-      const data = axios.put(`http://localhost:2024/api/bugs/${id}/close`, {
-        withCredentials: true,
-      });
+      const data = await axios.put(`http://localhost:2024/api/bugs/${id}/close`, { closed: true });
       showSuccess("Bug deleted successfully");
       setDeleteCounter(deleteCounter + 1);
       setBugs((prevBugs) => prevBugs.filter((bug) => bug._id !== id));
       setShowModal(false);
       navigate("/users");
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
   useEffect(() => {
     getBugs();
@@ -130,7 +128,9 @@ const ListBugs = ({showSuccess}) => {
                                     </div>
                                     <div className="modal-body">
                                       <p className="fs-4">
-                                        Are you sure you want to delete this bug? 
+                                        Are you sure you want to delete this bug?{""}
+                                        <br/>
+                                        <strong>{bug.title}</strong>
                                       </p>
                                     </div>
                                     <div className="modal-footer">

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import Select from "react-select";
 import "react-toastify/dist/ReactToastify.css";
 import "./UserEditor.css";
 

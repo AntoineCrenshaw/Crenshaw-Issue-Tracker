@@ -156,6 +156,12 @@ async function loginUser(email, password) {
   return user;
 }
 
+async function GetRoles(userId) {
+  const db = await connect();
+  const results = await db.collection("roles").find({}).toArray();
+  return results;
+}
+
 //comments CRUD operations
 
 async function GetComment(commentId) {
