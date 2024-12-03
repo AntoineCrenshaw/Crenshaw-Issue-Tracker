@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Skeleton from "react-loading-skeleton";
-import "./ListBugs.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import Skeleton from 'react-loading-skeleton';
+import './ListBugs.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 const ListBugs = ({ showSuccess, showError }) => {
   const [selectedBug, setSelectedBug] = useState({});
   const [bugs, setBugs] = useState([]);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteCounter, setDeleteCounter] = useState(0);
@@ -17,18 +17,15 @@ const ListBugs = ({ showSuccess, showError }) => {
   const getBugs = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:2024/api/bugs", {
+      const response = await axios.get('http://localhost:2024/api/bugs', {
         withCredentials: true,
       });
-      console.log("Response Data: ", response.data);
+      console.log('Response Data: ', response.data);
 
       setBugs(response.data.bugs || []);
-      setMessage(response.data.message || "You must be signed in to view bugs");
+      setMessage(response.data.message || 'You must be signed in to view bugs');
     } catch (e) {
-      setMessage(
-        e.response?.data?.message ||
-          "Error fetching users. Refresh the page to try again"
-      );
+      setMessage(e.response?.data?.message || 'Error fetching users. Refresh the page to try again');
     }
     setIsLoading(false);
   };
@@ -37,24 +34,21 @@ const ListBugs = ({ showSuccess, showError }) => {
     e.preventDefault();
     console.log(id);
     try {
-      const response = await axios.put(
-        `http://localhost:2024/api/bugs/${id}/close`,
-        {
-          closed: true,
-        }
-      );
+      const response = await axios.put(`http://localhost:2024/api/bugs/${id}/close`, {
+        closed: true,
+      });
       if (response.status === 200) {
-        showSuccess("Bug closed successfully");
+        showSuccess('Bug closed successfully');
         setDeleteCounter(deleteCounter + 1);
         setShowModal(false);
-        navigate("/bugs");
+        navigate('/bugs');
       } else {
         showError(response.data.message);
       }
     } catch (e) {
       console.log(e);
     }
-  };
+  }
 
   const handleBugClick = (bug) => {
     setSelectedBug(bug);
@@ -121,23 +115,21 @@ const ListBugs = ({ showSuccess, showError }) => {
                                 <i className="bi bi-pencil"></i>
                               </NavLink>
                             </button>
-                            <button
-                              className="btn btn-link"
-                              onClick={() => handleBugClick(bug)}
-                            >
-                              <i className="bi bi-trash3"></i>
+                            <button className="btn btn-link" onClick={() => handleBugClick(bug)}>
+                              <i className="bi bi-ban"></i>
                             </button>
                             {showModal && selectedBug._id === bug._id && (
                               <div className="modal show d-block" tabIndex="-1">
                                 <div className="modal-dialog">
                                   <div className="modal-content">
                                     <div className="modal-header">
-                                      <h5 className="modal-title">
-                                        Confirm Delete
-                                      </h5>
+                                      <h5 className="modal-title">Confirm Delete</h5>
                                       <button
                                         type="button"
                                         className="btn-close"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="Tooltip on top"
                                         onClick={() => setShowModal(false)}
                                         data-bs-dismiss="modal"
                                         aria-label="Close"
@@ -154,6 +146,9 @@ const ListBugs = ({ showSuccess, showError }) => {
                                       <button
                                         type="button"
                                         className="btn btn-secondary"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="Tooltip on top"
                                         onClick={() => setShowModal(false)}
                                       >
                                         Cancel
@@ -161,9 +156,7 @@ const ListBugs = ({ showSuccess, showError }) => {
                                       <button
                                         type="button"
                                         className="btn btn-danger"
-                                        onClick={(e) =>
-                                          updateCloseStatus(e, bug._id)
-                                        }
+                                        onClick={(e) => updateCloseStatus(e, bug._id)}
                                       >
                                         Delete
                                       </button>
