@@ -63,11 +63,12 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
         }
       }
     } catch (err) {
-      // Error from the server (HTTP status code, response data, etc.)
-      // showError(
-      //   `Server Error: ${err.response.status} - ${err.response.statusText}`
-      // );
-      showError(`Details: ${JSON.stringify(err?.response?.data?.error)}`);
+      console.log(`Error Block ${JSON.stringify(err.response.data)}`);
+      if (err.response.data.error) {
+        err.response.data.error.forEach((error) => {
+          showError(error.message);
+        });
+      }
     }
   };
 

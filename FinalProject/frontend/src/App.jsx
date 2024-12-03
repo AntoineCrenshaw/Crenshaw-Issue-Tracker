@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useEffect, useState } from "react";
 import BugEditor from "../components/BugEditor.jsx";
 import UserEditor from "../components/UserEditor.jsx";
+import UserListItem from "../components/UserListItem.jsx";
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -48,7 +49,7 @@ function App() {
     if (auth) {
       setAuth(auth);
     }
-  }, [auth]);
+  }, []);
 
   return (
     <>
@@ -59,7 +60,7 @@ function App() {
         </header>
         <main>
           <Routes>
-            <Route path="/" element={<SignInForm />} />
+            <Route path="/" element={<ListUsers />} />
             <Route
               path="/login"
               element={
@@ -99,10 +100,14 @@ function App() {
             <Route
               path="/users"
               element={
-                <ListUsers showSuccess={showSuccess} showError={showError} />
+                <ListUsers
+                  setAuth={setAuth}
+                  showSuccess={showSuccess}
+                  showError={showError}
+                />
               }
             />
-            <Route
+            {/* <Route
               path="/users/:id"
               element={
                 <UserEditor
@@ -111,7 +116,8 @@ function App() {
                   setAuth={setAuth}
                 />
               }
-            />
+            /> */}
+            <Route path="/users/:id" element={<UserListItem />} />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>
         </main>
