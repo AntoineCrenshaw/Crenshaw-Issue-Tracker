@@ -54,7 +54,7 @@ const ListBugs = ({ showSuccess, showError }) => {
     } catch (e) {
       console.log(e);
     }
-  };
+  }
 
   const handleBugClick = (bug) => {
     setSelectedBug(bug);
@@ -100,8 +100,7 @@ const ListBugs = ({ showSuccess, showError }) => {
                 <thead>
                   <tr>
                     <th>Title</th>
-                    <th>Description</th>
-                    <th>Priority</th>
+                    <th>Classification</th>
                     <th>Assigned To</th>
                     <th>Actions</th>
                   </tr>
@@ -110,8 +109,23 @@ const ListBugs = ({ showSuccess, showError }) => {
                   {bugs.map((bug) => (
                     <tr key={bug._id}>
                       <td>{bug.title}</td>
-                      <td>{bug.description}</td>
-                      <td>{bug.classification}</td>
+                      <td>
+                        <span
+                          className={`badge ${
+                            bug.classification === `Approved`
+                              ? `bg-success`
+                              : bug.classification === `Unapproved`
+                              ? `bg-danger`
+                              : bug.classification === `Duplicate`
+                              ? `bg-danger`
+                              : bug.classification === `Unclassified`
+                              ? `bg-warning`
+                              : `bg-warning`
+                          }`}
+                        >
+                          {bug.classification}
+                        </span>
+                      </td>
                       <td>{bug.assignedToUserName}</td>
                       <td>
                         <span>

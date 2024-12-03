@@ -286,7 +286,7 @@ router.patch(
         currentBug.classification = newClassification;
         currentBug.classifiedOn = new Date();
         currentBug.lastUpdated = new Date();
-        currentBug.classifiedBy = req.auth._id
+        currentBug.classifiedBy = req.auth._id;
         debugBug(`Bug classification updated: ${(currentBug)}`);
        
         const result = await updateBugClassification(newClassification);

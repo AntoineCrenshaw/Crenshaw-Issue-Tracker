@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import "./ListBugs.css";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
@@ -73,78 +74,112 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
 
   return (
     <>
-      <div className="container mt-5">
+      <div className="container mt-5 form-container">
         <h1>Edit Bug - {bug.title}</h1>
-        <div className="row">
-          {/* First Row */}
-          <div className="col-12">
-            <form onSubmit={(e) => onBugUpdate(e)}>
-              <div className="mb-3">
-                <label htmlFor="title" className="form-label">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="description" className="form-label">
-                  Description
-                </label>
-                <textarea
-                  className="form-control"
-                  id="description"
-                  value={bugDescription}
-                  onChange={(e) => setDescription(e.target.value)}
-                ></textarea>
-              </div>
-            </form>
-          </div>
-        </div>
+        <form onSubmit={(e) => onBugUpdate(e)}>
+          <table className="table table-bordered">
+            <tbody>
+              <tr>
+                <td>
+                  <label htmlFor="title" className="form-label">
+                    Title
+                  </label>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label htmlFor="description" className="form-label">
+                    Description
+                  </label>
+                </td>
+                <td>
+                  <textarea
+                    className="form-control"
+                    id="description"
+                    value={bugDescription}
+                    onChange={(e) => setDescription(e.target.value)}
+                  ></textarea>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label htmlFor="stepsToReproduce" className="form-label">
+                    Steps to Reproduce
+                  </label>
+                </td>
+                <td>
+                  <textarea
+                    className="form-control"
+                    id="stepsToReproduce"
+                    value={stepsToReproduce}
+                    onChange={(e) => setStepsToReproduce(e.target.value)}
+                  ></textarea>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label htmlFor="userName" className="form-label">
+                    Assigned To
+                  </label>
+                </td>
+                <td>
+                  <textarea
+                    className="form-control"
+                    id="userName"
+                    value={assignedToUserName}
+                    onChange={(e) => setAssignedToUserName(e.target.value)}
+                  ></textarea>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label htmlFor="classification" className="form-label">
+                    Classification
+                  </label>
+                </td>
+                <td>
+                  <select
+                    className="form-select"
+                    id="classification"
+                    value={bug.classification}
+                    onChange={(e) =>
+                      setBug({ ...bug, classification: e.target.value })
+                    }
+                  >
+                    <option value="Approved">Approved</option>
+                    <option value="Unapproved">Unapproved</option>
+                    <option value="Duplicate">Duplicate</option>
+                    <option value="Unclassified">Unclassified</option>
+                  </select>
+                </td>
+              </tr>
 
-        <div className="row mt-3">
-          {/* Second Row */}
-          <div className="col-12">
-            <form onSubmit={(e) => onBugUpdate(e)}>
-              <div className="mb-3">
-                <label htmlFor="stepsToReproduce" className="form-label">
-                  Steps to Reproduce
-                </label>
-                <textarea
-                  className="form-control"
-                  id="stepsToReproduce"
-                  value={stepsToReproduce}
-                  onChange={(e) => setStepsToReproduce(e.target.value)}
-                ></textarea>
-              </div>
-              <div className="mb-3">
-                <label htmlFor="userName" className="form-label">
-                  Assigned To
-                </label>
-                <textarea
-                  className="form-control"
-                  id="userName"
-                  value={assignedToUserName}
-                  onChange={(e) => setAssignedToUserName(e.target.value)}
-                ></textarea>
-              </div>
-              <button type="submit" className="btn btn-primary">
-                Save
-              </button>
-              <button
-                type="button"
-                className="btn btn-warning text-black"
-                onClick={(e) => cancelEdit(e)}
-              >
-                Cancel
-              </button>
-            </form>
-          </div>
-        </div>
+              <tr>
+                <td colSpan="2" className="text-center">
+                  <button type="submit" className="btn btn-primary">
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-warning text-black"
+                    onClick={(e) => cancelEdit(e)}
+                  >
+                    Cancel
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </form>
       </div>
     </>
   );

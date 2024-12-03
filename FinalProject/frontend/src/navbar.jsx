@@ -26,15 +26,15 @@ const Navbar = ({ auth, onLogout }) => {
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarColor03">
-            <ul className="navbar-nav w-100">
+            <ul className="navbar-nav w-100 ">
               {auth ? (
                 <>
                   <div className="d-flex me-auto">
                     <li className="nav-item">
-                      <a className="nav-link active" href="/">
+                      <NavLink className="nav-link active" to="/">
                         Home
                         <span className="visually-hidden">(current)</span>
-                      </a>
+                      </NavLink>
                     </li>
                     <li className="nav-item">
                       <NavLink className="nav-link" to="/users">
