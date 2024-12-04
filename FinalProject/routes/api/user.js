@@ -182,7 +182,7 @@ router.get("/me", isLoggedIn(), async (req, res) => {
     const user = await GetUserById(userId);
 
     if (user) {
-      res.status(200).json(user);
+      res.status(200).json({user, message: "User retrieved successfully"});
     } else {
       res.status(404).json({ message: `User ${userId} not found.` });
     }

@@ -1,13 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-function UserListItem({ user, showSuccess, showError }) {
+function UserListItem({ showSuccess, showError }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [users, setUsers] = useState([]);
+  const { id } = useParams();
 
   const navigate = useNavigate();
+
+  const getUsers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:2024/api/users/${id}`, {
+        withCredentials: true,
+      });
+      setUsers(response.data.users || []);
+      console.log("Users from API:", response.data.users);
+      setMessage(
+        response.data.message || "Error fetching users."
+      );
+    } catch (e) {
+      const errorMessage =
+        e.response?.data?.message ||
+        "Error fetching users.";
+      setMessage(errorMessage);
+      showError(errorMessage);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
 
   const handleConfirmDelete = async (e, id) => {
     e.preventDefault();
@@ -33,8 +61,13 @@ function UserListItem({ user, showSuccess, showError }) {
 
   return (
     <>
-      <div>
-        <div className="card mt-3">
+    <div>
+  {isLoading ? (
+    <div className="text-center">Loading users...</div>
+  ) : users.length > 0 ? (
+    <div>
+      {users.map((user) => (
+        <div className="card mt-3" key={user._id}>
           <div className="card-body">
             <h5 className="card-title">Name: {user.fullName}</h5>
             <p className="card-text">Email: {user.email}</p>
@@ -57,10 +90,16 @@ function UserListItem({ user, showSuccess, showError }) {
             </div>
           </div>
           <div className="card-footer">
-            <small>Created On: {user.createdOn || "Unknown"}</small>
+            <small>Created On: {user.createdOn ? new Date(user.createdOn).toLocaleDateString() : "Unknown"}</small>
           </div>
         </div>
-      </div>
+      ))}
+    </div>
+  ) : (
+    <div className="text-center">No users found.</div>
+  )}
+</div>
+
 
       {message && <div className="users-message text-center">{message}</div>}
 

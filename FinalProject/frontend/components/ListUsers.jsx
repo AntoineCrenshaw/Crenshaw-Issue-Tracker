@@ -1,28 +1,23 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import "./ListUsers.css";
-import { Link } from "react-router-dom";
-import UserListItem from "./UserListItem";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import './ListUsers.css';
+import { Link } from 'react-router-dom';
 
 const ListUsers = ({ auth, showSuccess, showError }) => {
   const [users, setUsers] = useState([]);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const getUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:2024/api/users", {
+      const response = await axios.get('http://localhost:2024/api/users', {
         withCredentials: true,
       });
       setUsers(response.data.users || []);
-      setMessage(
-        response.data.message || "You must be signed in to view users"
-      );
+      setMessage(response.data.message || 'You must be signed in to view users');
     } catch (e) {
-      const errorMessage =
-        e.response?.data?.message ||
-        "Error fetching users. You must be signed in to view users";
+      const errorMessage = e.response?.data?.message || 'Error fetching users. You must be signed in to view users';
       setMessage(errorMessage);
       showError(errorMessage);
     }
@@ -37,19 +32,18 @@ const ListUsers = ({ auth, showSuccess, showError }) => {
     <>
       <h1 className="text-center mb-3">Users</h1>
       <div className="users-container mt-5">
-        {users.length > 0 ? (
+        {isLoading ? (
+          <div className="text-center">Loading users...</div>
+        ) : users.length > 0 ? (
           <div className="d-flex flex-wrap gap-2">
             {users.map((user) => (
               <Link key={user._id} to={`/users/${user._id}`}>
-                <UserListItem user={user} />
-                {/* <div className="card mb-3 me-3" key={user._id}>
+                <div className="card mb-3 me-3" key={user._id}>
                   <div className="card-body">
                     <h5 className="card-title">{user.fullName}</h5>
-                    <h6 className="card-subtitle mb-2 text-muted">
-                      {user.email}
-                    </h6>
+                    <h6 className="card-subtitle mb-2 text-muted">{user.email}</h6>
                   </div>
-                </div> */}
+                </div>
               </Link>
             ))}
           </div>
