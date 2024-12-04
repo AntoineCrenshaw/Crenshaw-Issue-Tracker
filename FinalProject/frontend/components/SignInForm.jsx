@@ -9,8 +9,6 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
 
   const navigate = useNavigate();
 

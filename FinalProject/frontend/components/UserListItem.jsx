@@ -1,13 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-function UserListItem({ user, showSuccess, showError }) {
+function UserListItem({ showSuccess, showError }) {
+  const { id } = useParams();
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
+  const [user, setUser] = useState({});
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("ID from URL:", id);
+    axios
+      .get(`http://localhost:2024/api/users/${id}`, {
+        withCredentials: true,
+      })
+      .then((response) => {
+        console.log(response.data);
+        setUser(response.data);
+      })
+      .catch((error) => console.log(error));
+  }, []);
 
   const handleConfirmDelete = async (e, id) => {
     e.preventDefault();
@@ -34,7 +49,7 @@ function UserListItem({ user, showSuccess, showError }) {
   return (
     <>
       <div>
-        <div className="card mt-3">
+        <div className="card mt-3" key={user._id}>
           <div className="card-body">
             <h5 className="card-title">Name: {user.fullName}</h5>
             <p className="card-text">Email: {user.email}</p>
