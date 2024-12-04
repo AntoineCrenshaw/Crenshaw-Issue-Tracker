@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import './ListUsers.css';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import "./ListUsers.css";
+import { Link } from "react-router-dom";
 
-const ListUsers = ({ auth, showSuccess, showError }) => {
+const ListUsers = ({ showSuccess, showError }) => {
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -15,7 +15,10 @@ const ListUsers = ({ auth, showSuccess, showError }) => {
         withCredentials: true,
       });
       setUsers(response.data.users || []);
-      setMessage(response.data.message || 'You must be signed in to view users');
+      setMessage(
+        response.data.message || "You must be signed in to view users"
+      );
+      showSuccess(response.data.message);
     } catch (e) {
       const errorMessage = e.response?.data?.message || 'Error fetching users. You must be signed in to view users';
       setMessage(errorMessage);
@@ -31,11 +34,9 @@ const ListUsers = ({ auth, showSuccess, showError }) => {
   return (
     <>
       <h1 className="text-center mb-3">Users</h1>
-      <div className="users-container mt-5">
-        {isLoading ? (
-          <div className="text-center">Loading users...</div>
-        ) : users.length > 0 ? (
-          <div className="d-flex flex-wrap gap-2">
+      <div className="users-container mt-5 min-h-screen">
+        {users.length > 0 ? (
+          <div className="d-flex flex-wrap gap-2 flex-grow ">
             {users.map((user) => (
               <Link key={user._id} to={`/users/${user._id}`}>
                 <div className="card mb-3 me-3" key={user._id}>

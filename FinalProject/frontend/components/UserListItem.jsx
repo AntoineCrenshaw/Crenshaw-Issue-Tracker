@@ -3,38 +3,25 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
 function UserListItem({ showSuccess, showError }) {
+  const { id } = useParams();
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [users, setUsers] = useState([]);
-  const { id } = useParams();
+  const [user, setUser] = useState({});
 
   const navigate = useNavigate();
 
-  const getUsers = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`http://localhost:2024/api/users/${id}`, {
-        withCredentials: true,
-      });
-      setUsers(response.data.users || []);
-      console.log("Users from API:", response.data.users);
-      setMessage(
-        response.data.message || "Error fetching users."
-      );
-    } catch (e) {
-      const errorMessage =
-        e.response?.data?.message ||
-        "Error fetching users.";
-      setMessage(errorMessage);
-      showError(errorMessage);
-    }
-    setIsLoading(false);
-  };
-
   useEffect(() => {
-    getUsers();
+    console.log("ID from URL:", id);
+    axios
+      .get(`http://localhost:2024/api/users/${id}`, {
+        withCredentials: true,
+      })
+      .then((response) => {
+        console.log(response.data);
+        setUser(response.data);
+      })
+      .catch((error) => console.log(error));
   }, []);
 
   const handleConfirmDelete = async (e, id) => {
@@ -61,12 +48,7 @@ function UserListItem({ showSuccess, showError }) {
 
   return (
     <>
-    <div>
-  {isLoading ? (
-    <div className="text-center">Loading users...</div>
-  ) : users.length > 0 ? (
-    <div>
-      {users.map((user) => (
+      <div>
         <div className="card mt-3" key={user._id}>
           <div className="card-body">
             <h5 className="card-title">Name: {user.fullName}</h5>
@@ -93,56 +75,51 @@ function UserListItem({ showSuccess, showError }) {
             <small>Created On: {user.createdOn ? new Date(user.createdOn).toLocaleDateString() : "Unknown"}</small>
           </div>
         </div>
-      ))}
     </div>
-  ) : (
-    <div className="text-center">No users found.</div>
-  )}
-</div>
-
-
-      {message && <div className="users-message text-center">{message}</div>}
-
-      {showModal && selectedUser && (
-        <div className="modal show d-block" tabIndex="-1">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Delete</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>
-                  Are you sure you want to delete{" "}
-                  <strong>{selectedUser.email}</strong>?
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={(e) => handleConfirmDelete(e, selectedUser._id)}
-                >
-                  Delete
-                </button>
-              </div>
+    {!user._id && (
+      <div className="text-center">No users found.</div>
+    )}
+    {message && <div className="users-message text-center">{message}</div>}
+    {showModal && selectedUser && (
+      <div className="modal show d-block" tabIndex="-1">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirm Delete</h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setShowModal(false)}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p>
+                Are you sure you want to delete{" "}
+                <strong>{selectedUser.email}</strong>?
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={(e) => handleConfirmDelete(e, selectedUser._id)}
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
-      )}
-    </>
+      </div>
+    )}
+  </>
   );
 }
 

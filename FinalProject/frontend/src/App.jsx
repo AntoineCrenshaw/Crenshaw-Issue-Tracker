@@ -100,11 +100,7 @@ function App() {
             <Route
               path="/users"
               element={
-                <ListUsers
-                  setAuth={setAuth}
-                  showSuccess={showSuccess}
-                  showError={showError}
-                />
+                <ListUsers showSuccess={showSuccess} showError={showError} />
               }
             />
             {/* <Route
@@ -117,7 +113,12 @@ function App() {
                 />
               }
             /> */}
-            <Route path="/users/:id" element={<UserListItem />} />
+            <Route
+              path="/users/:id"
+              element={
+                <UserListItem showError={showError} showSuccess={showSuccess} />
+              }
+            />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>
         </main>

@@ -38,10 +38,10 @@ h6:hover {
 
 .card:hover {
   cursor: pointer;
-  background: rgb(231, 230, 230);
+  /* background: rgb(231, 230, 230); */
   position: relative;
-  top: 2px;
-  left: 2px;
+  top: 5px;
+  left: 5px;
 }
 
 .card:active {
