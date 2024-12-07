@@ -13,7 +13,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect, useState } from "react";
 import BugEditor from "../components/BugEditor.jsx";
-import UserEditor from "../components/UserEditor.jsx";
 import UserListItem from "../components/UserListItem.jsx";
 
 function App() {
@@ -103,16 +102,6 @@ function App() {
                 <ListUsers showSuccess={showSuccess} showError={showError} />
               }
             />
-            {/* <Route
-              path="/users/:id"
-              element={
-                <UserEditor
-                  showSuccess={showSuccess}
-                  showError={showError}
-                  setAuth={setAuth}
-                />
-              }
-            /> */}
             <Route
               path="/users/:id"
               element={

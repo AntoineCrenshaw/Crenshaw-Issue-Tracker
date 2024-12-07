@@ -26,14 +26,14 @@ const newProductSchema = Joi.object({
   price: Joi.number().required(),
   category: Joi.string().required(),
   description: Joi.string().required(),
-});
+}).unknown(true);
 
 const updateProductSchema = Joi.object({
   name: Joi.string(),
   price: Joi.number(),
   category: Joi.string(),
   description: Joi.string(),
-});
+}).unknown(true);
 
 // Get all products
 router.get('', async (req, res, next) => {

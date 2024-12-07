@@ -5,7 +5,7 @@ import debug from 'debug';
 import { validId } from '../../middleware/validid.js';
 import { validBody } from '../../middleware/validBody.js';
 
-import { createUser, getUserById, getAllUsers, saveAuditLog, updateUser, getUserByEmail, findRoleByName} from '../../database.js'
+import { createUser, getUserById, getAllUsers, saveAuditLog, updateUser, getUserByEmail, findRoleByName, deleteUser} from '../../database.js'
 
 const debugUsers = debug('app:users');
 
@@ -24,19 +24,19 @@ const newUserSchema = Joi.object({
   ).required(),
   password: Joi.string().min(6).required(),
   role: Joi.string().optional()
-});
+}).unknown(true);
 
 const updateSelfSchema = Joi.object({
   fullName: Joi.string().min(8).max(30),
   email: Joi.string(),
   password: Joi.string().min(6),
   role: Joi.string()
-});
+}).unknown(true);
 
 const newLoginSchema = Joi.object({
   email: Joi.string().required(),
   password: Joi.string().min(6).required()
-});
+}).unknown(true);
 
 async function issueAuthToken(user) {
  
@@ -67,7 +67,7 @@ async function issueAuthCookie(res, token) {
 
 
 // Get all users
-router.get("", isLoggedIn(), hasRole('admin'), async (req, res, next) => {
+router.get("", async (req, res, next) => {
   try{
   const users = await getAllUsers();
 
@@ -84,7 +84,7 @@ router.get("", isLoggedIn(), hasRole('admin'), async (req, res, next) => {
 });
 
 // Get User by ID
-router.get("/:userId", isLoggedIn(), hasRole('admin'), validId("userId"), async (req,res, next) =>{
+router.get("/:userId",  validId("userId"), async (req,res, next) =>{
   const userId = req.userId;
   debugUsers(`User id: ${userId}`);
   try{
@@ -198,7 +198,7 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
     try {
       const user = await getUserByEmail(email);
       if (!user) {
-        return res.status(401).json({message: 'Invalid email or password'});
+        return res.status(200).json({message: 'Invalid email or password'});
       }
 
       if (user && (await bcrypt.compare(password, user.password))){
@@ -211,6 +211,30 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
       // Issue Auth Cookie
       await issueAuthCookie(res, token);
       res.status(200).json({message: 'Logged in', user, authToken: token});
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  });
+
+  router.delete("/:userId", validId("userId"), async (req, res, next) => {
+    const userId = req.userId;
+    debugUsers(`User id: ${userId}`);
+    console.log("Delete route hit");
+    try {
+      const user = await getUserById(userId);
+      if (user) {
+        const result = await deleteUser(userId);
+        const log = {
+          timestamp: new Date(),
+          collection: "Users",
+          operation: "Delete",
+          document: user,
+        }
+        await saveAuditLog(log);
+        return res.status(200).json({message: 'User deleted', userId});
+      } else {
+        res.status(404).json(`User ${userId} not found`);
+      }
     } catch (err) {
       res.status(500).send(err.message);
     }
