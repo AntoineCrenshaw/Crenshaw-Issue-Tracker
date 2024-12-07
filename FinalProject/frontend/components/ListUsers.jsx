@@ -5,13 +5,13 @@ import { Link } from "react-router-dom";
 
 const ListUsers = ({ showSuccess, showError }) => {
   const [users, setUsers] = useState([]);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const getUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:2024/api/users", {
+      const response = await axios.get('http://localhost:2024/api/users', {
         withCredentials: true,
       });
       setUsers(response.data.users || []);
@@ -20,9 +20,7 @@ const ListUsers = ({ showSuccess, showError }) => {
       );
       showSuccess(response.data.message);
     } catch (e) {
-      const errorMessage =
-        e.response?.data?.message ||
-        "Error fetching users. You must be signed in to view users";
+      const errorMessage = e.response?.data?.message || 'Error fetching users. You must be signed in to view users';
       setMessage(errorMessage);
       showError(errorMessage);
     }
@@ -44,9 +42,7 @@ const ListUsers = ({ showSuccess, showError }) => {
                 <div className="card mb-3 me-3" key={user._id}>
                   <div className="card-body">
                     <h5 className="card-title">{user.fullName}</h5>
-                    <h6 className="card-subtitle mb-2 text-muted">
-                      {user.email}
-                    </h6>
+                    <h6 className="card-subtitle mb-2 text-muted">{user.email}</h6>
                   </div>
                 </div>
               </Link>

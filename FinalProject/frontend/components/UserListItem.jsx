@@ -72,53 +72,54 @@ function UserListItem({ showSuccess, showError }) {
             </div>
           </div>
           <div className="card-footer">
-            <small>Created On: {user.createdOn || "Unknown"}</small>
+            <small>Created On: {user.createdOn ? new Date(user.createdOn).toLocaleDateString() : "Unknown"}</small>
           </div>
         </div>
-      </div>
-
-      {message && <div className="users-message text-center">{message}</div>}
-
-      {showModal && selectedUser && (
-        <div className="modal show d-block" tabIndex="-1">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Delete</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>
-                  Are you sure you want to delete{" "}
-                  <strong>{selectedUser.email}</strong>?
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={(e) => handleConfirmDelete(e, selectedUser._id)}
-                >
-                  Delete
-                </button>
-              </div>
+    </div>
+    {!user._id && (
+      <div className="text-center">No users found.</div>
+    )}
+    {message && <div className="users-message text-center">{message}</div>}
+    {showModal && selectedUser && (
+      <div className="modal show d-block" tabIndex="-1">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirm Delete</h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setShowModal(false)}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p>
+                Are you sure you want to delete{" "}
+                <strong>{selectedUser.email}</strong>?
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={(e) => handleConfirmDelete(e, selectedUser._id)}
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
-      )}
-    </>
+      </div>
+    )}
+  </>
   );
 }
 
