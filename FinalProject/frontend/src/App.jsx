@@ -103,16 +103,6 @@ function App() {
                 <ListUsers showSuccess={showSuccess} showError={showError} />
               }
             />
-            {/* <Route
-              path="/users/:id"
-              element={
-                <UserEditor
-                  showSuccess={showSuccess}
-                  showError={showError}
-                  setAuth={setAuth}
-                />
-              }
-            /> */}
             <Route
               path="/users/:id"
               element={

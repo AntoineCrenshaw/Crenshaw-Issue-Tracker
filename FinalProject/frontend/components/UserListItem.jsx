@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function UserListItem({ showSuccess, showError }) {
   const { id } = useParams();
@@ -48,7 +49,7 @@ function UserListItem({ showSuccess, showError }) {
 
   return (
     <>
-      <div>
+      <div className="user-card-container">
         <div className="card mt-3" key={user._id}>
           <div className="card-body">
             <h5 className="card-title">Name: {user.fullName}</h5>
@@ -63,16 +64,28 @@ function UserListItem({ showSuccess, showError }) {
               <span className="badge bg-primary me-1">No Role</span>
             )}
             <div>
-              <button
-                className="btn btn-link text-danger"
-                onClick={() => handleUserClick(user)}
-              >
-                <i className="bi bi-trash3"></i> Delete
-              </button>
+              <span>
+                <button className="btn btn-link text-warning">
+                  <Link to={`/user/${user._id}`}>
+                  <i className="bi bi-pencil">
+                    Edit
+                    </i>
+                    </Link>
+                </button>
+              </span>
+              <span>
+                <button
+                  className="btn btn-link text-danger"
+                  onClick={() => handleUserClick(user)}
+                >
+                  <i className="bi bi-trash3"></i> Delete
+                </button>
+              </span>
             </div>
+
           </div>
           <div className="card-footer">
-            <small>Created On: {user.createdOn ? new Date(user.createdOn).toLocaleDateString() : "Unknown"}</small>
+            <small>Registered: {user.createdOn ? new Date(user.createdOn).toLocaleDateString() : "Unknown"}</small>
           </div>
         </div>
     </div>

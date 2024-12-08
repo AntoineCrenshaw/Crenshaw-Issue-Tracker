@@ -17,3 +17,7 @@ button {
   font-size: inherit;
   font-family: inherit;
 }
+
+.user-card-container {
+  padding: 10rem;
+}

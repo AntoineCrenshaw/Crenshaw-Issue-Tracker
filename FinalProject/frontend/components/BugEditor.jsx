@@ -13,7 +13,7 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
   const [bugDescription, setDescription] = useState("");
   const [stepsToReproduce, setStepsToReproduce] = useState("");
   const [assignedToUserName, setAssignedToUserName] = useState("");
-  const [users, setUsers] = useState([]);
+  const [bugs, setBugs] = useState([]);
 
   const navigate = useNavigate();
 
@@ -23,16 +23,17 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
       .get(`http://localhost:2024/api/bugs/${id}`, { withCredentials: true })
       .then((response) => {
         console.log(response.data.bugs);
-        setBug(response.data);
-        setTitle(response.data.title);
-        setDescription(response.data.description);
-        setStepsToReproduce(response.data.stepsToReproduce);
-        setAssignedToUserName(response.data.assignedToUserName);
+        const bugData = response.data;
+        setBug(bugData);
+        setTitle(bugData.title);
+        setDescription(bugData.description);
+        setStepsToReproduce(bugData.stepsToReproduce);
+        setAssignedToUserName(bugData.assignedToUserName);
       })
       .catch((error) => console.log(error));
 
     axios
-      .get("http://localhost:2024/api/users", { withCredentials: true })
+      .get("http://localhost:2024/api/bugs", { withCredentials: true })
       .then((response) => {
         console.log(response.data);
       })
@@ -130,21 +131,16 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
                 </label>
                 <select
                   className="form-select"
-                  id="username"
+                  id="userName"
                   value={assignedToUserName}
                   onChange={(e) => setAssignedToUserName(e.target.value)}
                 >
-                  {!assignedToUserName && (
-                    <option value="" disabled>
-                      Select a user
-                    </option>
-                  )}
-                  {users.map((user) => (
-                    <option key={user._id} value={user.fullName}>
-                      {console.log(user.fullName)}
-                      {user.fullName}
-                    </option>
-                  ))}
+                  <option value="">Select User</option>
+                  <option value="Jalen Williams">Jalen Williams</option>
+                  <option value="Steven Adams">Steven Adams</option>
+                  <option value="Anthony Davis">Anthony Davis</option>
+                    
+                
                 </select>
               </div>
               <div className="mb-3">
