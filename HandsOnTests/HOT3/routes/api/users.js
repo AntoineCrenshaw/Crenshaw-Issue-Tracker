@@ -12,7 +12,8 @@ const debugUsers = debug('app:users');
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { isLoggedIn, hasRole, fetchRoles} from '@merlin4/express-auth';
+import { isLoggedIn, hasRole, fetchRoles, hasPermission} from '@merlin4/express-auth';
+import { mergePermissions } from '@merlin4/express-auth';
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -23,6 +24,8 @@ const newUserSchema = Joi.object({
     "email"
   ).required(),
   password: Joi.string().min(6).required(),
+  givenName: Joi.string().min(3).max(20).required(),
+  familyName: Joi.string().min(3).max(20).required(),
   role: Joi.string().optional()
 }).unknown(true);
 
@@ -30,6 +33,8 @@ const updateSelfSchema = Joi.object({
   fullName: Joi.string().min(8).max(30),
   email: Joi.string(),
   password: Joi.string().min(6),
+  givenName: Joi.string().min(3).max(20).optional(),
+  familyName: Joi.string().min(3).max(20).optional(),
   role: Joi.string()
 }).unknown(true);
 
@@ -44,15 +49,15 @@ async function issueAuthToken(user) {
   const roles = await fetchRoles(user, role => findRoleByName(role));
   debugUsers(roles);
 
-
+  const permissions = mergePermissions(user, roles);
+  
   const token = jwt.sign(
-    { _id: user._id, email: user.email, role: user.role},
+    { _id: user._id, email: user.email, role: user.role, permissions: permissions},
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
-  return token;
 
-  
+  return token;
 }
 
 async function issueAuthCookie(res, token) {
@@ -60,7 +65,7 @@ async function issueAuthCookie(res, token) {
     httpOnly: true,
     maxAge: 1000 * 60 * 60,
     sameSite: "strict",
-    secure: true,
+    secure: false,
   };
   res.cookie("authToken", token, cookieOptions);
 }
@@ -207,10 +212,10 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
       
       // Issue JWT token
       const token = await issueAuthToken(user);
-
       // Issue Auth Cookie
       await issueAuthCookie(res, token);
-      res.status(200).json({message: 'Logged in', user, authToken: token});
+
+      res.status(200).json({message: `Welcome back!`, role: user.role, email: user.email, "authToken": token});
     } catch (err) {
       res.status(500).send(err.message);
     }
@@ -246,6 +251,7 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
         res.status(404).json(`User ${userId} not found`);
       }
     } catch (err) {
+      debugUsers(err.message);
       res.status(500).send(err.message);
     }
   });

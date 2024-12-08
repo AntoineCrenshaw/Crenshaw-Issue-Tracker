@@ -53,8 +53,8 @@ function App() {
 
   return (
     <>
+     <div className="container">
       <ToastContainer />
-      <div className="container">
         <header>
           <Navbar auth={auth} onLogout={onLogout} />
         </header>

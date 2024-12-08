@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Paper,
   Typography,
@@ -110,7 +110,7 @@ export const UserListItem = ({ showSuccess, showError }) => {
             Family Name: {user.familyName}
           </Typography>
           <Box>
-            <Link component={RouterLink} to={`/users/${user._id}/edit`}>
+            <Link  to={`/users/${user._id}/edit`}>
               <i
                 className="bi bi-pencil"
                 onClick={() => console.log("Navigating to edit:", user._id)}

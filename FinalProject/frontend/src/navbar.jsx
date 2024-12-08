@@ -8,6 +8,8 @@ const Navbar = ({ auth, onLogout }) => {
     onLogout();
   };
 
+  console.log('Auth:', auth);
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-light" data-bs-theme="light">

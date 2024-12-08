@@ -42,6 +42,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'));
 });
 
+
 const port = process.env.PORT || 3000;
 
 
