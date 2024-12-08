@@ -89,6 +89,12 @@ async function getUserByEmail(email){
   return results;
 }
 
+async function deleteUser(userId){
+  const db = await connect();
+  const results = await db.collection('Users').deleteOne({_id: new ObjectId(userId)});
+  return results;
+}
+
 async function updateUser(userId, updatedUser){
   const db = await connect();
   const results = await db.collection('Users').updateOne({_id: new ObjectId(userId)}, {$set: updatedUser});
@@ -118,4 +124,4 @@ async function findRoleByName(roleName){
 
 ping();
 
-export {getAllProducts, deleteProduct, getProductById, createProduct, getProductByName, updateProduct, getAllUsers, createUser, getUserById, saveAuditLog, updateUser, getUserByEmail, findRoleByName};
+export {getAllProducts, deleteProduct, getProductById, createProduct, getProductByName, updateProduct, getAllUsers, createUser, getUserById, saveAuditLog, updateUser, getUserByEmail, findRoleByName, deleteUser};

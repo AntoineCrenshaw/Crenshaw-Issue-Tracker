@@ -13,8 +13,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect, useState } from "react";
 import BugEditor from "../components/BugEditor.jsx";
-import UserEditor from "../components/UserEditor.jsx";
 import UserListItem from "../components/UserListItem.jsx";
+import UserEditor from "../components/UserEditor.jsx";
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -107,6 +107,16 @@ function App() {
               path="/users/:id"
               element={
                 <UserListItem showError={showError} showSuccess={showSuccess} />
+              }
+            />
+            <Route
+              path="/users/:id/edit"
+              element={
+                <UserEditor
+                  showSuccess={showSuccess}
+                  showError={showError}
+                  setAuth={setAuth}
+                />
               }
             />
             <Route path="*" element={<h1>Not Found</h1>} />
