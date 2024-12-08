@@ -216,6 +216,40 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
     }
   });
 
+  router.put("/:userId", validId("userId"), async (req, res, next) => {
+    const userId = req.userId;
+    const updatedUser = req.body;
+    debugUsers(`User id: ${userId}`);
+    console.log("Update route hit");
+    try {
+      const user = await getUserById(userId);
+      if (user) {
+        for (const key of Object.keys(updatedUser)) {
+          user[key] = updatedUser[key];
+          user.lastUpdatedOn = new Date();
+          user.lastUpdatedBy = userId;
+        }
+
+        if (updatedUser.password) {
+          user.password = await bcrypt.hash(updatedUser.password, 10);
+        }
+        const result = await updateUser(userId, user);
+        const log = {
+          timestamp: new Date(),
+          collection: "Users",
+          operation: "Update",
+          document: user,
+        }
+        await saveAuditLog(log);
+        return res.status(200).json({message: 'User updated', userId});
+      } else {
+        res.status(404).json(`User ${userId} not found`);
+      }
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  });
+
   router.delete("/:userId", validId("userId"), async (req, res, next) => {
     const userId = req.userId;
     debugUsers(`User id: ${userId}`);

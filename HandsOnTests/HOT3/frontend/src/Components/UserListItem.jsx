@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
 import {
   Paper,
   Typography,
@@ -38,7 +39,7 @@ export const UserListItem = ({ showSuccess, showError }) => {
     setIsLoading(false);
   }, [id, showError]);
 
-  const handleConfirmDelte = async (e, id) => {
+  const handleConfirmDelete = async (e, id) => {
     console.log("Deleting user with ID: ", id);
     e.preventDefault();
     try {
@@ -47,6 +48,7 @@ export const UserListItem = ({ showSuccess, showError }) => {
       });
       showSuccess("User deleted successfully");
       setShowModal(false);
+      console.log("Navigating to /users");
       navigate("/users");
     } catch (e) {
       console.error(e);
@@ -108,11 +110,20 @@ export const UserListItem = ({ showSuccess, showError }) => {
             Family Name: {user.familyName}
           </Typography>
           <Box>
-            <Chip
-              label="Delete User"
-              color="error"
+            <Link component={RouterLink} to={`/users/${user._id}/edit`}>
+              <i
+                className="bi bi-pencil"
+                onClick={() => console.log("Navigating to edit:", user._id)}
+              >
+                Edit
+              </i>
+            </Link>
+            <Button
+              className="btn btn-link"
               onClick={() => handleUserClick(user)}
-            />
+            >
+              <i className="bi bi-trash3">Delete</i>
+            </Button>
           </Box>
         </Paper>
       )}
@@ -129,9 +140,12 @@ export const UserListItem = ({ showSuccess, showError }) => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button onClick={(e) => handleConfirmDelte(e, selectedUser._id)}>
+            <Button onClick={(e) => handleConfirmDelete(e, selectedUser._id)}>
               Delete
             </Button>
+            {console.log("Selected User: ", selectedUser)}
+            {console.log("Selected User ID: ", selectedUser._id)}
+            {console.log("handleConfirmDelete is: ", handleConfirmDelete)}
           </DialogActions>
         </Dialog>
       )}
