@@ -10,7 +10,7 @@ import {
   Button,
 } from "@mui/material";
 
-export const UserEditor = ({ showSuccess, showError,  }) => {
+export const UserEditor = ({ showSuccess, showError }) => {
   const { id } = useParams();
   const [user, setUser] = useState([]);
   const [email, setEmail] = useState("");
@@ -85,7 +85,7 @@ export const UserEditor = ({ showSuccess, showError,  }) => {
     <>
       <Container maxWidth="xs">
         <Paper elevation={10} sx={{ p: 2, mt: 6, height: "fit-content" }}>
-          <Typography component="h1" variant="h4" sx={{ textAlign: "center" }}>
+          <Typography variant="h4" sx={{ textAlign: "center" }}>
             Edit User Info
           </Typography>
           <Box
@@ -93,7 +93,9 @@ export const UserEditor = ({ showSuccess, showError,  }) => {
             onSubmit={(e) => onUserUpdate(e)}
             sx={{ mt: 1 }}
           >
-            <Box sx={{pb: "1rem"}} fontSize={"1rem"}>Email</Box>
+            <Box sx={{ pb: "1rem" }} fontSize={"1rem"}>
+              Email
+            </Box>
             <TextField
               placeholder="Enter email"
               fullWidth
@@ -102,7 +104,9 @@ export const UserEditor = ({ showSuccess, showError,  }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <Box sx={{pb: "1rem"}} fontSize={"1rem"}>Roles</Box>
+            <Box sx={{ pb: "1rem" }} fontSize={"1rem"}>
+              Roles
+            </Box>
             <TextField
               placeholder="Roles"
               fullWidth
@@ -110,7 +114,9 @@ export const UserEditor = ({ showSuccess, showError,  }) => {
               value={roles}
               onChange={(e) => setRoles(e.target.value)}
             />
-            <Box sx={{pb: "1rem"}} fontSize={"1rem"}>First Name</Box>
+            <Box sx={{ pb: "1rem" }} fontSize={"1rem"}>
+              First Name
+            </Box>
             <TextField
               placeholder="Enter First Name"
               fullWidth
@@ -118,7 +124,9 @@ export const UserEditor = ({ showSuccess, showError,  }) => {
               value={givenName}
               onChange={(e) => setGivenName(e.target.value)}
             />
-            <Box sx={{pb: "1rem"}} fontSize={"1rem"}>Last Name</Box>
+            <Box sx={{ pb: "1rem" }} fontSize={"1rem"}>
+              Last Name
+            </Box>
             <TextField
               placeholder="Enter Last Name"
               fullWidth
@@ -126,7 +134,9 @@ export const UserEditor = ({ showSuccess, showError,  }) => {
               value={familyName}
               onChange={(e) => setFamilyName(e.target.value)}
             />
-            <Box sx={{pb: "1rem"}} fontSize={"1rem"}>Full Name</Box>
+            <Box sx={{ pb: "1rem" }} fontSize={"1rem"}>
+              Full Name
+            </Box>
             <TextField
               placeholder="Enter Full Name"
               fullWidth

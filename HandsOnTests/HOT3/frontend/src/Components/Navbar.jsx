@@ -7,7 +7,7 @@ const Navbar = ({ auth, onLogout }) => {
     onLogout();
   };
 
-  console.log('Auth:', auth); // Debugging line
+  // console.log('Auth:', auth); // Debugging line
 
   return (
     <>
@@ -49,7 +49,8 @@ const Navbar = ({ auth, onLogout }) => {
                   </div>
                   <li className="nav-item">
                     <a className="nav-link" disabled href="#">
-                      Welcome {auth.email}
+                      Welcome {auth.email || "User"}
+                      {console.log("Auth:", auth)}
                     </a>
                   </li>
                   <li className="nav-item">

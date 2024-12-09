@@ -75,7 +75,7 @@ export const UserList = ({ showError, showSuccess }) => {
             ))}
           </Box>
         ) : (
-          <Typography variant="h1">No users found</Typography>
+          <Typography variant="subtitle1">No users found</Typography>
         )}
       </Container>
     </>

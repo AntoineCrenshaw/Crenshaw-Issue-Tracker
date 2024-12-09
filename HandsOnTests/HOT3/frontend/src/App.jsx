@@ -83,17 +83,45 @@ function App() {
             <Route
               path="/users"
               element={
-                <UserList
+                <UserList showSuccess={showSuccess} showError={showError} />
+              }
+            />
+            <Route
+              path="/users/:id"
+              element={
+                <UserListItem showSuccess={showSuccess} showError={showError} />
+              }
+            />
+            <Route
+              path="/users/:id/edit"
+              element={
+                <UserEditor showError={showError} showSuccess={showSuccess} />
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <ProductsList showSuccess={showSuccess} showError={showError} />
+              }
+            />
+            <Route
+              path="/products/:id"
+              element={
+                <ProductListItem
                   showSuccess={showSuccess}
                   showError={showError}
                 />
               }
             />
-            <Route path="/users/:id" element={<UserListItem showSuccess={showSuccess} showError={showError} />} />
-            <Route path="/users/:id/edit" element={<UserEditor showError={showError} showSuccess={showSuccess} />} />
-            <Route path="/products" element={<ProductsList />} />
-            <Route path="/products/:id" element={<ProductListItem />} />
-            <Route path="/products/:id/edit" element={<ProductEditor />} />
+            <Route
+              path="/products/:id/edit"
+              element={
+                <ProductEditor
+                  showSuccess={showSuccess}
+                  showError={showError}
+                />
+              }
+            />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>
         </main>

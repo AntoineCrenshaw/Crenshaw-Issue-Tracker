@@ -151,7 +151,7 @@ router.post('', hasRole('Admin'), validBody(newProductSchema), async (req, res, 
 // Update Product by ID
 router.patch(
   '/:productId',
-  hasRole('Admin'),
+  hasRole('admin'),
   validId('productId'),
   validBody(updateProductSchema),
   async (req, res, next) => {
@@ -177,7 +177,7 @@ router.patch(
 );
 
 // Delete Product by ID
-router.delete('/:productId', hasRole('Admin'), validId('productId'), async (req, res, next) => {
+router.delete('/:productId', hasRole('admin'), validId('productId'), async (req, res, next) => {
   const productId = req.productId;
   debugProducts(`Product id: ${productId}`);
   try {

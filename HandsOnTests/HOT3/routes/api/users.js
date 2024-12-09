@@ -46,7 +46,7 @@ const newLoginSchema = Joi.object({
 async function issueAuthToken(user) {
  
   // merge roles into token
-  const roles = await fetchRoles(user, role => findRoleByName(role));
+  const roles = await fetchRoles(user, (role) => findRoleByName(role));
   debugUsers(roles);
 
   const permissions = mergePermissions(user, roles);
@@ -87,22 +87,6 @@ router.get("", async (req, res, next) => {
     debugUsers(`Error getting users: ${err.message}`)
   }
 });
-
-// Get User by ID
-router.get("/:userId",  validId("userId"), async (req,res, next) =>{
-  const userId = req.userId;
-  debugUsers(`User id: ${userId}`);
-  try{
-    if (userId) {
-    const user = await getUserById(userId);
-    res.status(200).json(user);
-    } else {
-      res.status(404).json(` User ${userId} not found}`)
-    }
-  }catch(err){
-    res.status(500).send(err);
-  }
-})
 
 // Create a new user
 router.post("/register", validBody(newUserSchema), async (req, res, next) => {
@@ -220,6 +204,27 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
       res.status(500).send(err.message);
     }
   });
+
+  router.post("/logout", async (req, res, next) => {
+    res.clearCookie("authToken");
+    res.status(200).json({message: 'Logged out'});
+  });
+
+  // Get User by ID
+router.get("/:userId",  validId("userId"), async (req,res, next) =>{
+  const userId = req.userId;
+  debugUsers(`User id: ${userId}`);
+  try{
+    if (userId) {
+    const user = await getUserById(userId);
+    res.status(200).json(user);
+    } else {
+      res.status(404).json(` User ${userId} not found}`)
+    }
+  }catch(err){
+    res.status(500).send(err);
+  }
+});
 
   router.put("/:userId", validId("userId"), async (req, res, next) => {
     const userId = req.userId;
