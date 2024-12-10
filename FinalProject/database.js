@@ -89,9 +89,9 @@ async function closeBug(updatedBug) {
 
 //Users CRUD operations
 
-async function GetAllUsers() {
+async function GetAllUsers(pipeline) {
   const db = await connect();
-  const results = await db.collection("users").find({}).toArray();
+  const results = await db.collection("users").aggregate(pipeline).toArray();
   return results;
 }
 

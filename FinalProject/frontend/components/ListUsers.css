@@ -56,6 +56,10 @@ h6:hover {
   animation: fadeIn 0.5s ease-out;
 }
 
+.flexContainer {
+  display: flex;
+}
+
 .skeletonWrapper {
   animation: shimmer 1.5s infinite;
 }

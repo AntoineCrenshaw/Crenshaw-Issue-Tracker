@@ -1,4 +1,4 @@
- {
+{
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
@@ -12,7 +12,9 @@
     "build:auto": "vite build --watch"
   },
   "dependencies": {
-    "@mui/material": "^6.1.8",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.1.10",
     "@radix-ui/themes": "^3.1.5",
     "axios": "^1.7.7",
     "babel": "^6.23.0",

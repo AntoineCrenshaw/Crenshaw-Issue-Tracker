@@ -29,7 +29,6 @@
 
 #password,
 #email {
-  width: 100%;
   border: 1px solid black;
   border-radius: 4px;
   font-size: 1rem;

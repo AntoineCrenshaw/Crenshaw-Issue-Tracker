@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import BugEditor from "../components/BugEditor.jsx";
 import UserListItem from "../components/UserListItem.jsx";
 import UserEditor from "../components/UserEditor.jsx";
+import HomePage from "../components/HomePage.jsx";
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -53,14 +54,14 @@ function App() {
 
   return (
     <>
-     <div className="container">
-      <ToastContainer />
+      <div className="container">
+        <ToastContainer />
         <header>
           <Navbar auth={auth} onLogout={onLogout} />
         </header>
         <main>
           <Routes>
-            <Route path="/" element={<ListUsers />} />
+            <Route path="/" element={<HomePage />} />
             <Route
               path="/login"
               element={
@@ -100,7 +101,11 @@ function App() {
             <Route
               path="/users"
               element={
-                <ListUsers showSuccess={showSuccess} showError={showError} />
+                <ListUsers
+                  showSuccess={showSuccess}
+                  showError={showError}
+                  auth={auth}
+                />
               }
             />
             <Route

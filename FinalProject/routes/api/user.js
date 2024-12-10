@@ -105,12 +105,30 @@ async function issueAuthCookie(res, token) {
 }
 
 router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
-  // Get All Users
-  let users = await GetAllUsers();
+
 
   if (req.auth) {
     debugUser(req.auth.email);
   }
+
+  let match = {};
+
+  let {keywords} = req.query;
+
+  debugUser(`Keywords: ${keywords}`);
+
+  if(keywords) {
+    match.$text = { $search: keywords };
+  }
+
+  const pipeline = [
+    {$match: match}
+  ];
+
+    // Get All Users
+    let users = await GetAllUsers(pipeline);
+
+
 
   // Get users search query
   const { role, maxAge, minAge, sortBy, pageNumber, pageSize } = req.query;
@@ -261,7 +279,7 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ message: `Welcome back!`, role: existingUser.role, email: existingUser.email, "authToken": jwtToken });
+      .json({ message: `Welcome back!`, role: existingUser.role, email: existingUser.email, token: jwtToken });
   } catch (e) {
     debugUser(e);
     return res.status(500).json({ message: `Error logging in user` });
