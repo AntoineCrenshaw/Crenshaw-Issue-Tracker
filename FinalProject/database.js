@@ -29,9 +29,9 @@ async function ping() {
 }
 
 // Bugs CRUD operations
-async function GetAllBugs() {
+async function GetAllBugs(pipeline) {
   const db = await connect();
-  const results = await db.collection("bugs").find({}).toArray();
+  const results = await db.collection("bugs").aggregate(pipeline).toArray();
   return results;
 }
 
