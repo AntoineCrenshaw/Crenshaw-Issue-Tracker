@@ -69,96 +69,84 @@ const updateTestSchema = Joi.object({
 // List all bugs
 router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
   try {
-    let bugs = await GetAllBugs();
-    // debugBug(`Bugs: ${JSON.stringify(bugs)}`);
-    console.log(bugs.length);
 
-    // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
-    const {
-      classification,
-      sortBy,
-      maxAge,
-      minAge,
-      pageNumber,
-      pageSize,
-      closed,
-    } = req.query;
-    console.log("Received query parameters:", req.query);
+    let match = {};
+
+    let {keywords, classification, sortBy, closed, minAge, maxAge} = req.query;
+
+    debugBug(`Keywords: ${keywords}`);
+
+    if (keywords) {
+      match.$text = { $search: keywords };
+    }
+
     if (classification) {
-      bugs = bugs.filter((bug) => bug.classification === classification);
-    }
-    if (closed) {
-      bugs = bugs.filter((bug) => bug.closed === closed);
+      match.classification = {$eq: classification};
     }
 
-    //FIX THIS
-    const today = new Date();
+    
+
+    if(closed == 'true'){
+      match.closed = {$eq: true};
+    }else if(closed == 'false'){
+      match.closed = {$eq: false};
+    }
+
+    let sort = {title: 1};
+
+    switch(sortBy) {
+      case 'title':
+        sort = {title: 1};
+        break;
+      case 'classification':
+        sort = {classification: 1};
+        break;
+      case 'resolution':
+        sort = {resolution: 1};
+        break;
+      case 'closed':
+        sort = {closed: 1};
+        break;
+      default:
+        sort = {title: 1};
+    }
+
+    const today = new Date(); // Get current date and time
     today.setHours(0);
     today.setMinutes(0);
     today.setSeconds(0);
-    today.setMilliseconds(0);
-
-    const maxAgeDays = parseInt(maxAge, 10);
-    const minAgeDays = parseInt(minAge, 10);
+    today.setMilliseconds(0); // Remove time from Date
     const pastMaximumDaysOld = new Date(today);
-    pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - maxAgeDays); // Set pastMaximumDaysOld to today minus maxAge
+    pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - maxAge); // Set pastMaximumDaysOld to today minus maxAge
     const pastMinimumDaysOld = new Date(today);
-    pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - minAgeDays); // Set pastMinimumDaysOld to today minus minAge
-
-    if (maxAge && minAge) {
-      bugs = bugs.filter(
-        (bug) =>
-          new Date(bug.createdOn) >= pastMinimumDaysOld &&
-          new Date(bug.createdOn) <= pastMaximumDaysOld
-      );
-    } else if (minAge) {
-      bugs = bugs.filter(
-        (bug) => new Date(bug.createdOn) >= pastMinimumDaysOld
-      );
-    } else if (maxAge) {
-      bugs = bugs.filter(
-        (bug) => new Date(bug.createdOn) <= pastMaximumDaysOld
-      );
+    pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - minAge); // Set pastMinimumDaysOld to today minus minAge
+    
+    if(maxAge && minAge){
+      match.createdOn = {$lte:pastMinimumDaysOld, $gte:pastMaximumDaysOld};
+    } else if(minAge){
+      match.createdOn = {$lte:pastMinimumDaysOld};
+    } else if(maxAge) {
+      match.createdOn = {$gte:pastMaximumDaysOld};
     }
 
-    const allowedSorts = [
-      "newest",
-      "oldest",
-      "title",
-      "classification",
-      "assignedTo",
-      "createdBy",
+    const pipeline = [
+      {$match: match},
+      {$sort: sort},
     ];
-    if (sortBy && allowedSorts.includes(sortBy)) {
-      switch (sortBy) {
-        case "oldest":
-          bugs = bugs.sort(
-            (a, b) => new Date(a.createdDate) - new Date(b.createdDate)
-          );
-          break;
-        case "title":
-          bugs = bugs.sort((a, b) => a.title.localeCompare(b.title));
-          break;
-        case "classification":
-          bugs = bugs.sort((a, b) =>
-            a.classification.localeCompare(b.classification)
-          );
-          break;
-        case "assignedTo":
-          bugs = bugs.sort((a, b) =>
-            a.assignedToUserId.localeCompare(b.assignedToUserId)
-          );
-          break;
-        case "createdBy":
-          bugs = bugs.sort((a, b) => a.createdBy.localeCompare(b.createdBy));
-          break;
-        case "newest":
-          bugs = bugs.sort(
-            (a, b) => new Date(b.createdDate) - new Date(a.createdDate)
-          );
-          break;
-      }
-    }
+
+   
+
+    let bugs = await GetAllBugs(pipeline);
+
+    // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
+    const {
+      pageNumber,
+      pageSize,
+    } = req.query;
+    console.log("Received query parameters:", req.query);
+  
+
+   
 
     // Pagination
     const page = parseInt(pageNumber) || 1;
