@@ -121,6 +121,7 @@ router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
     match.$text = { $search: keywords };
   }
 
+
   const pipeline = [
     {$match: match}
   ];
