@@ -16,6 +16,7 @@ import BugEditor from "../components/BugEditor.jsx";
 import UserListItem from "../components/UserListItem.jsx";
 import UserEditor from "../components/UserEditor.jsx";
 import HomePage from "../components/HomePage.jsx";
+import { Pagination } from "../components/Pagination.jsx";
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -85,7 +86,11 @@ function App() {
             <Route
               path="/bugs"
               element={
-                <ListBugs showSuccess={showSuccess} showError={showError} />
+                <ListBugs
+                  showSuccess={showSuccess}
+                  showError={showError}
+                  auth={auth}
+                />
               }
             />
             <Route
@@ -127,7 +132,10 @@ function App() {
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>
         </main>
-        <Footer />
+        <footer>
+          <Pagination />
+          <Footer />
+        </footer>
       </div>
     </>
   );
