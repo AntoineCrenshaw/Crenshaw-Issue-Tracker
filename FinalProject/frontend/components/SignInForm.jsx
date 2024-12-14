@@ -115,6 +115,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                 >
                   Password
                 </label>
+             
                 <div className="input-group">
                   <span className="input-group-text" id="password-addon">
                     <i className="bi bi-lock-fill input-icon"></i>
@@ -130,6 +131,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                     autoComplete="current-password"
                     required
                   />
+                  
                   <span onClick={() => setShowPassword(!showPassword)}>
                     <i
                       className={`bi ${

@@ -61,7 +61,7 @@ function App() {
         </header>
         <main>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<ListUsers />} />
             <Route
               path="/login"
               element={
