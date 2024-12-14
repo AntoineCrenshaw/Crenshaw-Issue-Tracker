@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
+import moment from "moment/moment";
 
-function UserListItem({ showSuccess, showError }) {
+function UserListItem({ showSuccess, showError, auth }) {
   const { id } = useParams();
   const [selectedUser, setSelectedUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -61,78 +61,80 @@ function UserListItem({ showSuccess, showError }) {
                 </span>
               ))
             ) : (
-              <span className="badge bg-primary me-1">No Role</span>
+              <span className="badge bg-primary me-1">No Roles assigned</span>
             )}
             <div>
-              <span>
-                <button className="btn btn-link text-warning">
-                  <Link to={`/user/${user._id}`}>
-                  <i className="bi bi-pencil">
-                    Edit
-                    </i>
-                    </Link>
-                </button>
-              </span>
-              <span>
-                <button
-                  className="btn btn-link text-danger"
-                  onClick={() => handleUserClick(user)}
-                >
-                  <i className="bi bi-trash3"></i> Delete
-                </button>
-              </span>
-            </div>
+              <>
+                {auth?.role?.includes("Admin") && (
+                  <>
+                    <button
+                      className="btn btn-link text-danger"
+                      onClick={() => navigate(`/users/${user._id}/edit`)}
+                    >
+                      <i className="bi bi-pencil">Edit</i>
+                    </button>
 
+                    <button
+                      className="btn btn-link text-danger"
+                      onClick={() => handleUserClick(user)}
+                    >
+                      <i className="bi bi-trash3"></i> Delete
+                    </button>
+                  </>
+                )}
+              </>
+            </div>
           </div>
           <div className="card-footer">
-            <small>Registered: {user.createdOn ? new Date(user.createdOn).toLocaleDateString() : "Unknown"}</small>
-          </div>
-        </div>
-    </div>
-    {!user._id && (
-      <div className="text-center">No users found.</div>
-    )}
-    {message && <div className="users-message text-center">{message}</div>}
-    {showModal && selectedUser && (
-      <div className="modal show d-block" tabIndex="-1">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Confirm Delete</h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setShowModal(false)}
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <p>
-                Are you sure you want to delete{" "}
-                <strong>{selectedUser.email}</strong>?
-              </p>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={(e) => handleConfirmDelete(e, selectedUser._id)}
-              >
-                Delete
-              </button>
-            </div>
+            <small>
+              Registered:{" "}
+              {user.createdOn ? moment(user.createdOn).fromNow() : "Unknown"}
+            </small>
           </div>
         </div>
       </div>
-    )}
-  </>
+      {!user._id && <div className="text-center">No users found.</div>}
+      {message && <div className="users-message text-center">{message}</div>}
+      {showModal && selectedUser && (
+        <div className="modal show d-block" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Delete</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>
+                  Are you sure you want to delete{" "}
+                  <strong>{selectedUser.email}</strong>?
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={(e) => handleConfirmDelete(e, selectedUser._id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

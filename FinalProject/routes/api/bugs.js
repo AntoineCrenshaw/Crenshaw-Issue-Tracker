@@ -1,5 +1,6 @@
 import express from "express";
 const router = express.Router();
+import moment from "moment";
 
 import debug from "debug";
 import {
@@ -29,15 +30,17 @@ import { hasPermission, isLoggedIn , hasAnyRole} from "@merlin4/express-auth";
 router.use(express.urlencoded({ extended: false }));
 
 const newBugSchema = Joi.object({
-  title: Joi.string().min(6).max(100).required(),
-  bugDescription: Joi.string().min(10).max(500).required(),
-  stepsToReproduce: Joi.string().min(10).max(500).required(),
+  title: Joi.string().min(1).max(100).required(),
+  bugDescription: Joi.string().min(1).max(500).required(),
+  stepsToReproduce: Joi.string().min(1).max(500).required(),
 });
 
 const updateBugSchema = Joi.object({
-  title: Joi.string().min(3).max(100),
-  bugDescription: Joi.string().min(10).max(500),
-  stepsToReproduce: Joi.string().min(10).max(500),
+  title: Joi.string().min(1).max(100),
+  bugDescription: Joi.string().min(1).max(500),
+  stepsToReproduce: Joi.string().min(1).max(500),
+  assignedTo: Joi.string().min(1).max(100),
+  closed: Joi.boolean(),
 }).unknown(true);
 
 const classifyBugSchema = Joi.object({
@@ -53,16 +56,16 @@ const closeBugSchema = Joi.object({
 });
 
 const commentSchema = Joi.object({
-  comment: Joi.string().min(3).max(500).required(),
+  comment: Joi.string().min(1).max(500).required(),
 });
 
 const newTestsSchema = Joi.object({
-  status: Joi.string().min(3).required(),
+  status: Joi.string().min(1).required(),
   addedBy: Joi.string().required(),
 });
 
 const updateTestSchema = Joi.object({
-  status: Joi.string().min(3),
+  status: Joi.string().min(1),
   addedBy: Joi.string(),
 });
 
@@ -83,8 +86,6 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
     if (classification) {
       match.classification = {$eq: classification};
     }
-
-    
 
     if(closed == 'true'){
       match.closed = {$eq: true};
@@ -116,19 +117,22 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
     today.setMinutes(0);
     today.setSeconds(0);
     today.setMilliseconds(0); // Remove time from Date
-    const pastMaximumDaysOld = new Date(today);
-    pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - maxAge); // Set pastMaximumDaysOld to today minus maxAge
-    const pastMinimumDaysOld = new Date(today);
-    pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - minAge); // Set pastMinimumDaysOld to today minus minAge
-    
-    if(maxAge && minAge){
-      match.createdOn = {$lte:pastMinimumDaysOld, $gte:pastMaximumDaysOld};
-    } else if(minAge){
-      match.createdOn = {$lte:pastMinimumDaysOld};
-    } else if(maxAge) {
-      match.createdOn = {$gte:pastMaximumDaysOld};
-    }
 
+    const parsedMinAge = parseInt(minAge, 10);
+    const parsedMaxAge = parseInt(maxAge, 10);
+
+    const pastMaximumDaysOld = new Date(today);
+    pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - parsedMaxAge); // Set pastMaximumDaysOld to today minus maxAge
+    const pastMinimumDaysOld = new Date(today);
+    pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - parsedMinAge); // Set pastMinimumDaysOld to today minus minAge
+    
+    if(parsedMinAge && parsedMaxAge){
+      match.createdDate = {$gte: pastMaximumDaysOld, $lte: pastMinimumDaysOld};
+    } else if(parsedMinAge){
+      match.createdDate = {$gte: pastMinimumDaysOld};
+    } else if(parsedMaxAge){
+      match.createdDate = {$lte: pastMaximumDaysOld};
+    }
     const pipeline = [
       {$match: match},
       {$sort: sort},
@@ -193,7 +197,7 @@ router.post(
 
     try {
       newBug.createdDate = new Date();
-      newBug.createdOn = new Date();
+      newBug.createdOn = moment.defaultFormat();
       newBug.createdBy = req.auth._id;
       newBug.classification = "unclassified";
       newBug.closed = false;
@@ -317,8 +321,8 @@ router.patch(
 
       // Update the bug's assignment details
       bug.assignedBy = req.auth._id;
-      bug.assignedToUserId = assignedToUserId;
-      bug.assignedToUserName = `${assignedToUser.givenName} ${assignedToUser.familyName}`;
+      bug.assignedToUserId = assignedToUser._id;
+      bug.assignedToUserName = `${assignedToUser.fullName}`;
       bug.assignedOn = new Date();
       bug.lastUpdated = new Date();
 

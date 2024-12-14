@@ -4,6 +4,7 @@ import Skeleton from "react-loading-skeleton";
 import "./ListBugs.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, useNavigate } from "react-router-dom";
+import { Pagination } from "./Pagination.jsx";
 
 const ListBugs = ({ showSuccess, showError, auth }) => {
   const [selectedBug, setSelectedBug] = useState({});
@@ -35,8 +36,9 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
         e.response?.data?.message ||
           "Error fetching users. Refresh the page to try again"
       );
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   async function updateCloseStatus(e, id) {
@@ -66,6 +68,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
     evt.preventDefault();
     try {
       const { data } = await axios.get(`http://localhost:2024/api/bugs/`, {
+        headers: { authorization: `Bearer ${auth?.token}` },
         params: {
           keywords: keywords,
           classification: classificationFilter,
@@ -119,106 +122,95 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
       ) : (
         <div>
           <div className="bugs-container mt-5">
+            <div className="container-fluid">
+              <form className="row w-100 mb-4" role="search">
+                <div className="col-md-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search"
+                    onChange={(evt) => setKeywords(evt.target.value)}
+                    value={keywords}
+                  />
+                  <button
+                    className="btn btn-secondary mt-2 w-100"
+                    onClick={(evt) => onSubmitSearch(evt)}
+                  >
+                    Search
+                  </button>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">Filter by Classification</label>
+                  <select
+                    className="form-select"
+                    onChange={(evt) =>
+                      setClassificationFilter(evt.target.value)
+                    }
+                  >
+                    <option value="">Select a classification</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Unapproved">Unapproved</option>
+                    <option value="Unclassified">Unclassified</option>
+                    <option value="Duplicate">Duplicate</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">Sort By</label>
+                  <select
+                    className="form-select"
+                    onChange={(evt) => setSortBy(evt.target.value)}
+                  >
+                    <option value="">Sort By</option>
+                    <option value="title">Title</option>
+                    <option value="classification">Classification</option>
+                    <option value="status">Status</option>
+                    <option value="resolution">Resolution</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">
+                    Close Status {showInactive}
+                  </label>
+                  <div className="form-check">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="showInactive"
+                      onChange={(evt) =>
+                        setShowInactive(evt.target.checked ? "true" : "false")
+                      }
+                    />
+                    <label className="form-check-label" htmlFor="showInactive">
+                      Show Closed
+                    </label>
+                  </div>
+                </div>
+                <div className="row mb-4 mt-2">
+                  <div className="col">
+                    <input
+                      type="number"
+                      name="txtMinAge"
+                      id="txtMinAge"
+                      className="form-control"
+                      placeholder="Minimum Age"
+                      onChange={(evt) => setMinAge(evt.target.value)}
+                    />
+                  </div>
+                  <div className="col">
+                    <input
+                      type="number"
+                      name="txtMaxAge"
+                      id="txtMaxAge"
+                      className="form-control"
+                      placeholder="Maximum Age"
+                      onChange={(evt) => setMaxAge(evt.target.value)}
+                    />
+                  </div>
+                </div>
+              </form>
+            </div>
             {bugs.length > 0 ? (
               <>
-                <div className="container-fluid">
-                  <form className="row w-100 mb-4" role="search">
-                    <div className="col-md-3">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search"
-                        onChange={(evt) => setKeywords(evt.target.value)}
-                        value={keywords}
-                      />
-                      <button
-                        className="btn btn-secondary mt-2 w-100"
-                        onClick={(evt) => onSubmitSearch(evt)}
-                      >
-                        Search
-                      </button>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label">
-                        Filter by Classification
-                      </label>
-                      <select
-                        className="form-select"
-                        onChange={(evt) =>
-                          setClassificationFilter(evt.target.value)
-                        }
-                      >
-                        <option value="">Select a classification</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Unapproved">Unapproved</option>
-                        <option value="Unclassified">Unclassified</option>
-                        <option value="Duplicate">Duplicate</option>
-                      </select>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label">Sort By</label>
-                      <select
-                        className="form-select"
-                        onChange={(evt) => setSortBy(evt.target.value)}
-                      >
-                        <option value="">Sort By</option>
-                        <option value="title">Title</option>
-                        <option value="classification">Classification</option>
-                        <option value="status">Status</option>
-                        <option value="resolution">Resolution</option>
-                      </select>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label">
-                        Close Status {showInactive}
-                      </label>
-                      <div className="form-check">
-                        <input
-                          type="checkbox"
-                          className="form-check-input"
-                          id="showInactive"
-                          onChange={(evt) =>
-                            setShowInactive(
-                              evt.target.checked ? "true" : "false"
-                            )
-                          }
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="showInactive"
-                        >
-                          Show Closed
-                        </label>
-                      </div>
-                    </div>
-                    <div className="row mb-4">
-                      <div className="col">
-                        <label htmlFor="txtMinAge" className="form-label">
-                          Minimum Age
-                        </label>
-                        <input
-                          type="number"
-                          name="txtMinAge"
-                          id="txtMinAge"
-                          className="form-control"
-                          onChange={(evt) => setMinAge(evt.target.value)}
-                        />
-                      </div>
-                      <div className="col">
-                        <label htmlFor="txtMaxAge" className="form-label">
-                          Maximum Age
-                        </label>
-                        <input
-                          type="number"
-                          name="txtMaxAge"
-                          id="txtMaxAge"
-                          className="form-control"
-                          onChange={(evt) => setMaxAge(evt.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </form>
-                </div>
                 <table className="bugs-table">
                   <caption>Bugs</caption>
                   <thead>
@@ -345,9 +337,10 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                 </table>
               </>
             ) : (
-              <p>{message}</p>
+              <p>No bugs meet your desired criteria. Try again</p>
             )}
           </div>
+          <Pagination />
         </div>
       )}
     </>

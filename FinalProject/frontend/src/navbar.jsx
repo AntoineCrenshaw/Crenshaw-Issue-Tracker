@@ -9,7 +9,7 @@ const Navbar = ({ auth, onLogout }) => {
   };
 
   return (
-    <>
+    <div id="navRoot">
       <nav className="navbar navbar-expand-lg bg-light" data-bs-theme="light">
         <div className="container-fluid">
           <AiFillBug />
@@ -46,6 +46,11 @@ const Navbar = ({ auth, onLogout }) => {
                         Bugs
                       </NavLink>
                     </li>
+                    <li className="nav-item">
+                      <NavLink className="nav-link" to="/bugs/report">
+                        Report Bug
+                      </NavLink>
+                    </li>
                   </div>
                   <li className="nav-item">
                     <a className="nav-link" disabled href="#">
@@ -80,7 +85,7 @@ const Navbar = ({ auth, onLogout }) => {
           </div>
         </div>
       </nav>
-    </>
+    </div>
   );
 };
 
