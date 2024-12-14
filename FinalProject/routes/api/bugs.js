@@ -1,5 +1,6 @@
 import express from "express";
 const router = express.Router();
+import moment from "moment";
 
 import debug from "debug";
 import {
@@ -29,15 +30,17 @@ import { hasPermission, isLoggedIn , hasAnyRole} from "@merlin4/express-auth";
 router.use(express.urlencoded({ extended: false }));
 
 const newBugSchema = Joi.object({
-  title: Joi.string().min(6).max(100).required(),
-  bugDescription: Joi.string().min(10).max(500).required(),
-  stepsToReproduce: Joi.string().min(10).max(500).required(),
+  title: Joi.string().min(1).max(100).required(),
+  bugDescription: Joi.string().min(1).max(500).required(),
+  stepsToReproduce: Joi.string().min(1).max(500).required(),
 });
 
 const updateBugSchema = Joi.object({
-  title: Joi.string().min(3).max(100),
-  bugDescription: Joi.string().min(10).max(500),
-  stepsToReproduce: Joi.string().min(10).max(500),
+  title: Joi.string().min(1).max(100),
+  bugDescription: Joi.string().min(1).max(500),
+  stepsToReproduce: Joi.string().min(1).max(500),
+  assignedTo: Joi.string().min(1).max(100),
+  closed: Joi.boolean(),
 }).unknown(true);
 
 const classifyBugSchema = Joi.object({
@@ -53,112 +56,101 @@ const closeBugSchema = Joi.object({
 });
 
 const commentSchema = Joi.object({
-  comment: Joi.string().min(3).max(500).required(),
+  comment: Joi.string().min(1).max(500).required(),
 });
 
 const newTestsSchema = Joi.object({
-  status: Joi.string().min(3).required(),
+  status: Joi.string().min(1).required(),
   addedBy: Joi.string().required(),
 });
 
 const updateTestSchema = Joi.object({
-  status: Joi.string().min(3),
+  status: Joi.string().min(1),
   addedBy: Joi.string(),
 });
 
 // List all bugs
 router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
   try {
-    let bugs = await GetAllBugs();
-    // debugBug(`Bugs: ${JSON.stringify(bugs)}`);
-    console.log(bugs.length);
 
-    // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
-    const {
-      classification,
-      sortBy,
-      maxAge,
-      minAge,
-      pageNumber,
-      pageSize,
-      closed,
-    } = req.query;
-    console.log("Received query parameters:", req.query);
+    let match = {};
+
+    let {keywords, classification, sortBy, closed, minAge, maxAge} = req.query;
+
+    debugBug(`Keywords: ${keywords}`);
+
+    if (keywords) {
+      match.$text = { $search: keywords };
+    }
+
     if (classification) {
-      bugs = bugs.filter((bug) => bug.classification === classification);
-    }
-    if (closed) {
-      bugs = bugs.filter((bug) => bug.closed === closed);
+      match.classification = {$eq: classification};
     }
 
-    //FIX THIS
-    const today = new Date();
+    if(closed == 'true'){
+      match.closed = {$eq: true};
+    }else if(closed == 'false'){
+      match.closed = {$eq: false};
+    }
+
+    let sort = {title: 1};
+
+    switch(sortBy) {
+      case 'title':
+        sort = {title: 1};
+        break;
+      case 'classification':
+        sort = {classification: 1};
+        break;
+      case 'resolution':
+        sort = {resolution: 1};
+        break;
+      case 'closed':
+        sort = {closed: 1};
+        break;
+      default:
+        sort = {title: 1};
+    }
+
+    const today = new Date(); // Get current date and time
     today.setHours(0);
     today.setMinutes(0);
     today.setSeconds(0);
-    today.setMilliseconds(0);
+    today.setMilliseconds(0); // Remove time from Date
 
-    const maxAgeDays = parseInt(maxAge, 10);
-    const minAgeDays = parseInt(minAge, 10);
+    const parsedMinAge = parseInt(minAge, 10);
+    const parsedMaxAge = parseInt(maxAge, 10);
+
     const pastMaximumDaysOld = new Date(today);
-    pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - maxAgeDays); // Set pastMaximumDaysOld to today minus maxAge
+    pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - parsedMaxAge); // Set pastMaximumDaysOld to today minus maxAge
     const pastMinimumDaysOld = new Date(today);
-    pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - minAgeDays); // Set pastMinimumDaysOld to today minus minAge
-
-    if (maxAge && minAge) {
-      bugs = bugs.filter(
-        (bug) =>
-          new Date(bug.createdOn) >= pastMinimumDaysOld &&
-          new Date(bug.createdOn) <= pastMaximumDaysOld
-      );
-    } else if (minAge) {
-      bugs = bugs.filter(
-        (bug) => new Date(bug.createdOn) >= pastMinimumDaysOld
-      );
-    } else if (maxAge) {
-      bugs = bugs.filter(
-        (bug) => new Date(bug.createdOn) <= pastMaximumDaysOld
-      );
+    pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - parsedMinAge); // Set pastMinimumDaysOld to today minus minAge
+    
+    if(parsedMinAge && parsedMaxAge){
+      match.createdDate = {$gte: pastMaximumDaysOld, $lte: pastMinimumDaysOld};
+    } else if(parsedMinAge){
+      match.createdDate = {$gte: pastMinimumDaysOld};
+    } else if(parsedMaxAge){
+      match.createdDate = {$lte: pastMaximumDaysOld};
     }
-
-    const allowedSorts = [
-      "newest",
-      "oldest",
-      "title",
-      "classification",
-      "assignedTo",
-      "createdBy",
+    const pipeline = [
+      {$match: match},
+      {$sort: sort},
     ];
-    if (sortBy && allowedSorts.includes(sortBy)) {
-      switch (sortBy) {
-        case "oldest":
-          bugs = bugs.sort(
-            (a, b) => new Date(a.createdDate) - new Date(b.createdDate)
-          );
-          break;
-        case "title":
-          bugs = bugs.sort((a, b) => a.title.localeCompare(b.title));
-          break;
-        case "classification":
-          bugs = bugs.sort((a, b) =>
-            a.classification.localeCompare(b.classification)
-          );
-          break;
-        case "assignedTo":
-          bugs = bugs.sort((a, b) =>
-            a.assignedToUserId.localeCompare(b.assignedToUserId)
-          );
-          break;
-        case "createdBy":
-          bugs = bugs.sort((a, b) => a.createdBy.localeCompare(b.createdBy));
-          break;
-        case "newest":
-          bugs = bugs.sort(
-            (a, b) => new Date(b.createdDate) - new Date(a.createdDate)
-          );
-          break;
-      }
-    }
+
+   
+
+    let bugs = await GetAllBugs(pipeline);
+
+    // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
+    const {
+      pageNumber,
+      pageSize,
+    } = req.query;
+    console.log("Received query parameters:", req.query);
+  
+
+   
 
     // Pagination
     const page = parseInt(pageNumber) || 1;
@@ -205,7 +197,7 @@ router.post(
 
     try {
       newBug.createdDate = new Date();
-      newBug.createdOn = new Date();
+      newBug.createdOn = moment.defaultFormat();
       newBug.createdBy = req.auth._id;
       newBug.classification = "unclassified";
       newBug.closed = false;
@@ -329,8 +321,8 @@ router.patch(
 
       // Update the bug's assignment details
       bug.assignedBy = req.auth._id;
-      bug.assignedToUserId = assignedToUserId;
-      bug.assignedToUserName = `${assignedToUser.givenName} ${assignedToUser.familyName}`;
+      bug.assignedToUserId = assignedToUser._id;
+      bug.assignedToUserName = `${assignedToUser.fullName}`;
       bug.assignedOn = new Date();
       bug.lastUpdated = new Date();
 

@@ -16,6 +16,7 @@ import BugEditor from "../components/BugEditor.jsx";
 import UserListItem from "../components/UserListItem.jsx";
 import UserEditor from "../components/UserEditor.jsx";
 import HomePage from "../components/HomePage.jsx";
+import ReportBug from "../components/ReportBug.jsx";
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -43,12 +44,27 @@ function App() {
       });
     navigate("/login");
     localStorage.removeItem("auth");
+    localStorage.removeItem("authExpiration");
   }
 
   useEffect(() => {
     const auth = JSON.parse(localStorage.getItem("auth"));
     if (auth) {
       setAuth(auth);
+      console.log("auth", auth);
+      const interval = setInterval(() => {
+        const authExpiration = localStorage.getItem("expirationTime");
+        const now = new Date().getTime();
+        const expirationTime = parseInt(authExpiration, 10);
+        // console.log("interval hit");
+        // console.log("now time", now / 1000);
+        // console.log("expiration time", expirationTime / 100);
+        if (now > expirationTime) {
+          clearInterval(interval);
+          onLogout();
+          localStorage.removeItem("auth");
+        }
+      }, 1000);
     }
   }, []);
 
@@ -85,17 +101,18 @@ function App() {
             <Route
               path="/bugs"
               element={
-                <ListBugs showSuccess={showSuccess} showError={showError} />
+                <ListBugs
+                  showSuccess={showSuccess}
+                  showError={showError}
+                  auth={auth}
+                />
               }
             />
+            <Route path="/bugs/report" element={<ReportBug auth={auth} />} />
             <Route
               path="/bugs/:id"
               element={
-                <BugEditor
-                  showSuccess={showSuccess}
-                  showError={showError}
-                  setAuth={setAuth}
-                />
+                <BugEditor showSuccess={showSuccess} showError={showError} />
               }
             />
             <Route
@@ -111,23 +128,25 @@ function App() {
             <Route
               path="/users/:id"
               element={
-                <UserListItem showError={showError} showSuccess={showSuccess} />
+                <UserListItem
+                  showError={showError}
+                  showSuccess={showSuccess}
+                  auth={auth}
+                />
               }
             />
             <Route
               path="/users/:id/edit"
               element={
-                <UserEditor
-                  showSuccess={showSuccess}
-                  showError={showError}
-                  setAuth={setAuth}
-                />
+                <UserEditor showSuccess={showSuccess} showError={showError} />
               }
             />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>
         </main>
-        <Footer />
+        <footer>
+          <Footer />
+        </footer>
       </div>
     </>
   );

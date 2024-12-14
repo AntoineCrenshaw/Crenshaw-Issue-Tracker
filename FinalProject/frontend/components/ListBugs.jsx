@@ -4,14 +4,21 @@ import Skeleton from "react-loading-skeleton";
 import "./ListBugs.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, useNavigate } from "react-router-dom";
+import { Pagination } from "./Pagination.jsx";
 
-const ListBugs = ({ showSuccess, showError }) => {
+const ListBugs = ({ showSuccess, showError, auth }) => {
   const [selectedBug, setSelectedBug] = useState({});
   const [bugs, setBugs] = useState([]);
   const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteCounter, setDeleteCounter] = useState(0);
+  const [keywords, setKeywords] = useState("");
+  const [classificationFilter, setClassificationFilter] = useState("");
+  const [sortBy, setSortBy] = useState("title");
+  const [showInactive, setShowInactive] = useState("");
+  const [minAge, setMinAge] = useState("");
+  const [maxAge, setMaxAge] = useState("");
   const navigate = useNavigate();
 
   const getBugs = async () => {
@@ -29,8 +36,9 @@ const ListBugs = ({ showSuccess, showError }) => {
         e.response?.data?.message ||
           "Error fetching users. Refresh the page to try again"
       );
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   async function updateCloseStatus(e, id) {
@@ -56,6 +64,27 @@ const ListBugs = ({ showSuccess, showError }) => {
     }
   }
 
+  const onSubmitSearch = async (evt) => {
+    evt.preventDefault();
+    try {
+      const { data } = await axios.get(`http://localhost:2024/api/bugs/`, {
+        headers: { authorization: `Bearer ${auth?.token}` },
+        params: {
+          keywords: keywords,
+          classification: classificationFilter,
+          sortBy: sortBy,
+          closed: showInactive,
+          minAge: minAge,
+          maxAge: maxAge,
+        },
+      });
+      console.log(data.bugs);
+      setBugs(data.bugs);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleBugClick = (bug) => {
     setSelectedBug(bug);
     setShowModal(true);
@@ -63,7 +92,7 @@ const ListBugs = ({ showSuccess, showError }) => {
 
   useEffect(() => {
     getBugs();
-  }, []);
+  }, [deleteCounter]);
 
   return (
     <>
@@ -93,129 +122,225 @@ const ListBugs = ({ showSuccess, showError }) => {
       ) : (
         <div>
           <div className="bugs-container mt-5">
+            <div className="container-fluid">
+              <form className="row w-100 mb-4" role="search">
+                <div className="col-md-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search"
+                    onChange={(evt) => setKeywords(evt.target.value)}
+                    value={keywords}
+                  />
+                  <button
+                    className="btn btn-secondary mt-2 w-100"
+                    onClick={(evt) => onSubmitSearch(evt)}
+                  >
+                    Search
+                  </button>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">Filter by Classification</label>
+                  <select
+                    className="form-select"
+                    onChange={(evt) =>
+                      setClassificationFilter(evt.target.value)
+                    }
+                  >
+                    <option value="">Select a classification</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Unapproved">Unapproved</option>
+                    <option value="Unclassified">Unclassified</option>
+                    <option value="Duplicate">Duplicate</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">Sort By</label>
+                  <select
+                    className="form-select"
+                    onChange={(evt) => setSortBy(evt.target.value)}
+                  >
+                    <option value="">Sort By</option>
+                    <option value="title">Title</option>
+                    <option value="classification">Classification</option>
+                    <option value="status">Status</option>
+                    <option value="resolution">Resolution</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">
+                    Close Status {showInactive}
+                  </label>
+                  <div className="form-check">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="showInactive"
+                      onChange={(evt) =>
+                        setShowInactive(evt.target.checked ? "true" : "false")
+                      }
+                    />
+                    <label className="form-check-label" htmlFor="showInactive">
+                      Show Closed
+                    </label>
+                  </div>
+                </div>
+                <div className="row mb-4 mt-2">
+                  <div className="col">
+                    <input
+                      type="number"
+                      name="txtMinAge"
+                      id="txtMinAge"
+                      className="form-control"
+                      placeholder="Minimum Age"
+                      onChange={(evt) => setMinAge(evt.target.value)}
+                    />
+                  </div>
+                  <div className="col">
+                    <input
+                      type="number"
+                      name="txtMaxAge"
+                      id="txtMaxAge"
+                      className="form-control"
+                      placeholder="Maximum Age"
+                      onChange={(evt) => setMaxAge(evt.target.value)}
+                    />
+                  </div>
+                </div>
+              </form>
+            </div>
             {bugs.length > 0 ? (
-              <table className="bugs-table">
-                <caption>Bugs</caption>
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Classification</th>
-                    <th>Status</th>
-                    <th>Assigned To</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bugs.map((bug) => (
-                    <tr key={bug._id}>
-                      <td>{bug.title}</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            bug.classification === `Approved`
-                              ? `bg-success`
-                              : bug.classification === `Unapproved`
-                              ? `bg-danger`
-                              : bug.classification === `Duplicate`
-                              ? `bg-danger`
-                              : bug.classification === `Unclassified`
-                              ? `bg-warning`
-                              : `bg-warning`
-                          }`}
-                        >
-                          {bug.classification}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            bug.closed === true
-                              ? `bg-success`
-                              : bug.closed === false
-                              ? `bg-danger`
-                              : `bg-warning`
-                          }`}
-                        >
-                          {bug.closed ? `Closed` : `Open`}
-                        </span>
-                      </td>
-                      <td>{bug.assignedToUserName}</td>
-                      <td>
-                        <span>
+              <>
+                <table className="bugs-table">
+                  <caption>Bugs</caption>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Classification</th>
+                      <th>Status</th>
+                      <th>Assigned To</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bugs.map((bug) => (
+                      <tr key={bug._id}>
+                        <td>{bug.title}</td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              bug.classification === `Approved`
+                                ? `bg-success`
+                                : bug.classification === `Unapproved`
+                                ? `bg-danger`
+                                : bug.classification === `Duplicate`
+                                ? `bg-danger`
+                                : bug.classification === `Unclassified`
+                                ? `bg-info`
+                                : `bg-info`
+                            }`}
+                          >
+                            {bug.classification}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              bug.closed === true
+                                ? `bg-success`
+                                : bug.closed === false
+                                ? `bg-primary`
+                                : `bg-primary`
+                            }`}
+                          >
+                            {bug.closed ? `Closed` : `Open`}
+                          </span>
+                        </td>
+                        <td>{bug.assignedToUserName}</td>
+                        <td>
                           <span>
-                            <button className="btn btn-link">
-                              <Link to={`/bugs/${bug._id}`}>
-                                <i className="bi bi-pencil"></i>
-                              </Link>
-                            </button>
-                            <button
-                              className="btn btn-link"
-                              onClick={() => handleBugClick(bug)}
-                            >
-                              <i className="bi bi-ban"></i>
-                            </button>
-                            {showModal && selectedBug._id === bug._id && (
-                              <div className="modal show d-block" tabIndex="-1">
-                                <div className="modal-dialog">
-                                  <div className="modal-content">
-                                    <div className="modal-header">
-                                      <h5 className="modal-title">
-                                        Confirm Delete
-                                      </h5>
-                                      <button
-                                        type="button"
-                                        className="btn-close"
-                                        data-toggle="tooltip"
-                                        data-placement="top"
-                                        title="Tooltip on top"
-                                        onClick={() => setShowModal(false)}
-                                        data-bs-dismiss="modal"
-                                        aria-label="Close"
-                                      ></button>
-                                    </div>
-                                    <div className="modal-body">
-                                      <p className="fs-4">
-                                        Are you sure you want to close this bug?
-                                        <br />
-                                        {bug.title}
-                                      </p>
-                                    </div>
-                                    <div className="modal-footer">
-                                      <button
-                                        type="button"
-                                        className="btn btn-secondary"
-                                        data-toggle="tooltip"
-                                        data-placement="top"
-                                        title="Tooltip on top"
-                                        onClick={() => setShowModal(false)}
-                                      >
-                                        Cancel
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="btn btn-danger"
-                                        onClick={(e) =>
-                                          updateCloseStatus(e, bug._id)
-                                        }
-                                      >
-                                        Delete
-                                      </button>
+                            <span>
+                              {auth?.role?.includes("Admin") && (
+                                <button className="btn btn-link">
+                                  <Link to={`/bugs/${bug._id}`}>
+                                    <i className="bi bi-pencil"></i>
+                                  </Link>
+                                </button>
+                              )}
+                              <button
+                                className="btn btn-link"
+                                onClick={() => handleBugClick(bug)}
+                              >
+                                <i className="bi bi-ban"></i>
+                              </button>
+                              {showModal && selectedBug._id === bug._id && (
+                                <div
+                                  className="modal show d-block"
+                                  tabIndex="-1"
+                                >
+                                  <div className="modal-dialog">
+                                    <div className="modal-content">
+                                      <div className="modal-header">
+                                        <h5 className="modal-title">
+                                          Confirm Delete
+                                        </h5>
+                                        <button
+                                          type="button"
+                                          className="btn-close"
+                                          data-toggle="tooltip"
+                                          data-placement="top"
+                                          title="Tooltip on top"
+                                          onClick={() => setShowModal(false)}
+                                          data-bs-dismiss="modal"
+                                          aria-label="Close"
+                                        ></button>
+                                      </div>
+                                      <div className="modal-body">
+                                        <p className="fs-4">
+                                          Are you sure you want to close this
+                                          bug?
+                                          <br />
+                                          {bug.title}
+                                        </p>
+                                      </div>
+                                      <div className="modal-footer">
+                                        <button
+                                          type="button"
+                                          className="btn btn-secondary"
+                                          data-toggle="tooltip"
+                                          data-placement="top"
+                                          title="Tooltip on top"
+                                          onClick={() => setShowModal(false)}
+                                        >
+                                          Cancel
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn-danger"
+                                          onClick={(e) =>
+                                            updateCloseStatus(e, bug._id)
+                                          }
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            </span>
                           </span>
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
             ) : (
-              <p>{message}</p>
+              <p>No bugs meet your desired criteria. Try again</p>
             )}
           </div>
+          <Pagination />
         </div>
       )}
     </>

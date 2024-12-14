@@ -29,9 +29,9 @@ async function ping() {
 }
 
 // Bugs CRUD operations
-async function GetAllBugs() {
+async function GetAllBugs(pipeline) {
   const db = await connect();
-  const results = await db.collection("bugs").find({}).toArray();
+  const results = await db.collection("bugs").aggregate(pipeline).toArray();
   return results;
 }
 
@@ -91,6 +91,7 @@ async function closeBug(updatedBug) {
 
 async function GetAllUsers(pipeline) {
   const db = await connect();
+  debugDb(`Pipeline: ${JSON.stringify(pipeline)}`);
   const results = await db.collection("users").aggregate(pipeline).toArray();
   return results;
 }
@@ -121,11 +122,11 @@ async function createUser(newUser) {
   return dbResult;
 }
 
-async function updateUser(userId, user) {
+async function updateUser(user) {
   const db = await connect();
   const dbResult = db
     .collection("users")
-    .updateOne({ _id: new ObjectId(userId) }, { $set: user });
+    .updateOne({ _id: new ObjectId(user._id) }, { $set: user });
   return dbResult;
 }
 

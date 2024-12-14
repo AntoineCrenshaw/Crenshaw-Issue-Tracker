@@ -5,15 +5,17 @@ import "./ListBugs.css";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import "./BugEditor.css";
+import BugComment from "./BugComment";
 
-const BugEditor = ({ showSuccess, showError, setAuth }) => {
+const BugEditor = ({ showSuccess, showError }) => {
   const { id } = useParams();
   const [bug, setBug] = useState({});
   const [title, setTitle] = useState("");
-  const [bugDescription, setDescription] = useState("");
+  const [description, setDescription] = useState("");
   const [stepsToReproduce, setStepsToReproduce] = useState("");
   const [assignedToUserName, setAssignedToUserName] = useState("");
-  const [bugs, setBugs] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [newComment, setNewComment] = useState("");
 
   const navigate = useNavigate();
 
@@ -36,6 +38,12 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
       .get("http://localhost:2024/api/bugs", { withCredentials: true })
       .then((response) => {
         console.log(response.data);
+      });
+    axios
+      .get("http://localhost:2024/api/users", { withCredentials: true })
+      .then((response) => {
+        setUsers(response.data.users);
+        console.log(response.data.users);
       })
       .catch((error) => console.log(error));
   }, [id]);
@@ -47,7 +55,7 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
     const updatedBug = {
       ...bug,
       title,
-      description: bugDescription,
+      description,
       stepsToReproduce,
       assignedToUserName,
     };
@@ -63,15 +71,12 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
       if (response.status === 200) {
         setBug(response.data.bugs);
         showSuccess(response.data.message);
-        setAuth(response.data);
-        localStorage.setItem("auth", JSON.stringify(response.data));
         navigate("/bugs");
       } else {
         showError(response.data.message);
-        setAuth(null);
       }
     } catch (e) {
-      console.log(`catch block: ${JSON.stringify(e.response.data)}`);
+      showError(e.response.data.message);
     }
   };
 
@@ -85,7 +90,7 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
   return (
     <>
       <div className="bugs-card-container mt-5 mb-2">
-        <div className="card">
+        <div className="card" key={bug._id}>
           <div className="bg-white">
             <h1> {bug.title}</h1>
           </div>
@@ -110,7 +115,7 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
                 <textarea
                   className="form-control"
                   id="description"
-                  value={bugDescription}
+                  value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
               </div>
@@ -127,7 +132,7 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
               </div>
               <div className="mb-3">
                 <label htmlFor="userName" className="form-label">
-                  Assigned To
+                  Assigned To {bug.assignedToUserName}
                 </label>
                 <select
                   className="form-select"
@@ -135,12 +140,11 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
                   value={assignedToUserName}
                   onChange={(e) => setAssignedToUserName(e.target.value)}
                 >
-                  <option value="">Select User</option>
-                  <option value="Jalen Williams">Jalen Williams</option>
-                  <option value="Steven Adams">Steven Adams</option>
-                  <option value="Anthony Davis">Anthony Davis</option>
-                    
-                
+                  {users.map((user) => (
+                    <option key={user._id} value={user.fullName}>
+                      {user.fullName}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="mb-3">
@@ -161,6 +165,20 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
                   <option value="Unclassified">Unclassified</option>
                 </select>
               </div>
+              <div className="mb-3">
+                <label htmlFor="closedStatus" className="form-label">
+                  Closed
+                </label>
+                <select
+                  className="form-select"
+                  id="closedStatus"
+                  value={bug.closed}
+                  onChange={(e) => setBug({ ...bug, closed: e.target.value })}
+                >
+                  <option value="true">Closed</option>
+                  <option value="false">Open</option>{" "}
+                </select>
+              </div>
               <div className="text-center">
                 <button type="submit" className="btn btn-primary">
                   Save
@@ -176,6 +194,28 @@ const BugEditor = ({ showSuccess, showError, setAuth }) => {
             </form>
           </div>
         </div>
+      </div>
+      <div className="col mb-3">
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Comment</th>
+              <th scope="col">Created On</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bug.comments &&
+              bug.comments.map((comment, index) => (
+                <tr key={comment._id}>
+                  <td>{index + 1}</td>
+                  <td>{comment}</td>
+                  <td>{comment.createdOn}</td>
+                </tr>
+              ))}
+            {console.log("Comments for current bug", bug.comments)}
+          </tbody>
+        </table>
       </div>
     </>
   );

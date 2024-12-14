@@ -47,6 +47,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
         { email, password },
         { withCredentials: true }
       );
+
       if (response.status === 200) {
         console.log(response.data);
         if (response.data.message === "Invalid email or password") {
@@ -57,7 +58,10 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
           setAuth(response.data);
           showSuccess(response.data.message);
           localStorage.setItem("auth", JSON.stringify(response.data));
+          const expirationTime = new Date().getTime() + 3600000;
+          localStorage.setItem("expirationTime", expirationTime);
           navigate("/bugs");
+          window.location.reload();
         }
       }
     } catch (err) {
@@ -82,7 +86,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
           >
             <div className="input-group">
               <div className="mb-3">
-                <label htmlFor="email" className="form-label">
+                <label htmlFor="emailForm" className="form-label">
                   Email
                 </label>
                 <div className="input-group">
@@ -90,14 +94,19 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                     <i className="bi bi-envelope-fill input-icon"></i>
                   </span>
                   <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="form-control input-field"
-                    autoComplete="email"
+                    autoComplete="off"
+                    type="text"
+                    className={`form-control mb-3 ${
+                      email === ""
+                        ? ""
+                        : email.includes("@")
+                        ? "is-valid"
+                        : "is-invalid"
+                    }`}
+                    id="emailForm"
+                    placeholder="ENTER EMAIL"
                     required
+                    onChange={(evt) => setEmail(evt.target.value)}
                   />
                 </div>
                 <div className="valid-feedback">Looks good!</div>
@@ -140,6 +149,14 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                     ></i>
                   </span>
                 </div>
+                <span onClick={() => setShowPassword(!showPassword)}>
+                  <i
+                    className={`bi ${
+                      showPassword ? "bi-eye-slash-fill" : "bi-eye-fill"
+                    }`}
+                  ></i>
+                </span>
+
                 <div className="invalid-feedback">
                   Please enter a valid 6 or more character password.
                 </div>

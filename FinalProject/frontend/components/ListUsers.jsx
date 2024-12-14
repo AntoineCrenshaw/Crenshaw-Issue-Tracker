@@ -7,6 +7,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [roleFilter, setRoleFilter] = useState([]);
   const [keywords, setKeywords] = useState("");
 
   const getUsers = async () => {
@@ -35,7 +36,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
     try {
       const { data } = await axios.get(`http://localhost:2024/api/users/`, {
         headers: { authorization: `Bearer ${auth?.token}` },
-        params: { keywords: keywords },
+        params: { keywords: keywords, roles: roleFilter },
       });
       console.log(data.users);
       setUsers(data.users);
@@ -72,23 +73,40 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
       
       <div className="users-container mt-5 min-h-screen">
         <div className="container-fluid">
-          <form
-            className="d-flex w-100 justify-content-center mb-4 gap-2"
-            role="search"
-          >
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search"
-              onChange={(evt) => setKeywords(evt.target.value)}
-              value={keywords}
-            />
-            <button
-              className="btn btn-secondary"
-              onClick={(evt) => onSubmitSearch(evt)}
-            >
-              Search
-            </button>
+          <form className=" row w-100  mb-4" role="search">
+            <div className="col-md-3">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search"
+                onChange={(evt) => setKeywords(evt.target.value)}
+                value={keywords}
+              />
+              <button
+                className="btn btn-secondary mt-2 w-100"
+                onClick={(evt) => onSubmitSearch(evt)}
+              >
+                Search
+              </button>
+            </div>
+            <div className="col-md-3">
+              <label className="form-label" htmlFor="rolesLabel">
+                Filter by Role {roleFilter}
+              </label>
+              <select
+                className="form-select"
+                onChange={(evt) => setRoleFilter(evt.target.value)}
+                value={roleFilter}
+              >
+                <option value="">Select Role</option>
+                <option value="Admin">Admin</option>
+                <option value="Customer">Customer</option>
+                <option value="Technical Manager">TM</option>
+                <option value="Business Analyst">BA</option>
+                <option value="Developer">Developer</option>
+                <option value="Quality Analyst">Quality Analyst</option>
+              </select>
+            </div>
           </form>
         </div>
         {users.length > 0 ? (
@@ -107,7 +125,9 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
             ))}
           </div>
         ) : (
-          <div className="users-message text-center">{message}</div>
+          <div className="users-message text-center">
+            <p>No search matches your criteria</p>
+          </div>
         )}
       </div>
     </>

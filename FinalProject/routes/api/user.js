@@ -94,6 +94,8 @@ async function issueAuthToken(user) {
   return token;
 }
 
+
+
 async function issueAuthCookie(res, token) {
   const cookieOptions = {
     httpOnly: true,
@@ -104,6 +106,8 @@ async function issueAuthCookie(res, token) {
   res.cookie("authToken", token, cookieOptions);
 }
 
+
+
 router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
 
 
@@ -113,13 +117,18 @@ router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
 
   let match = {};
 
-  let {keywords} = req.query;
+  let {keywords, roles } = req.query;
+
 
   debugUser(`Keywords: ${keywords}`);
-
+  debugUser(`Roles: ${roles}`);
   if(keywords) {
     match.$text = { $search: keywords };
   }
+
+ if (roles) {
+    match.role = { $eq: roles };
+ }
 
   const pipeline = [
     {$match: match}
@@ -128,61 +137,12 @@ router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
     // Get All Users
     let users = await GetAllUsers(pipeline);
 
-
-
-  // Get users search query
-  const { role, maxAge, minAge, sortBy, pageNumber, pageSize } = req.query;
-
-  // Filter users by role
-  if (role) {
-    users = users.filter((user) => user.role === role);
-  }
-
-  // Filter users by age of account
-  if (maxAge || minAge) {
-    users = users.filter((user) => {
-      if (maxAge) {
-        return new Date(user.createdDate) <= new Date(maxAge);
-      }
-      if (minAge) {
-        return new Date(user.createdDate) >= new Date(minAge);
-      }
-    });
-    debugUser(`Max Age: ${maxAge}, Min Age: ${minAge}`);
-  }
-
-  // Sort users by date, role, name, or createdDate
-  const allowedSorts = ["newest", "givenName", "familyName", "role", "oldest"];
-  if (sortBy && allowedSorts.includes(sortBy)) {
-    switch (sortBy) {
-      case "newest":
-        users = users.sort(
-          (a, b) => new Date(b.createdDate) - new Date(a.createdDate)
-        );
-        break;
-      case "oldest":
-        users = users.sort(
-          (a, b) => new Date(a.createdDate) - new Date(b.createdDate)
-        );
-        break;
-      case "givenName":
-        users = users.sort((a, b) => a.givenName.localeCompare(b.givenName));
-        break;
-      case "familyName":
-        users = users.sort((a, b) => a.familyName.localeCompare(b.familyName));
-        break;
-      case "role":
-        users = users.sort((a, b) => a.role.localeCompare(b.role));
-        break;
-    }
-  }
-
   // Pagination
-  const page = parseInt(pageNumber) || 1;
-  const limit = parseInt(pageSize) || 5;
-  const skip = (page - 1) * limit;
+  // const page = parseInt(pageNumber) || 1;
+  // const limit = parseInt(pageSize) || 5;
+  // const skip = (page - 1) * limit;
 
-  users = users.slice(skip, skip + limit);
+  // users = users.slice(skip, skip + limit);
 
   res.status(200).json({ users, message: "Users retrieved successfully" });
 });
@@ -247,6 +207,7 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
         newUser,
         authToken: jwtToken,
       });
+    
     } catch (error) {
       return res.status(500).send(error.message);
     }
@@ -380,7 +341,7 @@ router.patch(
           const jwtToken = await issueAuthToken(user);
           return await issueAuthCookie(res, jwtToken);
         }
-        const result = await updateUser(userId, user);
+        const result = await updateUser(user);
         const log = {
           timestamp: new Date(),
           collection: "users",
@@ -393,7 +354,7 @@ router.patch(
           .status(200)
           .json({ message: `User updated!` });
       } else {
-        res.status(404).send(`User ${userId} not found.`);
+        res.status(404).json({message: `User ${userId} not found.`});
       }
     } catch (err) {
       res.status(500).send(err);

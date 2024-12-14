@@ -5,15 +5,13 @@ import { NavLink } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "./UserEditor.css";
 
-export default function UserEditor({ showSuccess, showError, setAuth }) {
+export default function UserEditor({ showSuccess, showError }) {
   const { id } = useParams();
   const [user, setUser] = useState({});
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [givenName, setFirstName] = useState("");
+  const [familyName, setLastName] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [roles, setRoles] = useState([]); // State to hold roles
-  const [selectedRole, setSelectedRole] = useState(""); // State for selected role
   const navigate = useNavigate();
 
   // Display the user details on open of the page
@@ -29,11 +27,6 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
         setLastName(response.data.familyName);
         setFullName(response.data.fullName);
         setEmail(response.data.email);
-        const rolesData = Array.isArray(response.data.role)
-          ? response.data.role
-          : [];
-        setRoles(rolesData);
-        setSelectedRole(response.data.role);
       })
       .catch((error) => console.log(error));
   }, []);
@@ -45,11 +38,10 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
 
     const updatedUser = {
       ...user,
-      firstName,
-      lastName,
+      givenName,
+      familyName,
       fullName,
       email,
-      role: selectedRole,
     };
 
     delete updatedUser._id;
@@ -64,12 +56,9 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
         console.log(response.data);
         setUser(response.data.users);
         showSuccess(response.data.message);
-        setAuth(response.data);
-        localStorage.setItem("auth", JSON.stringify(response.data));
         navigate("/users");
       } else {
         showError(response.data.message);
-        setAuth(null);
       }
     } catch (err) {
       if (err.response) {
@@ -97,90 +86,80 @@ export default function UserEditor({ showSuccess, showError, setAuth }) {
   };
 
   return (
-    <div className="parent">
-      <h1 className="text-center">Edit User</h1>
-      <form onSubmit={(e) => onUserUpdate(e)}>
-        <div className="form-group ">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+    <div className="user-card-container">
+      <div className="card">
+        <div className="bg-white">
+          <h1>Edit user info</h1>
         </div>
-        <div className="form-group ">
-          <label htmlFor="fullName">Full Name</label>
-          <input
-            type="text"
-            className="form-control"
-            id="fullName"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
+        <div className="card-body">
+          <form>
+            <div className="mb-3">
+              <label htmlFor="firstNameForm" className="form-label">
+                First Name
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="firstNameForm"
+                value={givenName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="lastNameForm" className="form-label">
+                Last Name
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="lastNameForm"
+                value={familyName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="emailForm" className="form-label">
+                Email
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="emailForm"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="fullNameForm" className="form-label">
+                Full Name
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="fullNameForm"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+            <div className="mb-3">
+              <button
+                type="submit"
+                className="btn btn-primary"
+                onClick={(e) => onUserUpdate(e)}
+              >
+                Update
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={(e) => cancelEdit(e)}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="form-group">
-          <label htmlFor="firstName">First Name</label>
-          <input
-            type="text"
-            className="form-control"
-            id="firstName"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="lastName">Last Name</label>
-          <input
-            type="text"
-            className="form-control"
-            id="lastName"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="role">Choose your roles:</label>
-          <div id="role">
-            {roles.map((role, index) => (
-              <div key={index} className="form-check">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id={`role-${index}`}
-                  value={role}
-                  checked={selectedRole.includes(role)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedRole([...selectedRole, role]); // Add role to selected list
-                    } else {
-                      setSelectedRole(selectedRole.filter((r) => r !== role)); // Remove role from selected list
-                    }
-                  }}
-                />
-                <label htmlFor={`role-${index}`} className="form-check-label">
-                  {role}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <br />
-        <NavLink to="/users">
-          <button type="submit" className="btn btn-primary">
-            Update
-          </button>
-        </NavLink>
-        <button
-          type="button"
-          className="btn btn-warning text-black"
-          onClick={(e) => cancelEdit(e)}
-        >
-          Cancel
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
