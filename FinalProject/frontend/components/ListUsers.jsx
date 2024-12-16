@@ -9,6 +9,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState([]);
   const [keywords, setKeywords] = useState("");
+  const [sortBy, setSortBy] = useState("givenName");
 
   const getUsers = async () => {
     setIsLoading(true);
@@ -36,7 +37,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
     try {
       const { data } = await axios.get(`http://localhost:2024/api/users/`, {
         headers: { authorization: `Bearer ${auth?.token}` },
-        params: { keywords: keywords, roles: roleFilter },
+        params: { keywords: keywords, roles: roleFilter, sortBy: sortBy },
       });
       console.log(data.users);
       setUsers(data.users);
@@ -105,6 +106,20 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
                 <option value="Business Analyst">BA</option>
                 <option value="Developer">Developer</option>
                 <option value="Quality Analyst">Quality Analyst</option>
+              </select>
+            </div>
+            <div className="col-md-3">
+              <label className="form-label" htmlFor="sortByLabel">
+                Sort by
+              </label>
+              <select
+                className="form-select"
+                onChange={(evt) => setSortBy(evt.target.value)}
+                value={sortBy}
+              >
+                <option value="givenName">First Name</option>
+                <option value="familyName">Last Name</option>
+                <option value="role">Role</option>
               </select>
             </div>
           </form>
