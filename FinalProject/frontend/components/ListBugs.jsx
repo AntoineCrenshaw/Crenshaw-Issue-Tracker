@@ -5,6 +5,7 @@ import "./ListBugs.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, useNavigate } from "react-router-dom";
 import { Pagination } from "./Pagination.jsx";
+import moment from "moment";
 
 const ListBugs = ({ showSuccess, showError, auth }) => {
   const [selectedBug, setSelectedBug] = useState({});
@@ -161,10 +162,12 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                     onChange={(evt) => setSortBy(evt.target.value)}
                   >
                     <option value="">Sort By</option>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
                     <option value="title">Title</option>
                     <option value="classification">Classification</option>
-                    <option value="status">Status</option>
-                    <option value="resolution">Resolution</option>
+                    <option value="assignedTo">Assigned To</option>
+                    <option value="createdBy">Created By</option>
                   </select>
                 </div>
                 <div className="col-md-3">
@@ -220,6 +223,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                       <th>Status</th>
                       <th>Assigned To</th>
                       <th>Actions</th>
+                      <th>Time of Creation</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -331,6 +335,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                             </span>
                           </span>
                         </td>
+                        <td>{moment(bug.createdOn).fromNow()}</td>
                       </tr>
                     ))}
                   </tbody>
