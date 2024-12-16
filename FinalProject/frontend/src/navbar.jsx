@@ -51,6 +51,11 @@ const Navbar = ({ auth, onLogout }) => {
                         Report Bug
                       </NavLink>
                     </li>
+                    <li>
+                      <NavLink className="nav-link" to="/me">
+                        Profile
+                      </NavLink>
+                    </li>
                   </div>
                   <li className="nav-item">
                     <a className="nav-link" disabled href="#">

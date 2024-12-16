@@ -239,10 +239,19 @@ router.patch(
       return res.status(400).json({ message: `Bug ${bugId} not found` });
     }
 
+    if (getBug.authorID == req.auth._id || getBug.assignedToUserId == req.auth._id || req.auth.permissions.canEditAnyBug == true) {
     const updatedBug = req.body;
 
     for (const key of Object.keys(updatedBug)) {
       getBug[key] = updatedBug[key];
+    }
+
+    if(getBug.closed === true){
+      getBug.closedOn = new Date();
+      getBug.closedBy = req.auth._id;
+    } else {
+      getBug.closedOn = "";
+      getBug.closedBy = "";
     }
 
     try {
@@ -262,6 +271,7 @@ router.patch(
     } catch (err) {
       res.status(500).send(err);
     }
+  }
   }
 );
 
