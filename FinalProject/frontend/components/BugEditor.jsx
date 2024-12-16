@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import _ from "lodash";
 import "./ListBugs.css";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +16,7 @@ const BugEditor = ({ showSuccess, showError }) => {
   const [stepsToReproduce, setStepsToReproduce] = useState("");
   const [assignedToUserName, setAssignedToUserName] = useState("");
   const [users, setUsers] = useState([]);
-  const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState("");
 
   const navigate = useNavigate();
 
@@ -46,7 +47,13 @@ const BugEditor = ({ showSuccess, showError }) => {
         console.log(response.data.users);
       })
       .catch((error) => console.log(error));
-  }, [id]);
+
+      axios.get(`http://localhost:2024/api/bugs/${id}/comment/list`, { withCredentials: true })
+      .then((response) => {
+        console.log("Comment list",response.data);
+        setComments(response.data.comments);
+      }).catch(error => console.log(error));
+  }, []);
 
   const onBugUpdate = async (e) => {
     e.preventDefault();
@@ -91,8 +98,8 @@ const BugEditor = ({ showSuccess, showError }) => {
     <>
       <div className="bugs-card-container mt-5 mb-2">
         <div className="card" key={bug._id}>
-          <div className="bg-white">
-            <h1> {bug.title}</h1>
+          <div className="bg-white text-center">
+            <h1> Edit Bug</h1>
           </div>
           <div className="card-body">
             <form onSubmit={(e) => onBugUpdate(e)}>
@@ -198,6 +205,7 @@ const BugEditor = ({ showSuccess, showError }) => {
       <div className="col mb-3">
         <table className="table table-striped">
           <thead>
+            {console.table(bug)}
             <tr>
               <th scope="col">#</th>
               <th scope="col">Comment</th>
@@ -205,13 +213,8 @@ const BugEditor = ({ showSuccess, showError }) => {
             </tr>
           </thead>
           <tbody>
-            {bug.comments &&
-              bug.comments.map((comment, index) => (
-                <tr key={comment._id}>
-                  <td>{index + 1}</td>
-                  <td>{comment}</td>
-                  <td>{comment.createdOn}</td>
-                </tr>
+            {bug.comments && _.map(bug.comments, (comment, index) => (
+                <BugComment key={comment._id} comment={comment} index={index} />
               ))}
             {console.log("Comments for current bug", bug.comments)}
           </tbody>
