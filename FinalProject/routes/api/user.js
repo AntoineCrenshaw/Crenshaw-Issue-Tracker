@@ -80,12 +80,15 @@ async function issueAuthToken(user) {
 
   const permissions = mergePermissions(user, roles);
 
+  const fullName = `${user.givenName} ${user.familyName}`;
+
   const token = jwt.sign(
     {
       _id: user._id,
       email: user.email,
       role: user.role,
       permissions: permissions,
+      fullName: fullName,
     },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
@@ -117,7 +120,7 @@ router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
 
   let match = {};
 
-  let {keywords, roles } = req.query;
+  let {keywords, roles, sortBy } = req.query;
 
 
   debugUser(`Keywords: ${keywords}`);
@@ -130,8 +133,26 @@ router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
     match.role = { $eq: roles };
  }
 
+ let sort = {givenName: 1};
+
+ switch(sortBy){
+  case "givenName":
+    sort = {givenName: 1};
+    break;
+  case "familyName":
+    sort = {familyName: 1};
+    break;
+  case "role":
+    sort = {role: 1};
+    break;
+  default:
+    sort = {givenName: 1};
+    break;
+ }
+
   const pipeline = [
-    {$match: match}
+    {$match: match},
+    {$sort: sort},
   ];
 
     // Get All Users

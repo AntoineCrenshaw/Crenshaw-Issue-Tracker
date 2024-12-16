@@ -78,6 +78,11 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
     let {keywords, classification, sortBy, closed, minAge, maxAge} = req.query;
 
     debugBug(`Keywords: ${keywords}`);
+    debugBug(`Classification: ${classification}`);
+    debugBug(`Sort By: ${sortBy}`);
+    debugBug(`Closed: ${closed}`);
+    debugBug(`Min Age: ${minAge}`);
+    debugBug(`Max Age: ${maxAge}`);
 
     if (keywords) {
       match.$text = { $search: keywords };
@@ -93,23 +98,29 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
       match.closed = {$eq: false};
     }
 
-    let sort = {title: 1};
+    let sort = {createdOn: 1};
 
     switch(sortBy) {
+      case 'newest':
+        sort = {createdOn: -1};
+        break;
+      case 'oldest':
+        sort = {createdOn: 1};
+        break;
       case 'title':
-        sort = {title: 1};
+        sort = {title: 1, createdOn: -1};
         break;
       case 'classification':
-        sort = {classification: 1};
+        sort = {classification: 1, createdOn: -1};
         break;
-      case 'resolution':
-        sort = {resolution: 1};
+      case 'assignedTo':
+        sort = {assignedToUserName: 1, createdOn: -1};
         break;
-      case 'closed':
-        sort = {closed: 1};
+      case 'createdBy':
+        sort = {authorFullName: 1, createdOn: -1};
         break;
       default:
-        sort = {title: 1};
+        sort = {createdOn: 1};
     }
 
     const today = new Date(); // Get current date and time
@@ -121,17 +132,18 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
     const parsedMinAge = parseInt(minAge, 10);
     const parsedMaxAge = parseInt(maxAge, 10);
 
+    // Calculate past date based on minAge and maxAge
     const pastMaximumDaysOld = new Date(today);
     pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - parsedMaxAge); // Set pastMaximumDaysOld to today minus maxAge
     const pastMinimumDaysOld = new Date(today);
     pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - parsedMinAge); // Set pastMinimumDaysOld to today minus minAge
     
     if(parsedMinAge && parsedMaxAge){
-      match.createdDate = {$gte: pastMaximumDaysOld, $lte: pastMinimumDaysOld};
+      match.createdOn = {$lte: pastMinimumDaysOld, $gte: pastMaximumDaysOld};
     } else if(parsedMinAge){
-      match.createdDate = {$gte: pastMinimumDaysOld};
+      match.createdOn = {$gte: pastMinimumDaysOld};
     } else if(parsedMaxAge){
-      match.createdDate = {$lte: pastMaximumDaysOld};
+      match.createdOn = {$lte: pastMaximumDaysOld};
     }
     const pipeline = [
       {$match: match},
@@ -143,21 +155,13 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
     let bugs = await GetAllBugs(pipeline);
 
     // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
-    const {
-      pageNumber,
-      pageSize,
-    } = req.query;
-    console.log("Received query parameters:", req.query);
-  
-
    
-
     // Pagination
-    const page = parseInt(pageNumber) || 1;
-    const limit = parseInt(pageSize) || 5;
-    const skip = (page - 1) * limit;
+    // const page = parseInt(pageNumber) || 1;
+    // const limit = parseInt(pageSize) || 5;
+    // const skip = (page - 1) * limit;
 
-    bugs = bugs.slice(skip, skip + limit);
+    // bugs = bugs.slice(skip, skip + limit);
     res.status(200).json({bugs, message: "Bugs successfully fetched"});
   } catch (err) {
     res.status(500).send(err);
@@ -196,9 +200,9 @@ router.post(
     const newBug = req.body;
 
     try {
-      newBug.createdDate = new Date();
-      newBug.createdOn = moment.defaultFormat();
-      newBug.createdBy = req.auth._id;
+      newBug.createdOn = new Date();
+      newBug.authorID = req.auth._id;
+      newBug.authorFullName = `${req.auth.fullName}`;
       newBug.classification = "unclassified";
       newBug.closed = false;
       const dbResult = await createBug(newBug);
@@ -451,7 +455,7 @@ router.get(
 router.post(
   "/:bugId/comment/new",
   isLoggedIn(),
-  hasPermission('canAddComment'),
+  hasPermission('canAddComments'),
   validId("bugId"),
   validBody(commentSchema),
   async (req, res) => {
