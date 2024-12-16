@@ -1,14 +1,12 @@
-const BugComment = () => {
+import moment from "moment";
+
+const BugComment = (comments, index) => {
   return (
-    <form>
-      <div className="form-group">
-        <label htmlFor="comment">Comment</label>
-        <textarea className="form-control" id="comment" rows="3"></textarea>
-      </div>
-      <button type="submit" className="btn btn-primary">
-        Submit
-      </button>
-    </form>
+    <tr>
+      <td scope="row">{index + 1}</td>
+      <td>{comments.comment}</td>
+      <td>{moment(comments.createdOn).fromNow()}</td>
+    </tr>
   );
 };
 
