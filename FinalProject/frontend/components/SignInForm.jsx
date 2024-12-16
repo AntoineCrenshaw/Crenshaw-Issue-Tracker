@@ -149,13 +149,6 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                     ></i>
                   </span>
                 </div>
-                <span onClick={() => setShowPassword(!showPassword)}>
-                  <i
-                    className={`bi ${
-                      showPassword ? "bi-eye-slash-fill" : "bi-eye-fill"
-                    }`}
-                  ></i>
-                </span>
 
                 <div className="invalid-feedback">
                   Please enter a valid 6 or more character password.
