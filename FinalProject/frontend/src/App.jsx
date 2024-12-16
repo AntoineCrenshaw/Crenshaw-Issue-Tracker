@@ -108,7 +108,7 @@ function App() {
                 />
               }
             />
-            <Route path="/bugs/report" element={<ReportBug auth={auth} />} />
+            <Route path="/bugs/new" element={<ReportBug auth={auth} showError={showError} showSuccess={showSuccess} />} />
             <Route
               path="/bugs/:id"
               element={
