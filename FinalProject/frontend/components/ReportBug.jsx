@@ -1,33 +1,51 @@
-import useState, { useEffect } from "react";
+import useState from "react";
 import axios from "axios";
 
-const ReportBug = ({}) => {
+const ReportBug = ({auth, showSuccess, showError}) => {
   const [title, setTitle] = useState("");
-  const [bug, setBug] = useState({});
   const [description, setDescription] = useState("");
   const [stepsToReproduce, setStepsToReproduce] = useState("");
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:2024/api/bugs", {
-        header: { authorization: `Bearer ${localStorage.getItem("token")}` },
-      })
-      .then((response) => {
-        console.log(response.data.bugs);
-        setBug(response.data);
-      })
-      .catch((error) => console.log(error));
-  }, []);
 
-  const submitBug = async (e) => {
-    e.preventDefault();
-    axios.post(
-      "http://localhost:2024/api/bugs"
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch((error) => console.log(error))
-    );
+  const titleError = !title ? "Title is required" : "";
+
+  const descriptionError = !description ? "Description is required" : "";
+
+  const stepsToReproduceError = !stepsToReproduce ? "Steps to reproduce is required" : "";
+
+  const createNewBug = async (evt) => {
+    evt.preventDefault();
+    console.log("Creating new bug");
+
+   if (titleError){
+      showError(titleError);
+      return;
+    }
+
+    if(descriptionError){
+      showError(descriptionError);
+      return;
+    } 
+
+    if(stepsToReproduceError){
+      showError(stepsToReproduceError);
+      return;
+   }
+
+   if(title && description && stepsToReproduce){
+    try {
+      const response = await axios.post("http://localhost:2024/api/bugs/new", {
+        title,
+        description,
+        stepsToReproduce,
+      }, { withCredentials: true });
+      console.log(response.data);
+      showSuccess("Bug created successfully");
+    } catch (error) {
+      console.error(error);
+      showError("Failed to create bug");
+    }
+  }
   };
 
   return (
@@ -73,7 +91,7 @@ const ReportBug = ({}) => {
           ></textarea>
         </div>
       </div>
-      <button className="btn btn-primary" onClick={(e) => submitBug(e)}>
+      <button className="btn btn-primary" onClick={(evt) => createNewBug(evt)}>
         Submit Bug
       </button>
     </div>
