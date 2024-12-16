@@ -47,7 +47,7 @@ const Navbar = ({ auth, onLogout }) => {
                       </NavLink>
                     </li>
                     <li className="nav-item">
-                      <NavLink className="nav-link" to="/bugs/report">
+                      <NavLink className="nav-link" to="/bugs/new">
                         Report Bug
                       </NavLink>
                     </li>
