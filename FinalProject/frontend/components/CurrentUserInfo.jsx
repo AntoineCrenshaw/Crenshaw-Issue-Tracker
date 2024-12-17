@@ -1,12 +1,22 @@
 import "./UserEditor.css";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import axios from "axios";
 
 
 const CurrentUserInfo = ({auth}) => {
-  const navigate = useNavigate();
+
+useEffect(() => {
+  console.log(auth, "auth being displayed correctly")
+  axios.get("http://localhost:2024/api/users/me", {
+    headers: { authorization: `Bearer ${auth?.token}` }
+  })
+}, [auth]);
+
   return (
     <>
     {auth && (
+      
      <div className="user-card-container">
        <div className="card">
         <div className="bg-white">
@@ -25,14 +35,14 @@ const CurrentUserInfo = ({auth}) => {
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="fullNameForm" className="form-label">
-                Full Name
+              <label htmlFor="nameForm" className="form-label">
+                Name
               </label>
               <input
                 type="text"
                 className="form-control"
-                id="fullNameForm"
-                value={auth.givenName}
+                id="nameForm"
+                value={auth.familyName}
               />
             </div>
             <div className="mb-3">
@@ -57,7 +67,7 @@ const CurrentUserInfo = ({auth}) => {
                 value={auth.permissions}
               />
             </div>
-      
+        
           </form>
         </div>
         </div>
