@@ -46,9 +46,9 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
     }
   };
 
-  {isLoading && (<><div className="d-flex text-center text-primary" >
+  {isLoading && (<div className="d-flex text-center text-primary" >
     <span>Loading...</span>
-    </div></>)}
+    </div>)}
 
   useEffect(() => {
     getUsers();
@@ -57,7 +57,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
   return (
     <>
       <h1 className="text-center mb-3">Users </h1>
-      
+
       <div className="users-container mt-5 min-h-screen">
         <div className="container-fluid">
           <form className=" row w-100  mb-4" role="search">

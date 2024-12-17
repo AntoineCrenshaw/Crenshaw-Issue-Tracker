@@ -18,6 +18,7 @@ import UserEditor from "../components/UserEditor.jsx";
 import HomePage from "../components/HomePage.jsx";
 import ReportBug from "../components/ReportBug.jsx";
 import CurrentUserInfo from "../components/CurrentUserInfo.jsx";
+import DisplayUserDetails from "../components/DisplayUserDetails.jsx";
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -109,7 +110,26 @@ function App() {
                 />
               }
             />
-            <Route path="/bugs/new" element={<ReportBug auth={auth} showError={showError} showSuccess={showSuccess} />} />
+            <Route
+              path="/me"
+              element={
+                <DisplayUserDetails
+                  auth={auth}
+                  showError={showError}
+                  showSuccess={showSuccess}
+                />
+              }
+            />
+            <Route
+              path="/bugs/new"
+              element={
+                <ReportBug
+                  auth={auth}
+                  showError={showError}
+                  showSuccess={showSuccess}
+                />
+              }
+            />
             <Route
               path="/bugs/:id"
               element={
