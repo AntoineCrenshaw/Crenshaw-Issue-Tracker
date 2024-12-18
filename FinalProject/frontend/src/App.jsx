@@ -158,7 +158,11 @@ function App() {
             <Route
               path="/users/:id/edit"
               element={
-                <UserEditor showSuccess={showSuccess} showError={showError} />
+                <UserEditor
+                  showSuccess={showSuccess}
+                  showError={showError}
+                  auth={auth}
+                />
               }
             />
             <Route path="*" element={<h1>Not Found</h1>} />

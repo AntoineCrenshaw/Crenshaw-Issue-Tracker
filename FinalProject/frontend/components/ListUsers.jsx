@@ -65,7 +65,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
 
   return (
     <>
-      <h1 className="text-center mb-3">Users </h1>
+      <h1 className="text-center mb-3">Users</h1>
 
       <div className="users-container mt-5 min-h-screen">
         <div className="container-fluid">

@@ -51,6 +51,8 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
 
     delete updatedUser._id;
 
+    console.log("Updated user data being sent:", updatedUser);
+
     try {
       let response = await axios.patch(
         `http://localhost:2024/api/users/${id}`,

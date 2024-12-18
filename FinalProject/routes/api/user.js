@@ -291,7 +291,7 @@ router.patch(
         user.lastUpdatedOn = new Date();
         user.lastUpdatedBy = req.auth._id;
 
-        const result = await updateUser(userId, user);
+        const result = await updateUser( user);
         const log = {
           timestamp: new Date(),
           collection: "users",

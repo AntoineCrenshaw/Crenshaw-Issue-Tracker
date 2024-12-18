@@ -4,13 +4,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "./UserEditor.css";
 
-export default function UserEditor({ showSuccess, showError }) {
+export default function UserEditor({ showSuccess, showError, auth }) {
   const { id } = useParams();
   const [user, setUser] = useState({});
   const [givenName, setFirstName] = useState("");
   const [familyName, setLastName] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [roles, setRoles] = useState("");
   const navigate = useNavigate();
 
   // Display the user details on open of the page
@@ -26,9 +27,10 @@ export default function UserEditor({ showSuccess, showError }) {
         setLastName(response.data.familyName);
         setFullName(response.data.fullName);
         setEmail(response.data.email);
+        setRoles(response.data.role);
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, [id]);
 
   const onUserUpdate = async (e) => {
     e.preventDefault();
@@ -140,7 +142,32 @@ export default function UserEditor({ showSuccess, showError }) {
                 onChange={(e) => setFullName(e.target.value)}
               />
             </div>
-            <div className="mb-3">
+            {auth?.role?.some((role) =>
+              ["Admin", "Technical Manager"].includes(role)
+            ) ? (
+              <div className="mb-3">
+                <label htmlFor="roleForm" className="form-label">
+                  Role
+                </label>
+                <select
+                  className="form-select"
+                  id="roleForm"
+                  value={roles}
+                  onChange={(e) => setRoles(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select Role
+                  </option>
+                  <option value="Customer">Customer</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Technical Manager">Technical Manager</option>
+                  <option value="Business Analyst">Buisness Analyst</option>
+                  <option value="Developer">Developer</option>
+                  <option value="Quality Analyst">Quality Analyst</option>
+                </select>
+              </div>
+            ) : null}
+            <div className="d-flex flex-row gap-2">
               <button
                 type="submit"
                 className="btn btn-primary"

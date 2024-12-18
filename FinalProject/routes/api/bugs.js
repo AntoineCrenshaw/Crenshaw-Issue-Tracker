@@ -49,6 +49,7 @@ const classifyBugSchema = Joi.object({
 
 const assignBugSchema = Joi.object({
   assignedToUserId: Joi.string().required(),
+  assignedToUserName: Joi.string()
 });
 
 const closeBugSchema = Joi.object({
@@ -239,22 +240,54 @@ router.patch(
       return res.status(400).json({ message: `Bug ${bugId} not found` });
     }
 
-    const updatedBug = req.body;
+    const bugUpdates = {};
+    const { title, description, stepsToReproduce, assignedTo, assignedToUserName, closed, classification } = req.body;
 
-    for (const key of Object.keys(updatedBug)) {
-      getBug[key] = updatedBug[key];
+    if (title) {
+      getBug.title = title; bugUpdates.title = title;
     }
 
+    if (description) {
+      getBug.description = description; bugUpdates.description = description;
+    } 
+
+    if (stepsToReproduce) {
+      getBug.stepsToReproduce = stepsToReproduce; bugUpdates.stepsToReproduce = stepsToReproduce;
+    }
+
+    if (classification) {
+      getBug.classification = classification; bugUpdates.classification = classification;
+    }
+
+    if (assignedTo) {
+      getBug.assignedTo = assignedTo; bugUpdates.assignedTo = assignedTo;
+    }
+
+    if (assignedToUserName) {
+      getBug.assignedToUserName = assignedToUserName; bugUpdates.assignedToUserName = assignedToUserName;
+    }
+
+    if(closed === true){
+      getBug.closed = closed; bugUpdates.closed = closed;
+      getBug.closedOn = new Date(); bugUpdates.closedOn = new Date();
+      getBug.closedBy = req.auth._id; bugUpdates.closedBy = req.auth._id;
+    } else {
+      getBug.closed = closed; bugUpdates.closed = closed;
+      getBug.closedOn = ""; bugUpdates.closedOn = "";
+      getBug.closedBy = ""; bugUpdates.closedBy = "";
+    }
+
+    getBug.lastUpdated = new Date();
+    getBug.lastUpdatedBy = req.auth._id;
+
     try {
-      getBug.lastUpdated = new Date();
-      getBug.lastUpdatedBy = req.auth._id;
       const result = await updateBug(getBug);
       const log = {
         timestamp: new Date(),
         collection: "bugs",
         operation: "update",
         target: bugId,
-        update: updatedBug,
+        update: bugUpdates,
         auth: req.auth,
       };
       await saveAuditLog(log);
@@ -406,17 +439,16 @@ router.get(
     try {
       const bug = await GetBugById(bugId);
       if (JSON.stringify(bug) === "{}" || bug === null) {
-        res.status(404).send("Bug not found");
-      } else {
-        let detailedComments = [];
-
-        for (let i = 0; i < bug.comments.length; i++) {
-          const bugComment = await GetComment(bug.comments[i]);
-          detailedComments.push(bugComment);
-        }
-
-        res.status(200).json(detailedComments);
-      }
+        return res.status(404).send("Bug not found");
+      } 
+      const detailedComments = await Promise.all(
+        bug.comments.map(async (commentId) => {
+          const comment = await GetComment(commentId);
+          return comment;
+        })
+      );
+      res.status(200).json(detailedComments);
+      
     } catch (err) {
       res.status(500).send(err);
     }
@@ -474,6 +506,7 @@ router.post(
         res.status(404).send("Bug not found");
       } else {
         // Create the new comment
+        newComment.createdOn = new Date();
         const result = await createComment(newComment);
         // Add the comment id to the bug's comments array
         bug.comments.push(result.insertedId);
