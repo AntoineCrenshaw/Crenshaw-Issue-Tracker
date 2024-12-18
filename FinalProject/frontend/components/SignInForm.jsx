@@ -84,84 +84,82 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
             noValidate
             onSubmit={handleSubmit}
           >
-            <div className="input-group">
-              <div className="mb-3">
-                <label htmlFor="emailForm" className="form-label">
-                  Email
-                </label>
-                <div className="input-group">
-                  <span className="input-group-text" id="email-addon">
-                    <i className="bi bi-envelope-fill input-icon"></i>
-                  </span>
-                  <input
-                    autoComplete="off"
-                    type="text"
-                    className={`form-control mb-3 ${
-                      email === ""
-                        ? ""
-                        : email.includes("@")
-                        ? "is-valid"
-                        : "is-invalid"
-                    }`}
-                    id="emailForm"
-                    placeholder="ENTER EMAIL"
-                    required
-                    onChange={(evt) => setEmail(evt.target.value)}
-                  />
-                </div>
+            <div className="mb-3">
+              <label htmlFor="emailForm" className="form-label">
+                Email
+              </label>
+              <div className="input-group">
+                <span className="input-group-text" id="email-addon">
+                  <i className="bi bi-envelope-fill input-icon"></i>
+                </span>
+                <input
+                  autoComplete="off"
+                  type="text"
+                  className={`form-control ${
+                    email === ""
+                      ? ""
+                      : email.includes("@")
+                      ? "is-valid"
+                      : "is-invalid"
+                  }`}
+                  id="emailForm"
+                  placeholder="ENTER EMAIL"
+                  required
+                  onChange={(evt) => setEmail(evt.target.value)}
+                />
                 <div className="valid-feedback">Looks good!</div>
                 <div className="invalid-feedback">
                   Please enter a valid email.
                 </div>
               </div>
             </div>
-            <div className="input-group">
-              <div className="mb-3">
-                <label
-                  htmlFor="password"
-                  className="form-label"
-                  aria-autocomplete="current-password"
+            <div className="mb-3">
+              <label
+                htmlFor="password"
+                className={`form-label ${password.length > 5 ? "is-valid" : "is-invalid"}`}
+                aria-autocomplete="current-password"
+              >
+                Password
+              </label>
+              <div className="input-group">
+                <span className="input-group-text" id="password-addon">
+                  <i className="bi bi-lock-fill input-icon"></i>
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={password}
+                  minLength={6}
+                  className="form-control"
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+                <span
+                  className="input-group-text"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  Password
-                </label>
-             
-                <div className="input-group">
-                  <span className="input-group-text" id="password-addon">
-                    <i className="bi bi-lock-fill input-icon"></i>
-                  </span>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    name="password"
-                    value={password}
-                    minLength={6}
-                    className="form-control input-field"
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                    required
-                  />
-                  
-                  <span onClick={() => setShowPassword(!showPassword)}>
-                    <i
-                      className={`bi ${
-                        showPassword ? "bi-eye-slash-fill" : "bi-eye-fill"
-                      }`}
-                    ></i>
-                  </span>
-                </div>
-
-                <div className="invalid-feedback">
-                  Please enter a valid 6 or more character password.
-                </div>
+                  <i
+                    className={`bi ${
+                      showPassword ? "bi-eye-slash-fill" : "bi-eye-fill"
+                    }`}
+                  ></i>
+                </span>
+              </div>
+              <div className="valid-feedback">Looks good!</div>
+              <div className="invalid-feedback">
+                Please enter a valid 6 or more character password.
               </div>
             </div>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary w-100">
               Sign In
             </button>
-
-            <NavLink to="/register">
-              <span>Don&apos;t have an account? Register here</span>
-            </NavLink>
+            <div className="mt-3 text-center">
+              <NavLink to="/register">
+                <span>Don&apos;t have an account? Register here</span>
+              </NavLink>
+            </div>
           </form>
         </div>
       </div>
