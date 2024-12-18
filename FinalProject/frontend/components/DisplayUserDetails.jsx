@@ -37,6 +37,24 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
 
   const OnDetailsUpdate = async (e) => {
     e.preventDefault();
+    if (givenName === "" || givenName.length < 3) {
+      showError("First name is required and must be at least 3 characters");
+      return;
+    }
+    if (familyName === "" || familyName.length < 3) {
+      showError("Last name is required and must be at least 3 characters");
+      return;
+    }
+    if (email === "" || email.length < 3) {
+      showError("Email is required and must be at least 3 characters");
+      return;
+    }
+
+    if (fullName === "" || fullName.length < 3) {
+      showError("Full name is required and must be at least 3 characters");
+      return;
+    }
+
     console.log("Updating user");
     console.log("Fetched user data:", user);
 

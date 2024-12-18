@@ -37,6 +37,26 @@ export default function UserEditor({ showSuccess, showError, auth }) {
     console.log("Updating user");
     console.log("Fetched user data:", user);
 
+    if (givenName === "" || givenName.length < 3) {
+      showError("First name is required and must be at least 3 characters");
+      return;
+    }
+
+    if (familyName === "" || familyName.length < 3) {
+      showError("Last name is required and must be at least 3 characters");
+      return;
+    }
+
+    if (email === "" || email.length < 3) {
+      showError("Email is required and must be at least 3 characters");
+      return;
+    }
+
+    if (fullName === "" || fullName.length < 3) {
+      showError("Full name is required and must be at least 3 characters");
+      return;
+    }
+
     const updatedUser = {
       ...user,
       givenName,
@@ -68,13 +88,16 @@ export default function UserEditor({ showSuccess, showError, auth }) {
           `Server Error: ${err.response.status} - ${err.response.statusText}`
         );
         console.log(`Details: ${JSON.stringify(err.response.data)}`);
+        showError(err.response.data.error || "An error occurred");
       } else if (err.request) {
         // Error with the request itself, no response received
         console.log("Network Error: No response received");
         console.log(`Request: ${err.request}`);
+        showError("Network Error: No response received");
       } else {
         // Some other error occurred
         console.log(`Unexpected Error: ${err.message}`);
+        showError(`Unexpected Error: ${err.message}`);
       }
     }
   };

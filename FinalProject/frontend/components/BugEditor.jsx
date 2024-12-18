@@ -74,6 +74,7 @@ const BugEditor = ({ showSuccess, showError }) => {
       description,
       stepsToReproduce,
       assignedToUserName,
+      newComment,
     };
 
     delete updatedBug._id;
