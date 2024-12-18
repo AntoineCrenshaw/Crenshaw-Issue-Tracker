@@ -46,18 +46,9 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
     }
   };
 
-  {
-    isLoading && (
-      <>
-        <div
-          className="d-flex text-center spinner-grow text-primary"
-          role="status"
-        >
-          <span className="sr-only">Loading...</span>
-        </div>
-      </>
-    );
-  }
+  {isLoading && (<div className="d-flex text-center text-primary" >
+    <span>Loading...</span>
+    </div>)}
 
   useEffect(() => {
     getUsers();

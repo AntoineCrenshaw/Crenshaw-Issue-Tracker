@@ -17,6 +17,7 @@ import UserListItem from "../components/UserListItem.jsx";
 import UserEditor from "../components/UserEditor.jsx";
 import HomePage from "../components/HomePage.jsx";
 import ReportBug from "../components/ReportBug.jsx";
+import CurrentUserInfo from "../components/CurrentUserInfo.jsx";
 import DisplayUserDetails from "../components/DisplayUserDetails.jsx";
 
 function App() {
@@ -145,6 +146,7 @@ function App() {
                 />
               }
             />
+            <Route path="/me" element={<CurrentUserInfo auth={auth} /> } />
             <Route
               path="/users/:id"
               element={
@@ -165,7 +167,7 @@ function App() {
                 />
               }
             />
-            <Route path="*" element={<h1>Not Found</h1>} />
+            <Route path="*" element={<h1 className="text-center m-5">Not Found</h1>} />
           </Routes>
         </main>
         <footer>

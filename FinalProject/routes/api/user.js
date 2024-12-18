@@ -80,7 +80,8 @@ async function issueAuthToken(user) {
 
   const permissions = mergePermissions(user, roles);
 
-  const fullName = `${user.givenName} ${user.familyName}`;
+
+  
 
   const token = jwt.sign(
     {
@@ -88,7 +89,6 @@ async function issueAuthToken(user) {
       email: user.email,
       role: user.role,
       permissions: permissions,
-      fullName: fullName,
     },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
