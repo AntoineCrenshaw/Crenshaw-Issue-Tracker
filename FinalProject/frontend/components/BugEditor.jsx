@@ -16,7 +16,8 @@ const BugEditor = ({ showSuccess, showError }) => {
   const [stepsToReproduce, setStepsToReproduce] = useState("");
   const [assignedToUserName, setAssignedToUserName] = useState("");
   const [users, setUsers] = useState([]);
-  const [comment, setComments] = useState("");
+  const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState([]);
 
   const navigate = useNavigate();
 
@@ -25,7 +26,7 @@ const BugEditor = ({ showSuccess, showError }) => {
     axios
       .get(`http://localhost:2024/api/bugs/${id}`, { withCredentials: true })
       .then((response) => {
-        console.log(response.data.bugs);
+        console.log("initial bug fetch", response.data);
         const bugData = response.data;
         setBug(bugData);
         setTitle(bugData.title);
@@ -48,16 +49,24 @@ const BugEditor = ({ showSuccess, showError }) => {
       })
       .catch((error) => console.log(error));
 
-      axios.get(`http://localhost:2024/api/bugs/${id}/comment/list`, { withCredentials: true })
+    axios
+      .get(`http://localhost:2024/api/bugs/${id}/comment/list`, {
+        withCredentials: true,
+      })
       .then((response) => {
-        console.log("Comment list",response.data);
-        setComments(response.data.comment);
-      }).catch(error => console.log(error));
-  }, []);
+        console.log("Comment list", response.data);
+        setComments(response.data);
+      })
+      .catch((error) => console.log(error));
+  }, [id]);
 
   const onBugUpdate = async (e) => {
     e.preventDefault();
     console.log("Updating bug");
+
+    if (newComment) {
+      await onAddComment();
+    }
 
     const updatedBug = {
       ...bug,
@@ -65,6 +74,7 @@ const BugEditor = ({ showSuccess, showError }) => {
       description,
       stepsToReproduce,
       assignedToUserName,
+      newComment,
     };
 
     delete updatedBug._id;
@@ -83,6 +93,27 @@ const BugEditor = ({ showSuccess, showError }) => {
         showError(response.data.message);
       }
     } catch (e) {
+      showError(e.response.data.message);
+    }
+  };
+
+  const onAddComment = async () => {
+    try {
+      console.log("Adding comment:", newComment);
+      let response = await axios.post(
+        `http://localhost:2024/api/bugs/${id}/comment/new`,
+        { comment: newComment },
+        { withCredentials: true }
+      );
+      console.log("Response:", response);
+      if (response.status === 200) {
+        showSuccess("Comment Added");
+        setNewComment("");
+      } else {
+        showError(response.data.message);
+      }
+    } catch (e) {
+      console.error("Error adding comment:", e);
       showError(e.response.data.message);
     }
   };
@@ -186,7 +217,7 @@ const BugEditor = ({ showSuccess, showError }) => {
                   <option value="false">Open</option>{" "}
                 </select>
               </div>
-              <div className="text-center">
+              <div className="d-flex flex-row gap-2">
                 <button type="submit" className="btn btn-primary">
                   Save
                 </button>
@@ -213,13 +244,39 @@ const BugEditor = ({ showSuccess, showError }) => {
             </tr>
           </thead>
           <tbody>
-            {bug.comments && _.map(bug.comments, (comment, index) => (
-                <BugComment key={comment._id} comment={comment} index={index} />
-              ))}
-            {console.log("Comments for current bug", bug.comments)}
-            {bug.comments?.length === 0 && (<tr><td>No comments found</td></tr>)}
+            {comments.map((comment, index) => (
+              <BugComment key={comment._id} comment={comment} index={index} />
+            ))}
+            {comments?.length === 0 && (
+              <tr>
+                <td colSpan={3}>
+                  <h3 className="text-center">No comments found</h3>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
+        <div className="row mb-4">
+          <div className="col-md-9">
+            <div className="form-outline mb-4">
+              <input
+                type="text"
+                className="form-control"
+                id="comment"
+                value={newComment}
+                placeholder="Add a comment"
+                onChange={(e) => setNewComment(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="col-md-3"></div>
+          <div className="col-md-10"></div>
+          <div className="col-md-2">
+            <button className="btn btn-primary" onClick={(e) => onBugUpdate(e)}>
+              Add Comment
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );

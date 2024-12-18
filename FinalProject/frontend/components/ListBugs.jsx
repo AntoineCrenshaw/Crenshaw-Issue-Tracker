@@ -263,76 +263,77 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                         <td>{bug.assignedToUserName}</td>
                         <td>
                           <span>
-                            <span>
-                              {auth?.role?.includes("Admin") && (
+                            {auth?.role?.some((role) =>
+                              ["Admin", "Business Analyst"].includes(role)
+                            ) ? (
+                              <div>
                                 <button className="btn btn-link">
                                   <Link to={`/bugs/${bug._id}`}>
-                                    <i className="bi bi-pencil"></i>
+                                    <i className="bi bi-pencil text-primary-emphasis"></i>
                                   </Link>
                                 </button>
-                              )}
-                              <button
-                                className="btn btn-link"
-                                onClick={() => handleBugClick(bug)}
-                              >
-                                <i className="bi bi-ban"></i>
-                              </button>
-                              {showModal && selectedBug._id === bug._id && (
-                                <div
-                                  className="modal show d-block"
-                                  tabIndex="-1"
+
+                                <button
+                                  className="btn btn-link"
+                                  onClick={() => handleBugClick(bug)}
                                 >
-                                  <div className="modal-dialog">
-                                    <div className="modal-content">
-                                      <div className="modal-header">
-                                        <h5 className="modal-title">
-                                          Confirm Delete
-                                        </h5>
-                                        <button
-                                          type="button"
-                                          className="btn-close"
-                                          data-toggle="tooltip"
-                                          data-placement="top"
-                                          title="Tooltip on top"
-                                          onClick={() => setShowModal(false)}
-                                          data-bs-dismiss="modal"
-                                          aria-label="Close"
-                                        ></button>
-                                      </div>
-                                      <div className="modal-body">
-                                        <p className="fs-4">
-                                          Are you sure you want to close this
-                                          bug?
-                                          <br />
-                                          {bug.title}
-                                        </p>
-                                      </div>
-                                      <div className="modal-footer">
-                                        <button
-                                          type="button"
-                                          className="btn btn-secondary"
-                                          data-toggle="tooltip"
-                                          data-placement="top"
-                                          title="Tooltip on top"
-                                          onClick={() => setShowModal(false)}
-                                        >
-                                          Cancel
-                                        </button>
-                                        <button
-                                          type="button"
-                                          className="btn btn-danger"
-                                          onClick={(e) =>
-                                            updateCloseStatus(e, bug._id)
-                                          }
-                                        >
-                                          Delete
-                                        </button>
-                                      </div>
+                                  <i className="bi bi-ban text-primary-emphasis"></i>
+                                </button>
+                              </div>
+                            ) : (
+                              <span>No permissions currently</span>
+                            )}
+                            {showModal && selectedBug._id === bug._id && (
+                              <div className="modal show d-block" tabIndex="-1">
+                                <div className="modal-dialog">
+                                  <div className="modal-content">
+                                    <div className="modal-header">
+                                      <h5 className="modal-title">
+                                        Confirm Delete
+                                      </h5>
+                                      <button
+                                        type="button"
+                                        className="btn-close"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="Tooltip on top"
+                                        onClick={() => setShowModal(false)}
+                                        data-bs-dismiss="modal"
+                                        aria-label="Close"
+                                      ></button>
+                                    </div>
+                                    <div className="modal-body">
+                                      <p className="fs-4">
+                                        Are you sure you want to close this bug?
+                                        <br />
+                                        {bug.title}
+                                      </p>
+                                    </div>
+                                    <div className="modal-footer">
+                                      <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="Tooltip on top"
+                                        onClick={() => setShowModal(false)}
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="btn btn-danger"
+                                        onClick={(e) =>
+                                          updateCloseStatus(e, bug._id)
+                                        }
+                                      >
+                                        Delete
+                                      </button>
                                     </div>
                                   </div>
                                 </div>
-                              )}
-                            </span>
+                              </div>
+                            )}
                           </span>
                         </td>
                         <td>{moment(bug.createdOn).fromNow()}</td>

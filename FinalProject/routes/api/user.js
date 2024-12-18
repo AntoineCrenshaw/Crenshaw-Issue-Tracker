@@ -50,6 +50,7 @@ const updateUserSchema = Joi.object({
   // password: Joi.string().min(6).max(30).optional(),
   givenName: Joi.string().min(3).max(20).optional(),
   familyName: Joi.string().min(3).max(20).optional(),
+  fullName: Joi.string().min(3).max(50).optional(),
   // role: Joi.array().items(Joi.string().min(3)).unique().optional(),
 }).unknown(true);
 
@@ -292,7 +293,7 @@ router.patch(
         user.lastUpdatedOn = new Date();
         user.lastUpdatedBy = req.auth._id;
 
-        const result = await updateUser(userId, user);
+        const result = await updateUser( user);
         const log = {
           timestamp: new Date(),
           collection: "users",

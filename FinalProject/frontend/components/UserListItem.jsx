@@ -65,7 +65,7 @@ function UserListItem({ showSuccess, showError, auth }) {
             )}
             <div>
               <>
-                {auth?.role?.includes("Admin") && (
+                {auth?.role?.includes("Technical Manager") && (
                   <>
                     <button
                       className="btn btn-link text-danger"

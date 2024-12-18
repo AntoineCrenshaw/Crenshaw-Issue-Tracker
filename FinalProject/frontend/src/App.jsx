@@ -145,7 +145,16 @@ function App() {
                 />
               }
             />
-            <Route path="/me" element={<DisplayUserDetails auth={auth} showError={showError} showSuccess={showSuccess} /> } />
+            <Route
+              path="/me"
+              element={
+                <DisplayUserDetails
+                  auth={auth}
+                  showError={showError}
+                  showSuccess={showSuccess}
+                />
+              }
+            />
             <Route
               path="/users/:id"
               element={
@@ -159,10 +168,17 @@ function App() {
             <Route
               path="/users/:id/edit"
               element={
-                <UserEditor showSuccess={showSuccess} showError={showError} />
+                <UserEditor
+                  showSuccess={showSuccess}
+                  showError={showError}
+                  auth={auth}
+                />
               }
             />
-            <Route path="*" element={<h1 className="text-center m-5">Not Found</h1>} />
+            <Route
+              path="*"
+              element={<h1 className="text-center m-5">Not Found</h1>}
+            />
           </Routes>
         </main>
         <footer>

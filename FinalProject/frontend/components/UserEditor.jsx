@@ -4,13 +4,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "./UserEditor.css";
 
-export default function UserEditor({ showSuccess, showError }) {
+export default function UserEditor({ showSuccess, showError, auth }) {
   const { id } = useParams();
   const [user, setUser] = useState({});
   const [givenName, setFirstName] = useState("");
   const [familyName, setLastName] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [roles, setRoles] = useState("");
   const navigate = useNavigate();
 
   // Display the user details on open of the page
@@ -26,14 +27,35 @@ export default function UserEditor({ showSuccess, showError }) {
         setLastName(response.data.familyName);
         setFullName(response.data.fullName);
         setEmail(response.data.email);
+        setRoles(response.data.role);
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, [id]);
 
   const onUserUpdate = async (e) => {
     e.preventDefault();
     console.log("Updating user");
     console.log("Fetched user data:", user);
+
+    if (givenName === "" || givenName.length < 3) {
+      showError("First name is required and must be at least 3 characters");
+      return;
+    }
+
+    if (familyName === "" || familyName.length < 3) {
+      showError("Last name is required and must be at least 3 characters");
+      return;
+    }
+
+    if (email === "" || email.length < 3) {
+      showError("Email is required and must be at least 3 characters");
+      return;
+    }
+
+    if (fullName === "" || fullName.length < 3) {
+      showError("Full name is required and must be at least 3 characters");
+      return;
+    }
 
     const updatedUser = {
       ...user,
@@ -66,13 +88,16 @@ export default function UserEditor({ showSuccess, showError }) {
           `Server Error: ${err.response.status} - ${err.response.statusText}`
         );
         console.log(`Details: ${JSON.stringify(err.response.data)}`);
+        showError(err.response.data.error || "An error occurred");
       } else if (err.request) {
         // Error with the request itself, no response received
         console.log("Network Error: No response received");
         console.log(`Request: ${err.request}`);
+        showError("Network Error: No response received");
       } else {
         // Some other error occurred
         console.log(`Unexpected Error: ${err.message}`);
+        showError(`Unexpected Error: ${err.message}`);
       }
     }
   };
@@ -140,7 +165,32 @@ export default function UserEditor({ showSuccess, showError }) {
                 onChange={(e) => setFullName(e.target.value)}
               />
             </div>
-            <div className="mb-3">
+            {auth?.role?.some((role) =>
+              ["Admin", "Technical Manager"].includes(role)
+            ) ? (
+              <div className="mb-3">
+                <label htmlFor="roleForm" className="form-label">
+                  Role
+                </label>
+                <select
+                  className="form-select"
+                  id="roleForm"
+                  value={roles}
+                  onChange={(e) => setRoles(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select Role
+                  </option>
+                  <option value="Customer">Customer</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Technical Manager">Technical Manager</option>
+                  <option value="Business Analyst">Buisness Analyst</option>
+                  <option value="Developer">Developer</option>
+                  <option value="Quality Analyst">Quality Analyst</option>
+                </select>
+              </div>
+            ) : null}
+            <div className="d-flex flex-row gap-2">
               <button
                 type="submit"
                 className="btn btn-primary"
