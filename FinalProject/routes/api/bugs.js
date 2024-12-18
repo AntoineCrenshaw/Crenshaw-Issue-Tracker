@@ -31,7 +31,7 @@ router.use(express.urlencoded({ extended: false }));
 
 const newBugSchema = Joi.object({
   title: Joi.string().min(1).max(100).required(),
-  bugDescription: Joi.string().min(1).max(500).required(),
+  description: Joi.string().min(1).max(500).required(),
   stepsToReproduce: Joi.string().min(1).max(500).required(),
 });
 
@@ -201,6 +201,7 @@ router.post(
 
     try {
       newBug.createdOn = new Date();
+     moment(newBug.createdOn).toDate();
       newBug.authorID = req.auth._id;
       newBug.authorFullName = `${req.auth.fullName}`;
       newBug.classification = "unclassified";
@@ -246,12 +247,20 @@ router.patch(
       getBug[key] = updatedBug[key];
     }
 
+    if(getBug.createdOn){
+      // bug createdOn date is a string, convert to date
+      getBug.createdOn = new Date(getBug.createdOn);
+    }
+
     if(getBug.closed === true){
       getBug.closedOn = new Date();
       getBug.closedBy = req.auth._id;
-    } else {
-      getBug.closedOn = "";
-      getBug.closedBy = "";
+    } 
+
+    if(getBug.assignToUserName){
+      getBug.assignedOn = new Date();
+      getBug.assignedBy = req.auth._id;
+      getBug.assignedToUserId = req.auth._id;
     }
 
     try {

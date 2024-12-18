@@ -16,7 +16,7 @@ const BugEditor = ({ showSuccess, showError }) => {
   const [stepsToReproduce, setStepsToReproduce] = useState("");
   const [assignedToUserName, setAssignedToUserName] = useState("");
   const [users, setUsers] = useState([]);
-  const [comments, setComments] = useState("");
+  const [comment, setComments] = useState("");
 
   const navigate = useNavigate();
 
@@ -51,7 +51,7 @@ const BugEditor = ({ showSuccess, showError }) => {
       axios.get(`http://localhost:2024/api/bugs/${id}/comment/list`, { withCredentials: true })
       .then((response) => {
         console.log("Comment list",response.data);
-        setComments(response.data.comments);
+        setComments(response.data.comment);
       }).catch(error => console.log(error));
   }, []);
 
@@ -217,6 +217,7 @@ const BugEditor = ({ showSuccess, showError }) => {
                 <BugComment key={comment._id} comment={comment} index={index} />
               ))}
             {console.log("Comments for current bug", bug.comments)}
+            {bug.comments?.length === 0 && (<tr><td>No comments found</td></tr>)}
           </tbody>
         </table>
       </div>

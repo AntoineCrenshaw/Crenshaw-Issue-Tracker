@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { useParams } from "react-router-dom";
 
 const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
-  const { id } = useParams();
   const [givenName, setGivenName] = useState("");
   const [familyName, setFamilyName] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [user, setUser] = useState({});
+  const [roles, setRoles] = useState([]);
   const [createdDate, setCreatedDate] = useState("");
+  const [lastUpdatedOn, setLastUpdatedOn] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,7 +24,9 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
         setFamilyName(response.data.user.familyName);
         setFullName(response.data.user.fullName);
         setEmail(response.data.user.email);
+        setRoles(response.data.user.role);
         setCreatedDate(response.data.user.createdOn);
+        setLastUpdatedOn(response.data.user.lastUpdatedOn);
       })
       .catch((error) => console.log(error));
   }, []);
@@ -47,13 +49,13 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
       fullName,
       email,
       createdDate,
+      roles,
     };
 
-    delete updatedUser._id;
 
     try {
       let response = await axios.patch(
-        `http://localhost:2024/api/users/${id}`,
+       " http://localhost:2024/api/users/me",
         { ...updatedUser },
         { withCredentials: true }
       );
@@ -152,8 +154,33 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
                     readOnly
                   />
                 </div>
-
                 <div className="mb-3">
+                  <label htmlFor="rolesForm" className="form-label">
+                    Roles
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="rolesForm"
+                    value={roles}
+                    readOnly
+                  />
+                  </div>
+                <div className="card-footer">
+                  <div className="mb-3">
+                    <label htmlFor="lastUpdatedOn" className="form-label">
+                      Last Updated
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="lastUpdatedOn"
+                      value={moment(lastUpdatedOn).fromNow()}
+                      readOnly
+                    />
+                  </div>
+                  </div>
+                  <div className="mb-3">
                   <button
                     type="submit"
                     className="btn btn-primary"

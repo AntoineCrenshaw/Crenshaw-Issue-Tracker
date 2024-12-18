@@ -89,6 +89,7 @@ async function issueAuthToken(user) {
       email: user.email,
       role: user.role,
       permissions: permissions,
+      fullName: (`${user.givenName} ${user.familyName}`).trim(),
     },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
