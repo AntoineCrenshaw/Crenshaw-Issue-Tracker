@@ -172,7 +172,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                 </div>
                 <div className="col-md-3">
                   <label className="form-label">
-                    Close Status {showInactive}
+                    Close Status 
                   </label>
                   <div className="form-check">
                     <input

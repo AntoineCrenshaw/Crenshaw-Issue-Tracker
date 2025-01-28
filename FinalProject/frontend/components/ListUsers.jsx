@@ -1,5 +1,3 @@
-// @ts-check
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./ListUsers.css";
@@ -80,7 +78,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
             </div>
             <div className="col-md-3">
               <label className="form-label" htmlFor="rolesLabel">
-                Filter by Role {roleFilter}
+                Filter by Role
               </label>
               <select
                 className="form-select"

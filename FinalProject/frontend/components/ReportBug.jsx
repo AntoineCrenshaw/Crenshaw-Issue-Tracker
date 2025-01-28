@@ -49,6 +49,7 @@ const ReportBug = ({ auth, showSuccess, showError }) => {
         );
         console.log(response.data);
         showSuccess("Bug created successfully");
+        navigate("/bugs");
       } catch (error) {
         console.error(error);
         showError("Failed to create bug");
