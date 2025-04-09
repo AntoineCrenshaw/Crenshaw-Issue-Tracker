@@ -15,7 +15,6 @@ import { useEffect, useState } from "react";
 import BugEditor from "../components/BugEditor.jsx";
 import UserListItem from "../components/UserListItem.jsx";
 import UserEditor from "../components/UserEditor.jsx";
-import HomePage from "../components/HomePage.jsx";
 import ReportBug from "../components/ReportBug.jsx";
 import DisplayUserDetails from "../components/DisplayUserDetails.jsx";
 
@@ -78,7 +77,11 @@ function App() {
         </header>
         <main>
           <Routes>
-            <Route path="/" element={<ListUsers />} />
+            <Route path="/" element={<SignInForm 
+            showSuccess={showSuccess}
+                  showError={showError}
+                  setAuth={setAuth}
+                  />} />
             <Route
               path="/login"
               element={
