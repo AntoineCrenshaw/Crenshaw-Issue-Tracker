@@ -346,7 +346,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
               <p>No bugs meet your desired criteria. Try again</p>
             )}
           </div>
-          <Pagination />
+          {/* <Pagination /> */}
         </div>
       )}
     </>
