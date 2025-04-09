@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
+import { applyBootstrapValidation } from "../utils/applyBootstrapValidation";
 
 const SignInForm = ({ showSuccess, showError, setAuth }) => {
   const [email, setEmail] = useState("");
@@ -14,28 +15,7 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
 
   useEffect(() => {
     // Example starter JavaScript for disabling form submissions if there are invalid fields
-    (function () {
-      "use strict";
-
-      // Fetch all the forms we want to apply custom Bootstrap validation styles to
-      var forms = document.querySelectorAll(".needs-validation");
-
-      // Loop over them and prevent submission
-      Array.prototype.slice.call(forms).forEach(function (form) {
-        form.addEventListener(
-          "submit",
-          function (event) {
-            if (!form.checkValidity()) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-
-            form.classList.add("was-validated");
-          },
-          false
-        );
-      });
-    })();
+      applyBootstrapValidation();
   }, []);
 
   const handleSubmit = async (e) => {
