@@ -1,1 +1,5 @@
-runtime: nodejs18
+runtime: nodejs24
+service: backend
+env_variables:
+  MONGO_URI: "mongodb+srv://antoine17343:Tapitusa123@cluster0.vinqp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  JWT_SECRET: "QZMiMbtMBkZCEtU"
