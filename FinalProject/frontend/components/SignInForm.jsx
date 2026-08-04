@@ -1,5 +1,5 @@
 import "../components/SignInForm.css";
-import axios from "axios";
+import api from "../src/api";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
@@ -15,24 +15,19 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
 
   useEffect(() => {
     // Example starter JavaScript for disabling form submissions if there are invalid fields
-      applyBootstrapValidation();
+    applyBootstrapValidation();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      let response = await axios.post(
-        "http://localhost:2024/api/users/login",
-        { email, password },
-        { withCredentials: true }
-      );
+      let response = await api.post("/api/users/login", { email, password });
 
       if (response.status === 200) {
         console.log(response.data);
         if (response.data.message === "Invalid email or password") {
           setAuth(null);
-          // setMessage(response.data.message);
           showError(response.data.message);
         } else {
           setAuth(response.data);
@@ -79,8 +74,8 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
                     email === ""
                       ? ""
                       : email.includes("@")
-                      ? "is-valid"
-                      : "is-invalid"
+                        ? "is-valid"
+                        : "is-invalid"
                   }`}
                   id="emailForm"
                   placeholder="ENTER EMAIL"

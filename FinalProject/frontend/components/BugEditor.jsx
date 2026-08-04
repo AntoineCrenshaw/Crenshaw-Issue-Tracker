@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import _ from "lodash";
+import api from "../src/api";
 import "./ListBugs.css";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
@@ -21,10 +21,9 @@ const BugEditor = ({ showSuccess, showError }) => {
 
   const navigate = useNavigate();
 
-  // Display the bug details on open of the page
   useEffect(() => {
-    axios
-      .get(`http://localhost:2024/api/bugs/${id}`, { withCredentials: true })
+    api
+      .get(`/api/bugs/${id}`)
       .then((response) => {
         console.log("initial bug fetch", response.data);
         const bugData = response.data;
@@ -36,23 +35,19 @@ const BugEditor = ({ showSuccess, showError }) => {
       })
       .catch((error) => console.log(error));
 
-    axios
-      .get("http://localhost:2024/api/bugs", { withCredentials: true })
-      .then((response) => {
-        console.log(response.data);
-      });
-    axios
-      .get("http://localhost:2024/api/users", { withCredentials: true })
+    api.get("/api/bugs").then((response) => {
+      console.log(response.data);
+    });
+    api
+      .get("/api/users")
       .then((response) => {
         setUsers(response.data.users);
         console.log(response.data.users);
       })
       .catch((error) => console.log(error));
 
-    axios
-      .get(`http://localhost:2024/api/bugs/${id}/comment/list`, {
-        withCredentials: true,
-      })
+    api
+      .get(`/api/bugs/${id}/comment/list`)
       .then((response) => {
         console.log("Comment list", response.data);
         setComments(response.data);
@@ -80,11 +75,7 @@ const BugEditor = ({ showSuccess, showError }) => {
     delete updatedBug._id;
 
     try {
-      let response = await axios.patch(
-        `http://localhost:2024/api/bugs/${id}`,
-        { ...updatedBug },
-        { withCredentials: true }
-      );
+      let response = await api.patch(`/api/bugs/${id}`, { ...updatedBug });
       if (response.status === 200) {
         setBug(response.data.bugs);
         showSuccess(response.data.message);
@@ -100,11 +91,9 @@ const BugEditor = ({ showSuccess, showError }) => {
   const onAddComment = async () => {
     try {
       console.log("Adding comment:", newComment);
-      let response = await axios.post(
-        `http://localhost:2024/api/bugs/${id}/comment/new`,
-        { comment: newComment },
-        { withCredentials: true }
-      );
+      let response = await api.post(`/api/bugs/${id}/comment/new`, {
+        comment: newComment,
+      });
       console.log("Response:", response);
       if (response.status === 200) {
         showSuccess("Comment Added");
