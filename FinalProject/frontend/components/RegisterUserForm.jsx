@@ -30,7 +30,7 @@ export default function RegisterUserForm({ showSuccess, showError, setAuth }) {
       const response = await axios.post(
         "http://localhost:2024/api/users/register",
         { email, password, givenName, familyName },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.status === 200) {
@@ -45,13 +45,13 @@ export default function RegisterUserForm({ showSuccess, showError, setAuth }) {
         }
       }
     } catch (err) {
-       console.log(`Error Block ${JSON.stringify(err.response.data)}`);
+      console.log(`Error Block ${JSON.stringify(err.response.data)}`);
       if (err.response.data.error) {
         err.response.data.error.forEach((error) => {
           showError(error.message);
-    });
-  }
-}
+        });
+      }
+    }
   };
 
   return (
@@ -69,12 +69,12 @@ export default function RegisterUserForm({ showSuccess, showError, setAuth }) {
               <input
                 type="email"
                 className={`form-control ${
-                    email === ""
-                      ? ""
-                      : email.includes("@")
+                  email === ""
+                    ? ""
+                    : email.includes("@")
                       ? "is-valid"
                       : "is-invalid"
-                  }`}
+                }`}
                 id="email"
                 placeholder="ENTER EMAIL"
                 value={email}
@@ -82,16 +82,18 @@ export default function RegisterUserForm({ showSuccess, showError, setAuth }) {
                 required
               />
               <div className="valid-feedback">Looks good!</div>
-                <div className="invalid-feedback">
-                  Please enter a valid email.
-                </div>
+              <div className="invalid-feedback">
+                Please enter a valid email.
+              </div>
             </div>
             <div className=" mb-3">
-              <label htmlFor="password"
-               className={`form-label ${password.length > 5 ? "is-valid" : "is-invalid"}`}
-               >Password
-                </label>
-             <div className="input-group">
+              <label
+                htmlFor="password"
+                className={`form-label ${password.length > 5 ? "is-valid" : "is-invalid"}`}
+              >
+                Password
+              </label>
+              <div className="input-group">
                 <span className="input-group-text" id="password-addon">
                   <i className="bi bi-lock-fill input-icon"></i>
                 </span>
@@ -145,7 +147,7 @@ export default function RegisterUserForm({ showSuccess, showError, setAuth }) {
                 onChange={(e) => setGivenName(e.target.value)}
                 required
               />
-               <div className="valid-feedback">Looks good!</div>
+              <div className="valid-feedback">Looks good!</div>
               <div className="invalid-feedback">
                 Please enter a valid 3 or more character first name.
               </div>
@@ -162,18 +164,18 @@ export default function RegisterUserForm({ showSuccess, showError, setAuth }) {
                 onChange={(e) => setFamilyName(e.target.value)}
                 required
               />
-               <div className="valid-feedback">Looks good!</div>
+              <div className="valid-feedback">Looks good!</div>
               <div className="invalid-feedback">
                 Please enter a valid 3 or more character last name.
               </div>
             </div>
-            
+
             <button type="submit" className="btn btn-primary btn-block">
               Sign Up
             </button>
             <div className="text-center mt-3">
               <NavLink to="/login">
-              <span>Already have an account? Sign In here</span>
+                <span>Already have an account? Sign In here</span>
               </NavLink>
             </div>
           </form>
