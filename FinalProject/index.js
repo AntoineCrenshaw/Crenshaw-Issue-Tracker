@@ -18,12 +18,25 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("frontend/dist"));
+
+const allowedOrigins = [
+  "https://semiotic-runner-433715-b2.uc.r.appspot.com",
+  "http://localhost:2024", // your Vite dev server, if you test against deployed backend
+];
+
 app.use(
   cors({
-    orgin: "https://semiotic-runner-433715-b2.uc.r.appspot.com",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
+
 app.use(cookieParser());
 
 app.use(
