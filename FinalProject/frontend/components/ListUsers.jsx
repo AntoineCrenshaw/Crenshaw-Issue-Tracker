@@ -19,7 +19,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
       });
       setUsers(response.data.users || []);
       setMessage(
-        response.data.message || "You must be signed in to view users"
+        response.data.message || "You must be signed in to view users",
       );
       showSuccess(response.data.message);
     } catch (e) {
@@ -46,9 +46,13 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
     }
   };
 
-  {isLoading && (<div className="d-flex text-center text-primary" >
-    <span>Loading...</span>
-    </div>)}
+  {
+    isLoading && (
+      <div className="d-flex text-center text-primary">
+        <span>Loading...</span>
+      </div>
+    );
+  }
 
   useEffect(() => {
     getUsers();
