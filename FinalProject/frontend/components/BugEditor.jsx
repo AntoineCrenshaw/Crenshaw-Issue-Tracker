@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import api from "../src/api";
 import "./ListBugs.css";
 import "react-toastify/dist/ReactToastify.css";
