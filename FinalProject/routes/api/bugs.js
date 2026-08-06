@@ -25,7 +25,7 @@ import { validId } from "../../middleware/validid.js";
 const debugBug = debug("app:BugRouter");
 
 import Joi from "joi";
-import { hasPermission, isLoggedIn , hasAnyRole} from "@merlin4/express-auth";
+import { hasPermission, isLoggedIn, hasAnyRole } from "@merlin4/express-auth";
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -49,7 +49,7 @@ const classifyBugSchema = Joi.object({
 
 const assignBugSchema = Joi.object({
   assignedToUserId: Joi.string().required(),
-  assignedToUserName: Joi.string()
+  assignedToUserName: Joi.string(),
 });
 
 const closeBugSchema = Joi.object({
@@ -71,19 +71,14 @@ const updateTestSchema = Joi.object({
 });
 
 // List all bugs
-router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
-   console.log("Query:", req.query);
+router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
   console.log("Body:", req.body);
   try {
-
     let match = {};
 
-    let {keywords, classification, sortBy, closed, minAge, maxAge} = req.query;
+    let { keywords, classification, sortBy, closed, minAge, maxAge } =
+      req.query;
 
-    debugBug(`Keywords: ${keywords}`);
-    debugBug(`Classification: ${classification}`);
-    debugBug(`Sort By: ${sortBy}`);
-    debugBug(`Closed: ${closed}`);
     debugBug(`Min Age: ${minAge}`);
     debugBug(`Max Age: ${maxAge}`);
 
@@ -92,38 +87,38 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
     }
 
     if (classification) {
-      match.classification = {$eq: classification};
+      match.classification = { $eq: classification };
     }
 
-    if(closed == 'true'){
-      match.closed = {$eq: true};
-    }else if(closed == 'false'){
-      match.closed = {$eq: false};
+    if (closed == "true") {
+      match.closed = { $eq: true };
+    } else if (closed == "false") {
+      match.closed = { $eq: false };
     }
 
-    let sort = {createdOn: 1};
+    let sort = { createdOn: 1 };
 
-    switch(sortBy) {
-      case 'newest':
-        sort = {createdOn: -1};
+    switch (sortBy) {
+      case "newest":
+        sort = { createdOn: -1 };
         break;
-      case 'oldest':
-        sort = {createdOn: 1};
+      case "oldest":
+        sort = { createdOn: 1 };
         break;
-      case 'title':
-        sort = {title: 1, createdOn: -1};
+      case "title":
+        sort = { title: 1, createdOn: -1 };
         break;
-      case 'classification':
-        sort = {classification: 1, createdOn: -1};
+      case "classification":
+        sort = { classification: 1, createdOn: -1 };
         break;
-      case 'assignedTo':
-        sort = {assignedToUserName: 1, createdOn: -1};
+      case "assignedTo":
+        sort = { assignedToUserName: 1, createdOn: -1 };
         break;
-      case 'createdBy':
-        sort = {authorFullName: 1, createdOn: -1};
+      case "createdBy":
+        sort = { authorFullName: 1, createdOn: -1 };
         break;
       default:
-        sort = {createdOn: 1};
+        sort = { createdOn: 1 };
     }
 
     const today = new Date(); // Get current date and time
@@ -140,32 +135,27 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
     pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - parsedMaxAge); // Set pastMaximumDaysOld to today minus maxAge
     const pastMinimumDaysOld = new Date(today);
     pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - parsedMinAge); // Set pastMinimumDaysOld to today minus minAge
-    
-    if(parsedMinAge && parsedMaxAge){
-      match.createdOn = {$lte: pastMinimumDaysOld, $gte: pastMaximumDaysOld};
-    } else if(parsedMinAge){
-      match.createdOn = {$gte: pastMinimumDaysOld};
-    } else if(parsedMaxAge){
-      match.createdOn = {$lte: pastMaximumDaysOld};
-    }
-    const pipeline = [
-      {$match: match},
-      {$sort: sort},
-    ];
 
-   
+    if (parsedMinAge && parsedMaxAge) {
+      match.createdOn = { $lte: pastMinimumDaysOld, $gte: pastMaximumDaysOld };
+    } else if (parsedMinAge) {
+      match.createdOn = { $gte: pastMinimumDaysOld };
+    } else if (parsedMaxAge) {
+      match.createdOn = { $lte: pastMaximumDaysOld };
+    }
+    const pipeline = [{ $match: match }, { $sort: sort }];
 
     let bugs = await GetAllBugs(pipeline);
 
     // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
-   
+
     // Pagination
     // const page = parseInt(pageNumber) || 1;
     // const limit = parseInt(pageSize) || 5;
     // const skip = (page - 1) * limit;
 
     // bugs = bugs.slice(skip, skip + limit);
-    res.status(200).json({bugs, message: "Bugs successfully fetched"});
+    res.status(200).json({ bugs, message: "Bugs successfully fetched" });
   } catch (err) {
     res.status(500).send(err);
   }
@@ -175,7 +165,7 @@ router.get("", isLoggedIn(), hasPermission('canViewData'), async (req, res) => {
 router.get(
   "/:bugId",
   isLoggedIn(),
-  hasPermission('canViewData'),
+  hasPermission("canViewData"),
   validId("bugId"),
   async (req, res, next) => {
     const bugId = req.bugId;
@@ -184,12 +174,12 @@ router.get(
       if (bug) {
         res.status(200).json(bug);
       } else {
-        res.status(200).json({ message: `Bug ${bugId} not found` });
+        res.status(404).json({ message: `Bug ${bugId} not found` });
       }
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 // Create New Bug
@@ -197,14 +187,14 @@ router.post(
   "/new",
   isLoggedIn(),
   hasAnyRole(),
-  hasPermission('canCreateBug'),
+  hasPermission("canCreateBug"),
   validBody(newBugSchema),
   async (req, res, next) => {
     const newBug = req.body;
 
     try {
       newBug.createdOn = new Date();
-     moment(newBug.createdOn).toDate();
+      moment(newBug.createdOn).toDate();
       newBug.authorID = req.auth._id;
       newBug.authorFullName = `${req.auth.fullName}`;
       newBug.classification = "unclassified";
@@ -224,13 +214,13 @@ router.post(
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 // Update Bug
 router.patch(
   "/:bugId",
-  hasPermission('canEditAnyBug', 'CanEditMyBug', 'canEditIfAssignedTo'),
+  hasPermission("canEditAnyBug", "CanEditMyBug", "canEditIfAssignedTo"),
   validId("bugId"),
   isLoggedIn(),
   validBody(updateBugSchema),
@@ -240,44 +230,64 @@ router.patch(
     const getBug = await GetBugById(bugId);
 
     if (!getBug) {
-      return res.status(400).json({ message: `Bug ${bugId} not found` });
+      return res.status(404).json({ message: `Bug ${bugId} not found` });
     }
 
     const bugUpdates = {};
-    const { title, description, stepsToReproduce, assignedTo, assignedToUserName, closed, classification } = req.body;
+    const {
+      title,
+      description,
+      stepsToReproduce,
+      assignedTo,
+      assignedToUserName,
+      closed,
+      classification,
+    } = req.body;
 
     if (title) {
-      getBug.title = title; bugUpdates.title = title;
+      getBug.title = title;
+      bugUpdates.title = title;
     }
 
     if (description) {
-      getBug.description = description; bugUpdates.description = description;
-    } 
+      getBug.description = description;
+      bugUpdates.description = description;
+    }
 
     if (stepsToReproduce) {
-      getBug.stepsToReproduce = stepsToReproduce; bugUpdates.stepsToReproduce = stepsToReproduce;
+      getBug.stepsToReproduce = stepsToReproduce;
+      bugUpdates.stepsToReproduce = stepsToReproduce;
     }
 
     if (classification) {
-      getBug.classification = classification; bugUpdates.classification = classification;
+      getBug.classification = classification;
+      bugUpdates.classification = classification;
     }
 
     if (assignedTo) {
-      getBug.assignedTo = assignedTo; bugUpdates.assignedTo = assignedTo;
+      getBug.assignedTo = assignedTo;
+      bugUpdates.assignedTo = assignedTo;
     }
 
     if (assignedToUserName) {
-      getBug.assignedToUserName = assignedToUserName; bugUpdates.assignedToUserName = assignedToUserName;
+      getBug.assignedToUserName = assignedToUserName;
+      bugUpdates.assignedToUserName = assignedToUserName;
     }
 
-    if(closed === true){
-      getBug.closed = closed; bugUpdates.closed = closed;
-      getBug.closedOn = new Date(); bugUpdates.closedOn = new Date();
-      getBug.closedBy = req.auth._id; bugUpdates.closedBy = req.auth._id;
+    if (closed === true) {
+      getBug.closed = closed;
+      bugUpdates.closed = closed;
+      getBug.closedOn = new Date();
+      bugUpdates.closedOn = new Date();
+      getBug.closedBy = req.auth._id;
+      bugUpdates.closedBy = req.auth._id;
     } else {
-      getBug.closed = closed; bugUpdates.closed = closed;
-      getBug.closedOn = ""; bugUpdates.closedOn = "";
-      getBug.closedBy = ""; bugUpdates.closedBy = "";
+      getBug.closed = closed;
+      bugUpdates.closed = closed;
+      getBug.closedOn = "";
+      bugUpdates.closedOn = "";
+      getBug.closedBy = "";
+      bugUpdates.closedBy = "";
     }
 
     getBug.lastUpdated = new Date();
@@ -298,68 +308,63 @@ router.patch(
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 //Update Bug Classification/Priority
 router.patch(
   "/:bugId/classify",
   validId("bugId"),
-  hasPermission('canClassifyAnyBug'),
+  hasPermission("canClassifyAnyBug"),
   isLoggedIn(),
   validBody(classifyBugSchema),
   async (req, res, next) => {
     const bugId = req.bugId;
-    const  newClassification  = req.body;
+    const newClassification = req.body;
 
-      const currentBug = await GetBugById(bugId);
-      console.log(currentBug);
-      
-        currentBug.classification = newClassification;
-        currentBug.classifiedOn = new Date();
-        currentBug.lastUpdated = new Date();
-        currentBug.classifiedBy = req.auth._id;
-        debugBug(`Bug classification updated: ${(currentBug)}`);
-       
-        const result = await updateBugClassification(newClassification);
-        debugBug(`Bug classification updated: ${JSON.stringify(result)}`);
-        
-      //  debugBug(result);
-        const log = {
-          timestamp: new Date(),
-          collection: "bugs",
-          operation: "update",
-          target: bugId,
-          update: newClassification,
-          auth: req.auth,
-        };
-        console.log(log)
-        await saveAuditLog(log);
-        return res.status(200).json({ message: `Bug ${bugId} classified!`, bugId });
-  }
+    const currentBug = await GetBugById(bugId);
+    console.log(currentBug);
+
+    currentBug.classification = newClassification;
+    currentBug.classifiedOn = new Date();
+    currentBug.lastUpdated = new Date();
+    currentBug.classifiedBy = req.auth._id;
+    debugBug(`Bug classification updated: ${currentBug}`);
+
+    const result = await updateBugClassification(newClassification);
+    debugBug(`Bug classification updated: ${JSON.stringify(result)}`);
+
+    const log = {
+      timestamp: new Date(),
+      collection: "bugs",
+      operation: "update",
+      target: bugId,
+      update: newClassification,
+      auth: req.auth,
+    };
+    console.log(log);
+    await saveAuditLog(log);
+    return res.status(200).json({ message: `Bug ${bugId} classified!`, bugId });
+  },
 );
 
 //update assigned to
 router.patch(
   "/:bugId/assign",
   validId("bugId"),
-  hasPermission('canReassignIfAssignedTo'),
+  hasPermission("canReassignIfAssignedTo"),
   isLoggedIn(),
   validBody(assignBugSchema),
   async (req, res, next) => {
     const bugId = req.params.bugId;
 
-    //read from the request body
     const { assignedToUserId } = req.body;
 
     try {
-      // Query the database to get the bug by id
       const bug = await GetBugById(bugId);
 
-      // Query the database to get the user by id
       const assignedToUser = await GetUserById(assignedToUserId);
 
-      // Update the bug's assignment details
       bug.assignedBy = req.auth._id;
       bug.assignedToUserId = assignedToUser._id;
       bug.assignedToUserName = `${assignedToUser.fullName}`;
@@ -379,20 +384,20 @@ router.patch(
       res
         .status(200)
         .json(
-          `Bug ${bugId} assigned to ${assignedToUser.givenName} ${assignedToUser.familyName} successfully`
+          `Bug ${bugId} assigned to ${assignedToUser.givenName} ${assignedToUser.familyName} successfully`,
         );
     } catch (err) {
       debugBug(`Error assigning bug: ${err.message}`);
       res.status(500).json({ message: "Internal Server Error" });
     }
-  }
+  },
 );
 
 //close bug
 router.put(
   "/:bugId/close",
   validId("bugId"),
-  hasPermission('canCloseAnyBug'),
+  hasPermission("canCloseAnyBug"),
   isLoggedIn(),
   validBody(closeBugSchema),
   async (req, res, next) => {
@@ -419,7 +424,11 @@ router.put(
         collection: "bugs",
         operation: "update",
         target: bugId,
-        update: {closed: closed, closedOn: bug.closedOn, closedBy: bug.closedBy},
+        update: {
+          closed: closed,
+          closedOn: bug.closedOn,
+          closedBy: bug.closedBy,
+        },
         auth: req.auth,
       };
       await saveAuditLog(log);
@@ -427,14 +436,14 @@ router.put(
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 // Get comments for specific bug
 router.get(
   "/:bugId/comment/list",
   isLoggedIn(),
-  hasPermission('canViewData'),
+  hasPermission("canViewData"),
   validId("bugId"),
   async (req, res) => {
     const bugId = req.params.bugId;
@@ -443,19 +452,18 @@ router.get(
       const bug = await GetBugById(bugId);
       if (JSON.stringify(bug) === "{}" || bug === null) {
         return res.status(404).send("Bug not found");
-      } 
+      }
       const detailedComments = await Promise.all(
         bug.comments.map(async (commentId) => {
           const comment = await GetComment(commentId);
           return comment;
-        })
+        }),
       );
       res.status(200).json(detailedComments);
-      
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 // Get specific comment for a bug
@@ -464,7 +472,7 @@ router.get(
   isLoggedIn(),
   validId("bugId"),
   validId("commentId"),
-  hasPermission('canViewData'),
+  hasPermission("canViewData"),
   async (req, res) => {
     const bugId = req.params.bugId;
     const commentId = req.params.commentId;
@@ -483,14 +491,14 @@ router.get(
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 // Get Bug Comment by ID to Create a Comment
 router.post(
   "/:bugId/comment/new",
   isLoggedIn(),
-  hasPermission('canAddComments'),
+  hasPermission("canAddComments"),
   validId("bugId"),
   validBody(commentSchema),
   async (req, res) => {
@@ -502,25 +510,20 @@ router.post(
     }
 
     try {
-      // Get the bug by id
       const bug = await GetBugById(bugId);
-      // Check if the bug exists
       if (JSON.stringify(bug) === "{}" || bug === null) {
         res.status(404).send("Bug not found");
       } else {
-        // Create the new comment
         newComment.createdOn = new Date();
         const result = await createComment(newComment);
-        // Add the comment id to the bug's comments array
         bug.comments.push(result.insertedId);
-        // Update the bug with the new comment
         const updateResult = await updateBug(bug);
         res.status(200).json(`Comment added to bug ${bugId}`);
       }
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 // List tests by Bug ID
@@ -528,7 +531,7 @@ router.get(
   "/:bugId/test/list",
   isLoggedIn(),
   validId("bugId"),
-  hasPermission('canViewData'),
+  hasPermission("canViewData"),
   async (req, res) => {
     const bugId = req.bugId;
     debugBug(`Bug: ${bugId}`);
@@ -551,14 +554,14 @@ router.get(
       debugBug(`Error: ${err.message}`);
       res.status(500).send("Internal Server Error");
     }
-  }
+  },
 );
 
 // Retrieve a specific test case for a bug
 router.get(
   "/:bugId/tests/:testsId",
   isLoggedIn(),
-  hasPermission('canViewData'),
+  hasPermission("canViewData"),
   validId("bugId"),
   validId("testsId"),
   async (req, res) => {
@@ -577,14 +580,14 @@ router.get(
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 // Create new test case for a bug
 router.post(
   "/:bugId/tests",
   isLoggedIn(),
-  hasPermission('canAddTestCase'),
+  hasPermission("canAddTestCase"),
   validId("bugId"),
   validBody(newTestsSchema),
   async (req, res) => {
@@ -619,14 +622,14 @@ router.post(
     } catch (err) {
       return res.status(500).send(err);
     }
-  }
+  },
 );
 
 // Update specific test case for a bug
 router.patch(
   "/:bugId/tests/:testsId",
   isLoggedIn(),
-  hasPermission('canEditTestCase'),
+  hasPermission("canEditTestCase"),
   validId("bugId"),
   validId("testsId"),
   validBody(updateTestSchema),
@@ -671,14 +674,14 @@ router.patch(
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 // Delete specific test case for a bug
 router.delete(
   "/:bugId/tests/:testsId",
   isLoggedIn(),
-  hasPermission('canDeleteTestCase'),
+  hasPermission("canDeleteTestCase"),
   validId("bugId"),
   validId("testsId"),
   async (req, res) => {
@@ -713,7 +716,7 @@ router.delete(
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 export { router as bugRouter };
