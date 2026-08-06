@@ -31,7 +31,7 @@ const newUserSchema = Joi.object({
     .email()
     .pattern(
       /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
-      "email"
+      "email",
     )
     .required(),
   password: Joi.string().min(6).max(30).required(),
@@ -45,8 +45,9 @@ const updateUserSchema = Joi.object({
     .email()
     .pattern(
       /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
-      "email"
-    ).optional(),
+      "email",
+    )
+    .optional(),
   // password: Joi.string().min(6).max(30).optional(),
   givenName: Joi.string().min(3).max(20).optional(),
   familyName: Joi.string().min(3).max(20).optional(),
@@ -59,7 +60,7 @@ const loginUserSchema = Joi.object({
     .email()
     .pattern(
       /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
-      "email"
+      "email",
     )
     .required(),
   password: Joi.string().min(6).max(30).required(),
@@ -67,11 +68,12 @@ const loginUserSchema = Joi.object({
 
 const updatePasswordSchema = Joi.object({
   email: Joi.string()
-  .email()
-  .pattern(
-    /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
-    "email"
-  ).optional(),
+    .email()
+    .pattern(
+      /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
+      "email",
+    )
+    .optional(),
   currentPassword: Joi.string().min(6).max(30).required(),
   newPassword: Joi.string().min(6).max(30).required(),
 }).unknown(true);
@@ -81,91 +83,78 @@ async function issueAuthToken(user) {
 
   const permissions = mergePermissions(user, roles);
 
-
-  
-
   const token = jwt.sign(
     {
       _id: user._id,
       email: user.email,
       role: user.role,
       permissions: permissions,
-      fullName: (`${user.givenName} ${user.familyName}`).trim(),
+      fullName: `${user.givenName} ${user.familyName}`.trim(),
     },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "1h" },
   );
 
   return token;
 }
 
-
-
 async function issueAuthCookie(res, token) {
   const cookieOptions = {
     httpOnly: true,
     maxAge: 1000 * 60 * 60,
-    sameSite: "strict",
-    secure: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
   };
   res.cookie("authToken", token, cookieOptions);
 }
 
-
-
 router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
-
-
   if (req.auth) {
     debugUser(req.auth.email);
   }
 
   let match = {};
 
-  let {keywords, roles, sortBy } = req.query;
-
+  let { keywords, roles, sortBy } = req.query;
 
   debugUser(`Keywords: ${keywords}`);
   debugUser(`Roles: ${roles}`);
-  if(keywords) {
+  if (keywords) {
     match.$text = { $search: keywords };
   }
 
- if (roles) {
+  if (roles) {
     match.role = { $eq: roles };
- }
+  }
 
- let sort = {givenName: 1};
+  let sort = { givenName: 1 };
 
- switch(sortBy){
-  case "givenName":
-    sort = {givenName: 1};
-    break;
-  case "familyName":
-    sort = {familyName: 1};
-    break;
-  case "role":
-    sort = {role: 1};
-    break;
-  default:
-    sort = {givenName: 1};
-    break;
- }
+  switch (sortBy) {
+    case "givenName":
+      sort = { givenName: 1 };
+      break;
+    case "familyName":
+      sort = { familyName: 1 };
+      break;
+    case "role":
+      sort = { role: 1 };
+      break;
+    default:
+      sort = { givenName: 1 };
+      break;
+  }
 
-  const pipeline = [
-    {$match: match},
-    {$sort: sort},
-  ];
+  const pipeline = [{ $match: match }, { $sort: sort }];
 
-    // Get All Users
-    let users = await GetAllUsers(pipeline);
+  // Get All Users
+  let users = await GetAllUsers(pipeline);
 
-  // Pagination
-  // const page = parseInt(pageNumber) || 1;
-  // const limit = parseInt(pageSize) || 5;
-  // const skip = (page - 1) * limit;
+  const page = parseInt(pageNumber) || 1;
+  const limit = parseInt(pageSize) || 5;
+  const skip = (page - 1) * limit;
 
-  // users = users.slice(skip, skip + limit);
+  users = users.slice(skip, skip + limit);
 
   res.status(200).json({ users, message: "Users retrieved successfully" });
 });
@@ -183,7 +172,7 @@ router.get("/me", isLoggedIn(), async (req, res) => {
     const user = await GetUserById(userId);
 
     if (user) {
-      res.status(200).json({user, message: "User retrieved successfully"});
+      res.status(200).json({ user, message: "User retrieved successfully" });
     } else {
       res.status(404).json({ message: `User ${userId} not found.` });
     }
@@ -200,7 +189,7 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
   const exsistingUser = await GetUserByEmail(newUser.email);
 
   if (exsistingUser) {
-    res.status(200).json({message:"Email already exists"});
+    res.status(200).json({ message: "Email already exists" });
     return;
   } else {
     // save the new user to the DB
@@ -230,7 +219,6 @@ router.post("/register", validBody(newUserSchema), async (req, res, next) => {
         newUser,
         authToken: jwtToken,
       });
-    
     } catch (error) {
       return res.status(500).send(error.message);
     }
@@ -246,13 +234,13 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
   try {
     const existingUser = await GetUserByEmail(email);
     if (!existingUser) {
-      debugUser(`Invalid email or password`);
-      return res.status(200).json({ message: `Invalid email or password` });
+      debugUser(`Invalid email`);
+      return res.status(401).json({ message: `Invalid email or password` });
     }
     const passwordMatch = await bcrypt.compare(password, existingUser.password);
     if (!passwordMatch) {
-      debugUser(`Invalid email or password`);
-      return res.status(200).json({ message: `Invalid email or password` });
+      debugUser(`Invalid password`);
+      return res.status(401).json({ message: `Invalid email or password` });
     }
 
     debugUser(`User email and password verified`);
@@ -261,9 +249,12 @@ router.post("/login", validBody(loginUserSchema), async (req, res, next) => {
     const jwtToken = await issueAuthToken(existingUser);
     await issueAuthCookie(res, jwtToken);
 
-    return res
-      .status(200)
-      .json({ message: `Welcome back!`, role: existingUser.role, email: existingUser.email, token: jwtToken });
+    return res.status(200).json({
+      message: `Welcome back!`,
+      role: existingUser.role,
+      email: existingUser.email,
+      token: jwtToken,
+    });
   } catch (e) {
     debugUser(e);
     return res.status(500).json({ message: `Error logging in user` });
@@ -293,7 +284,7 @@ router.patch(
         user.lastUpdatedOn = new Date();
         user.lastUpdatedBy = req.auth._id;
 
-        const result = await updateUser( user);
+        const result = await updateUser(user);
         const log = {
           timestamp: new Date(),
           collection: "users",
@@ -303,16 +294,14 @@ router.patch(
           auth: req.auth,
         };
         await saveAuditLog(log);
-        return res
-          .status(200)
-          .json({ message: `User  updated!` });
+        return res.status(200).json({ message: `User  updated!` });
       } else {
         res.status(404).send(`User not found.`);
       }
     } catch (err) {
       res.status(500).send(err.message);
     }
-  }
+  },
 );
 
 // Get User by ID
@@ -322,7 +311,6 @@ router.get(
   isLoggedIn(),
   hasPermission("canViewData"),
   async (req, res, next) => {
-    // Get User by ID
     const userId = req.userId;
     try {
       // If user is found, return user details
@@ -330,12 +318,12 @@ router.get(
       if (user) {
         res.status(200).json(user);
       } else {
-        res.status(200).json({message: `User not found.`});
+        res.status(404).json({ message: `User not found.` });
       }
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 //Admins and TM's can update user information
@@ -373,18 +361,15 @@ router.patch(
           update: updatedUser,
         };
         await saveAuditLog(log);
-        return res
-          .status(200)
-          .json({ message: `User updated!` });
+        return res.status(200).json({ message: `User updated!` });
       } else {
-        res.status(404).json({message: `User ${userId} not found.`});
+        res.status(404).json({ message: `User ${userId} not found.` });
       }
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
-
 
 //Delete User
 router.delete(
@@ -413,7 +398,7 @@ router.delete(
     } catch (err) {
       res.status(500).send(err);
     }
-  }
+  },
 );
 
 export { router as userRouter };
