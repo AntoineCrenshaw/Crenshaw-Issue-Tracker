@@ -35,7 +35,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
     } catch (e) {
       setMessage(
         e.response?.data?.message ||
-          "Error fetching users. Refresh the page to try again"
+          "Error fetching users. Refresh the page to try again",
       );
     } finally {
       setIsLoading(false);
@@ -50,7 +50,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
         `http://localhost:2024/api/bugs/${id}/close`,
         {
           closed: true,
-        }
+        },
       );
       if (response.status === 200) {
         showSuccess("Bug closed successfully");
@@ -171,9 +171,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                   </select>
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label">
-                    Close Status 
-                  </label>
+                  <label className="form-label">Close Status</label>
                   <div className="form-check">
                     <input
                       type="checkbox"
@@ -236,12 +234,12 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                               bug.classification === `Approved`
                                 ? `bg-success`
                                 : bug.classification === `Unapproved`
-                                ? `bg-danger`
-                                : bug.classification === `Duplicate`
-                                ? `bg-danger`
-                                : bug.classification === `Unclassified`
-                                ? `bg-info`
-                                : `bg-info`
+                                  ? `bg-danger`
+                                  : bug.classification === `Duplicate`
+                                    ? `bg-danger`
+                                    : bug.classification === `Unclassified`
+                                      ? `bg-info`
+                                      : `bg-info`
                             }`}
                           >
                             {bug.classification}
@@ -253,8 +251,8 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                               bug.closed === true
                                 ? `bg-success`
                                 : bug.closed === false
-                                ? `bg-primary`
-                                : `bg-primary`
+                                  ? `bg-primary`
+                                  : `bg-primary`
                             }`}
                           >
                             {bug.closed ? `Closed` : `Open`}
@@ -264,7 +262,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                         <td>
                           <span>
                             {auth?.role?.some((role) =>
-                              ["Admin", "Business Analyst"].includes(role)
+                              ["Admin", "Business Analyst"].includes(role),
                             ) ? (
                               <div>
                                 <button className="btn btn-link">
