@@ -102,8 +102,8 @@ async function issueAuthCookie(res, token) {
   const cookieOptions = {
     httpOnly: true,
     maxAge: 1000 * 60 * 60,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: "None",
+    secure: true,
     path: "/",
   };
   res.cookie("authToken", token, cookieOptions);
