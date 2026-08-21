@@ -39,10 +39,10 @@ const SignInForm = ({ showSuccess, showError, setAuth }) => {
           window.location.reload();
         }
       }
-    } catch (err) {
-      console.log(`Error Block ${JSON.stringify(err.response.data)}`);
-      if (err.response.data.error) {
-        err.response.data.error.forEach((error) => {
+    } catch (error) {
+      console.log(`Error Block ${JSON.stringify(error.response.data)}`);
+      if (error.response.data.error) {
+        error.response.data.error.forEach((error) => {
           showError(error.message);
         });
       }
