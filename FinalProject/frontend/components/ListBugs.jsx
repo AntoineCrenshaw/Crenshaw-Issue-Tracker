@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../src/api";
 import Skeleton from "react-loading-skeleton";
 import "./ListBugs.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -25,9 +25,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
   const getBugs = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:2024/api/bugs", {
-        withCredentials: true,
-      });
+      const response = await api.get("api/bugs");
       console.log("Response Data: ", response.data);
 
       setBugs(response.data.bugs || []);
@@ -46,12 +44,9 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
     e.preventDefault();
     console.log(id);
     try {
-      const response = await axios.put(
-        `http://localhost:2024/api/bugs/${id}/close`,
-        {
-          closed: true,
-        },
-      );
+      const response = await api.put(`api/bugs/${id}/close`, {
+        closed: true,
+      });
       if (response.status === 200) {
         showSuccess("Bug closed successfully");
         setDeleteCounter(deleteCounter + 1);
@@ -68,7 +63,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
   const onSubmitSearch = async (evt) => {
     evt.preventDefault();
     try {
-      const { data } = await axios.get(`http://localhost:2024/api/bugs/`, {
+      const { data } = await api.get(`api/bugs/`, {
         headers: { authorization: `Bearer ${auth?.token}` },
         params: {
           keywords: keywords,
