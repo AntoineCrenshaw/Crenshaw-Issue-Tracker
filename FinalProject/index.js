@@ -43,6 +43,8 @@ app.use(
   authMiddleware(process.env.JWT_SECRET, "authToken", {
     httpOnly: true,
     maxAge: 1000 * 60 * 60,
+    sameSite: "None",
+    secure: true,
   }),
 );
 
