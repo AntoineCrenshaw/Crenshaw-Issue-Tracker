@@ -31,12 +31,6 @@ const Navbar = ({ auth, onLogout }) => {
                 <>
                   <div className="d-flex me-auto">
                     <li className="nav-item">
-                      <NavLink className="nav-link active" to="/">
-                        Home
-                        <span className="visually-hidden">(current)</span>
-                      </NavLink>
-                    </li>
-                    <li className="nav-item">
                       <NavLink className="nav-link" to="/users">
                         Users
                       </NavLink>
@@ -74,6 +68,12 @@ const Navbar = ({ auth, onLogout }) => {
                 </>
               ) : (
                 <>
+                  <li className="nav-item">
+                    <NavLink className="nav-link active" to="/">
+                      Home
+                      <span className="visually-hidden">(current)</span>
+                    </NavLink>
+                  </li>
                   <li className="nav-item">
                     <NavLink className="nav-link" to="/login">
                       Login
