@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../src/api";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 
@@ -15,8 +15,8 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get("http://localhost:2024/api/users/me", { withCredentials: true })
+    api
+      .get("/api/users/me", { withCredentials: true })
       .then((response) => {
         console.log("Selected User Data returned", response.data);
         setUser(response.data.user);
@@ -37,7 +37,7 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
     navigate("/users");
   };
 
-  const OnDetailsUpdate = async (e) => {
+  const handleDetailsUpdate = async (e) => {
     e.preventDefault();
     if (givenName === "" || givenName.length < 3) {
       showError("First name is required and must be at least 3 characters");
@@ -52,11 +52,6 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
       return;
     }
 
-    if (fullName === "" || fullName.length < 3) {
-      showError("Full name is required and must be at least 3 characters");
-      return;
-    }
-
     console.log("Updating user");
     console.log("Fetched user data:", user);
 
@@ -66,41 +61,20 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
       familyName,
       fullName,
       email,
-      createdDate,
-      roles,
     };
-
 
     console.log("Updated user data being sent:", updatedUser);
 
     try {
-      let response = await axios.patch(
-       " http://localhost:2024/api/users/me",
-        { ...updatedUser },
-        { withCredentials: true }
-      );
-      if (response.status === 200) {
-        console.log("You have successfully updated your data", response.data);
-        setUser(response.data.users);
-        showSuccess(response.data.message);
-      } else {
-        showError(response.data.message);
-      }
-    } catch (err) {
-      if (err.response) {
-        // Error from the server (HTTP status code, response data, etc.)
-        console.log(
-          `Server Error: ${err.response.status} - ${err.response.statusText}`
-        );
-        console.log(`Details: ${JSON.stringify(err.response.data)}`);
-      } else if (err.request) {
-        // Error with the request itself, no response received
-        console.log("Network Error: No response received");
-        console.log(`Request: ${err.request}`);
-      } else {
-        // Some other error occurred
-        console.log(`Unexpected Error: ${err.message}`);
-      }
+      const response = await api.patch("/api/users/me", updatedUser, {
+        withCredentials: true,
+      });
+      console.log("You have successfully updated your data", response.data);
+      setUser(response.data.users);
+      showSuccess(response.data.message);
+    } catch (error) {
+      showError(error.message);
+      return;
     }
   };
 
@@ -185,7 +159,7 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
                     value={roles}
                     readOnly
                   />
-                  </div>
+                </div>
                 <div className="card-footer">
                   <div className="mb-3">
                     <label htmlFor="lastUpdatedOn" className="form-label">
@@ -199,12 +173,12 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
                       readOnly
                     />
                   </div>
-                  </div>
-                  <div className="mb-3">
+                </div>
+                <div className="mb-3">
                   <button
                     type="submit"
                     className="btn btn-primary"
-                    onClick={(e) => OnDetailsUpdate(e)}
+                    onClick={(e) => handleDetailsUpdate(e)}
                   >
                     Update
                   </button>
