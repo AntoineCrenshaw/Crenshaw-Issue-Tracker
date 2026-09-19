@@ -1,5 +1,4 @@
 import Navbar from "./navbar.jsx";
-import "bootswatch/dist/journal/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import axios from "axios";
@@ -17,6 +16,7 @@ import UserListItem from "../components/UserListItem.jsx";
 import UserEditor from "../components/UserEditor.jsx";
 import ReportBug from "../components/ReportBug.jsx";
 import DisplayUserDetails from "../components/DisplayUserDetails.jsx";
+import HomePage from "../components/HomePage.jsx";
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -37,7 +37,7 @@ function App() {
       .post(
         "http://localhost:2024/api/users/logout",
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       )
       .then((response) => {
         console.log(response.data);
@@ -77,11 +77,7 @@ function App() {
         </header>
         <main>
           <Routes>
-            <Route path="/" element={<SignInForm 
-            showSuccess={showSuccess}
-                  showError={showError}
-                  setAuth={setAuth}
-                  />} />
+            <Route path="/" element={<HomePage />} />
             <Route
               path="/login"
               element={
@@ -145,16 +141,6 @@ function App() {
                   showSuccess={showSuccess}
                   showError={showError}
                   auth={auth}
-                />
-              }
-            />
-            <Route
-              path="/me"
-              element={
-                <DisplayUserDetails
-                  auth={auth}
-                  showError={showError}
-                  showSuccess={showSuccess}
                 />
               }
             />
