@@ -92,7 +92,6 @@ async function issueAuthToken(user) {
       fullName: `${user.givenName} ${user.familyName}`.trim(),
     },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" },
   );
 
   return token;
@@ -101,7 +100,6 @@ async function issueAuthToken(user) {
 async function issueAuthCookie(res, token) {
   const cookieOptions = {
     httpOnly: true,
-    maxAge: 1000 * 60 * 60,
     sameSite: "None",
     secure: true,
     path: "/",
@@ -149,12 +147,6 @@ router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
 
   // Get All Users
   let users = await GetAllUsers(pipeline);
-
-  const page = parseInt(pageNumber) || 1;
-  const limit = parseInt(pageSize) || 5;
-  const skip = (page - 1) * limit;
-
-  users = users.slice(skip, skip + limit);
 
   res.status(200).json({ users, message: "Users retrieved successfully" });
 });
