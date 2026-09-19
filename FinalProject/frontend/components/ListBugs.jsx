@@ -4,7 +4,6 @@ import Skeleton from "react-loading-skeleton";
 import "./ListBugs.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, useNavigate } from "react-router-dom";
-import { Pagination } from "./Pagination.jsx";
 import moment from "moment";
 
 const ListBugs = ({ showSuccess, showError, auth }) => {
@@ -339,7 +338,6 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
               <p>No bugs meet your desired criteria. Try again</p>
             )}
           </div>
-          {/* <Pagination /> */}
         </div>
       )}
     </>
