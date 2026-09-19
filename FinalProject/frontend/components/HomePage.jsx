@@ -1,55 +1,33 @@
-import { Box, Container, Typography, Button } from "@mui/material";
-import { Link } from "react-router-dom";
-import "../App.css";
+// Home.jsx
+import { NavLink } from "react-router-dom";
+import "./HomePage.css";
 
-const HomePage = () => {
+const Home = () => {
   return (
-    <>
-      <Container
-        sx={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-            gap: 3,
-          }}
-        >
-          <Typography
-            variant="h1"
-            align="center"
-            fontFamily={"Roboto Flex"}
-            sx={{ color: "primary.main", my: 1 }}
-          >
-            Issue Tracker
-          </Typography>
-          <Typography variant="subtitle1" sx={{ color: "primary.subtitle" }}>
-            Welcome to my MERN stack project
-          </Typography>
-          <Typography
-            variant="h1"
-            align="center"
-            sx={{
-              "&:hover": { position: "relative", top: "5px", left: "5px" },
-              bgcolor: "lightblue",
-              width: "fit-content",
-            }}
-          >
-            <Link to="/users">
-              <Button sx={{ padding: "10px 20px" }}>Get Started</Button>
-            </Link>
-          </Typography>
-        </Box>
-      </Container>
-    </>
+    <div className="home">
+      <div className="home-hero">
+        <h1>Welcome</h1>
+        <p>Track, report, and resolve software issues in one place.</p>
+      </div>
+
+      <div className="home-actions">
+        <NavLink to="/bugs/new" className="home-card">
+          <h2>Report a bug</h2>
+          <p>Log a new issue with steps to reproduce.</p>
+        </NavLink>
+
+        <NavLink to="/bugs" className="home-card">
+          <h2>View bugs</h2>
+          <p>Search, filter, and manage existing issues.</p>
+        </NavLink>
+
+        <NavLink to="/users" className="home-card">
+          <h2>View users</h2>
+          <p>See who's on the team and their roles.</p>
+        </NavLink>
+      </div>
+    </div>
   );
 };
 
-export default HomePage;
+export default Home;

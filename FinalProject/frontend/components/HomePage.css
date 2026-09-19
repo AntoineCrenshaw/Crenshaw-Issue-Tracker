@@ -1,0 +1,59 @@
+.home {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.home-hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.home-hero h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.home-hero p {
+  font-size: 16px;
+  color: #374151;
+}
+
+.home-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.home-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+
+.home-card:hover {
+  border-color: #2563eb;
+}
+
+.home-card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+}
+
+.home-card p {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .home-actions {
+    grid-template-columns: 1fr;
+  }
+}
