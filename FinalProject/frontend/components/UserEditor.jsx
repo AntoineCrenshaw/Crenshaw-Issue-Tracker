@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../src/api";
 import { useNavigate, useParams } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "./UserEditor.css";
@@ -16,7 +16,7 @@ export default function UserEditor({ showSuccess, showError, auth }) {
 
   // Display the user details on open of the page
   useEffect(() => {
-    axios
+    api
       .get(`http://localhost:2024/api/users/${id}`, { withCredentials: true })
       .then((response) => {
         console.log(response.data.users);
@@ -52,11 +52,6 @@ export default function UserEditor({ showSuccess, showError, auth }) {
       return;
     }
 
-    if (fullName === "" || fullName.length < 3) {
-      showError("Full name is required and must be at least 3 characters");
-      return;
-    }
-
     const updatedUser = {
       ...user,
       givenName,
@@ -68,10 +63,10 @@ export default function UserEditor({ showSuccess, showError, auth }) {
     delete updatedUser._id;
 
     try {
-      let response = await axios.patch(
+      let response = await api.patch(
         `http://localhost:2024/api/users/${id}`,
         { ...updatedUser },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (response.status === 200) {
         console.log(response.data);
@@ -85,7 +80,7 @@ export default function UserEditor({ showSuccess, showError, auth }) {
       if (err.response) {
         // Error from the server (HTTP status code, response data, etc.)
         console.log(
-          `Server Error: ${err.response.status} - ${err.response.statusText}`
+          `Server Error: ${err.response.status} - ${err.response.statusText}`,
         );
         console.log(`Details: ${JSON.stringify(err.response.data)}`);
         showError(err.response.data.error || "An error occurred");
@@ -166,7 +161,7 @@ export default function UserEditor({ showSuccess, showError, auth }) {
               />
             </div>
             {auth?.role?.some((role) =>
-              ["Admin", "Technical Manager"].includes(role)
+              ["Admin", "Technical Manager"].includes(role),
             ) ? (
               <div className="mb-3">
                 <label htmlFor="roleForm" className="form-label">
