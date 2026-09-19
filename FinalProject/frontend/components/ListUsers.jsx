@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../src/api";
 import "./ListUsers.css";
 import { Link } from "react-router-dom";
 
@@ -14,7 +14,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
   const getUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:2024/api/users", {
+      const response = await api.get("/api/users", {
         withCredentials: true,
       });
       setUsers(response.data.users || []);
@@ -35,7 +35,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
   const onSubmitSearch = async (evt) => {
     evt.preventDefault();
     try {
-      const { data } = await axios.get(`http://localhost:2024/api/users/`, {
+      const { data } = await api.get(`/api/users/`, {
         headers: { authorization: `Bearer ${auth?.token}` },
         params: { keywords: keywords, roles: roleFilter, sortBy: sortBy },
       });
