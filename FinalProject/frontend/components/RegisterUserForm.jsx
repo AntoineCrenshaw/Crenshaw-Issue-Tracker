@@ -1,6 +1,6 @@
 import "../components/RegisterUserForm.css";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import  api from "../src.api";
 import { NavLink, useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { applyBootstrapValidation } from "../utils/applyBootstrapValidation";
