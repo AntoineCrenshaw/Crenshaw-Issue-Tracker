@@ -1,6 +1,6 @@
 import "../components/RegisterUserForm.css";
 import { useEffect, useState } from "react";
-import  api from "../src.api";
+import  api from "../src/api";
 import { NavLink, useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { applyBootstrapValidation } from "../utils/applyBootstrapValidation";
@@ -27,8 +27,8 @@ export default function RegisterUserForm({ showSuccess, showError, setAuth }) {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:2024/api/users/register",
+      const response = await api.post(
+        "/api/users/register",
         { email, password, givenName, familyName },
         { withCredentials: true },
       );
