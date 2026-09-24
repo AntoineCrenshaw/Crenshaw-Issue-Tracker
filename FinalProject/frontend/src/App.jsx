@@ -1,7 +1,7 @@
 import Navbar from "./navbar.jsx";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import axios from "axios";
+import api from "../src/api";
 import Footer from "../components/Footer.jsx";
 import SignInForm from "../components/SignInForm.jsx";
 import ListUsers from "../components/ListUsers.jsx";
@@ -33,9 +33,9 @@ function App() {
   function onLogout() {
     setAuth(null);
     showSuccess("Logged out successfully");
-    axios
+    api
       .post(
-        "http://localhost:2024/api/users/logout",
+        "/api/users/logout",
         {},
         { withCredentials: true },
       )
