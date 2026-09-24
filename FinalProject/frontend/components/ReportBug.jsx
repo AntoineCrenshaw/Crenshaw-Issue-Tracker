@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../src/api";
 import { useNavigate } from "react-router-dom";
 import "./BugEditor.css";
 
@@ -38,8 +38,8 @@ const ReportBug = ({ auth, showSuccess, showError }) => {
 
     if (title && description && stepsToReproduce) {
       try {
-        const response = await axios.post(
-          "http://localhost:2024/api/bugs/new",
+        const response = await api.post(
+          "/api/bugs/new",
           {
             title,
             description,
