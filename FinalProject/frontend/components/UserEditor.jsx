@@ -17,7 +17,7 @@ export default function UserEditor({ showSuccess, showError, auth }) {
   // Display the user details on open of the page
   useEffect(() => {
     api
-      .get(`http://localhost:2024/api/users/${id}`, { withCredentials: true })
+      .get(`/api/users/${id}`, { withCredentials: true })
       .then((response) => {
         console.log(response.data.users);
         console.log("Roles from API:", response.data.role);
@@ -64,18 +64,14 @@ export default function UserEditor({ showSuccess, showError, auth }) {
 
     try {
       let response = await api.patch(
-        `http://localhost:2024/api/users/${id}`,
+        `/api/users/${id}`,
         { ...updatedUser },
         { withCredentials: true },
       );
-      if (response.status === 200) {
         console.log(response.data);
         setUser(response.data.users);
         showSuccess(response.data.message);
         navigate("/users");
-      } else {
-        showError(response.data.message);
-      }
     } catch (err) {
       if (err.response) {
         // Error from the server (HTTP status code, response data, etc.)
