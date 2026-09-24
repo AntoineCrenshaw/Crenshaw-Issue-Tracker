@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../src/api";
 import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment/moment";
 
@@ -14,8 +14,8 @@ function UserListItem({ showSuccess, showError, auth }) {
 
   useEffect(() => {
     console.log("ID from URL:", id);
-    axios
-      .get(`http://localhost:2024/api/users/${id}`, {
+    api
+      .get(`/api/users/${id}`, {
         withCredentials: true,
       })
       .then((response) => {
@@ -28,7 +28,7 @@ function UserListItem({ showSuccess, showError, auth }) {
   const handleConfirmDelete = async (e, id) => {
     e.preventDefault();
     try {
-      await axios.delete(`http://localhost:2024/api/users/${id}`, {
+      await api.delete(`/api/users/${id}`, {
         withCredentials: true,
       });
       showSuccess("User deleted successfully");
