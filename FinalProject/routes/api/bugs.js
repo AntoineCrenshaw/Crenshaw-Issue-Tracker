@@ -147,14 +147,6 @@ router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
 
     let bugs = await GetAllBugs(pipeline);
 
-    // Get bugs by classification, sortBy, maxAge, minAge, pageNumber, pageSize, closed
-
-    // Pagination
-    // const page = parseInt(pageNumber) || 1;
-    // const limit = parseInt(pageSize) || 5;
-    // const skip = (page - 1) * limit;
-
-    // bugs = bugs.slice(skip, skip + limit);
     res.status(200).json({ bugs, message: "Bugs successfully fetched" });
   } catch (err) {
     res.status(500).send(err);
@@ -450,18 +442,29 @@ router.get(
 
     try {
       const bug = await GetBugById(bugId);
-      if (JSON.stringify(bug) === "{}" || bug === null) {
+      if (bug == null) {
         return res.status(404).send("Bug not found");
       }
+
+      //list comments
+      // const detailedComments = await Promise.all(
+      //   bug.comments.map((commentId) => GetComment(commentId)),
+      // );
+
       const detailedComments = await Promise.all(
         bug.comments.map(async (commentId) => {
+          console.log("Comment ID:", commentId);
+
           const comment = await GetComment(commentId);
+
+          console.log("Found comment:", comment);
+
           return comment;
         }),
       );
       res.status(200).json(detailedComments);
     } catch (err) {
-      res.status(500).send(err);
+      res.status(500).send(err.message);
     }
   },
 );
