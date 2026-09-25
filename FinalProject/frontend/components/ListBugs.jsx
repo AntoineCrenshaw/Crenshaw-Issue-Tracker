@@ -24,9 +24,8 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
   const getBugs = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("api/bugs");
+      const response = await api.get("/api/bugs");
       console.log("Response Data: ", response.data);
-
       setBugs(response.data.bugs || []);
       setMessage(response.data.message || "You must be signed in to view bugs");
     } catch (e) {
@@ -43,17 +42,13 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
     e.preventDefault();
     console.log(id);
     try {
-      const response = await api.put(`api/bugs/${id}/close`, {
+      await api.put(`/api/bugs/${id}/close`, {
         closed: true,
       });
-      if (response.status === 200) {
-        showSuccess("Bug closed successfully");
-        setDeleteCounter(deleteCounter + 1);
-        setShowModal(false);
-        navigate("/bugs");
-      } else {
-        showError(response.data.message);
-      }
+      showSuccess("Bug closed successfully");
+      setDeleteCounter(deleteCounter + 1);
+      setShowModal(false);
+      navigate("/bugs");
     } catch (e) {
       console.log(e);
     }
@@ -62,7 +57,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
   const onSubmitSearch = async (evt) => {
     evt.preventDefault();
     try {
-      const { data } = await api.get(`api/bugs/`, {
+      const { data } = await api.get(`/api/bugs/`, {
         headers: { authorization: `Bearer ${auth?.token}` },
         params: {
           keywords: keywords,
