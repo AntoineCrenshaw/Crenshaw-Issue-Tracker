@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "jest",
-    "build:auto": "vite build --watch"
+    "build:auto": "vite build --watch --mode development"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
