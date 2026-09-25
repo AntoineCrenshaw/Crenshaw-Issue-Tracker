@@ -32,6 +32,12 @@ export default function UserEditor({ showSuccess, showError, auth }) {
       .catch((error) => console.log(error));
   }, [id]);
 
+  function getErrorMessage(err) {
+    if (err.response) return err.response.data?.message ?? "Server error";
+    if (err.request) return "No response from server";
+    return err.message ?? "Something went wrong";
+  }
+
   const onUserUpdate = async (e) => {
     e.preventDefault();
     console.log("Updating user");
@@ -52,44 +58,25 @@ export default function UserEditor({ showSuccess, showError, auth }) {
       return;
     }
 
-    const updatedUser = {
+    const { _id, ...updatedUser } = {
       ...user,
       givenName,
       familyName,
       fullName,
       email,
+      roles,
     };
 
-    delete updatedUser._id;
-
     try {
-      let response = await api.patch(
-        `/api/users/${id}`,
-        { ...updatedUser },
-        { withCredentials: true },
-      );
-        console.log(response.data);
-        setUser(response.data.users);
-        showSuccess(response.data.message);
-        navigate("/users");
+      let response = await api.patch(`/api/users/${id}`, updatedUser, {
+        withCredentials: true,
+      });
+      console.log(response.data);
+      setUser(response.data.users);
+      showSuccess(response.data.message);
+      navigate("/users");
     } catch (err) {
-      if (err.response) {
-        // Error from the server (HTTP status code, response data, etc.)
-        console.log(
-          `Server Error: ${err.response.status} - ${err.response.statusText}`,
-        );
-        console.log(`Details: ${JSON.stringify(err.response.data)}`);
-        showError(err.response.data.error || "An error occurred");
-      } else if (err.request) {
-        // Error with the request itself, no response received
-        console.log("Network Error: No response received");
-        console.log(`Request: ${err.request}`);
-        showError("Network Error: No response received");
-      } else {
-        // Some other error occurred
-        console.log(`Unexpected Error: ${err.message}`);
-        showError(`Unexpected Error: ${err.message}`);
-      }
+      showError(getErrorMessage(err));
     }
   };
 
