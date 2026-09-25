@@ -51,9 +51,12 @@ async function createBug(bug) {
 
 async function updateBug(updatedBug) {
   const db = await connect();
+
+  const { _id, ...fieldsToUpdate } = updateBug;
+
   const dbResult = await db
     .collection("bugs")
-    .updateOne({ _id: new ObjectId(updatedBug._id) }, { $set: updatedBug });
+    .updateOne({ _id: new ObjectId(_id) }, { $set: fieldsToUpdate });
   return dbResult;
 }
 
@@ -67,7 +70,7 @@ async function updateBugClassification(newClassification) {
         classifiedOn: newClassification.classifiedOn,
         lastUpdated: newClassification.lastUpdated,
       },
-    }
+    },
   );
   return dbResult;
 }
@@ -82,7 +85,7 @@ async function closeBug(updatedBug) {
         closedOn: updatedBug.closedOn,
         lastUpdated: updatedBug.lastUpdated,
       },
-    }
+    },
   );
   return dbResult;
 }
@@ -141,7 +144,7 @@ async function updateAssignTo(bug) {
         assignedOn: bug.assignedOn,
         lastUpdated: bug.lastUpdated,
       },
-    }
+    },
   );
   return dbResult;
 }
@@ -180,7 +183,7 @@ async function GetComment(commentId) {
 
 async function createComment(comment) {
   const db = await connect();
-  const dbResult = db.collection("comments").insertOne(comment);
+  const dbResult = await db.collection("comments").insertOne(comment);
   return dbResult;
 }
 
