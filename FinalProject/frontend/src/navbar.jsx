@@ -1,96 +1,97 @@
+// navbar.jsx
+import { useState } from "react";
 import { AiFillBug } from "react-icons/ai";
 import { NavLink } from "react-router-dom";
-import "./assets/css/navbar.css";
+import "./navbar.css";
 
 const Navbar = ({ auth, onLogout }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const onClickLogout = (e) => {
     e.preventDefault();
     onLogout();
   };
 
+  const navLinkClass = ({ isActive }) =>
+    isActive ? "nav-link nav-link--active" : "nav-link";
+
   return (
-    <div id="navRoot">
-      <nav className="navbar navbar-expand-lg bg-light" data-bs-theme="light">
-        <div className="container-fluid">
+    <nav className="navbar">
+      <div className="navbar-inner">
+        <NavLink to="/" className="navbar-brand">
           <AiFillBug />
-          <span className="navbar-brand">Issue Tracker</span>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarColor03"
-            aria-controls="navbarColor03"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarColor03">
-            <ul className="navbar-nav w-100 ">
-              {auth ? (
-                <>
-                  <div className="d-flex me-auto">
-                    <li className="nav-item">
-                      <NavLink className="nav-link" to="/users">
-                        Users
-                      </NavLink>
-                    </li>
-                    <li className="nav-item">
-                      <NavLink className="nav-link" to="/bugs">
-                        Bugs
-                      </NavLink>
-                    </li>
-                    <li className="nav-item">
-                      <NavLink className="nav-link" to="/bugs/new">
-                        Report Bug
-                      </NavLink>
-                    </li>
-                    <li className="nav-item">
-                      <NavLink className="nav-link" to="/me">
-                        Profile
-                      </NavLink>
-                    </li>
-                  </div>
-                  <li className="nav-item">
-                    <a className="nav-link" disabled href="#">
-                      Welcome {auth.email}
-                    </a>
-                  </li>
-                  <li className="nav-item">
-                    <NavLink
-                      className="nav-link"
-                      to="/login"
-                      onClick={(e) => onClickLogout(e)}
-                    >
-                      Logout
-                    </NavLink>
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li className="nav-item">
-                    <NavLink className="nav-link active" to="/">
-                      Home
-                      <span className="visually-hidden">(current)</span>
-                    </NavLink>
-                  </li>
-                  <li className="nav-item">
-                    <NavLink className="nav-link" to="/login">
-                      Login
-                    </NavLink>
-                  </li>
-                  <li className="nav-item">
-                    <NavLink className="nav-link" to="/register">
-                      Register
-                    </NavLink>
-                  </li>
-                </>
-              )}
+          <span>Issue Tracker</span>
+        </NavLink>
+
+        <button
+          className="navbar-toggle"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label="Toggle navigation"
+          aria-expanded={menuOpen}
+        >
+          <span />
+          <span />
+        </button>
+
+        <div className={`navbar-menu ${menuOpen ? "navbar-menu--open" : ""}`}>
+          {auth ? (
+            <>
+              <ul className="navbar-links">
+                <li>
+                  <NavLink to="/" className={navLinkClass} end>
+                    Home
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/users" className={navLinkClass}>
+                    Users
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/bugs" className={navLinkClass}>
+                    Bugs
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/bugs/new" className={navLinkClass}>
+                    Report Bug
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/me" className={navLinkClass}>
+                    Profile
+                  </NavLink>
+                </li>
+              </ul>
+              <div className="navbar-account">
+                <span className="navbar-email">{auth.email}</span>
+                <button className="navbar-logout" onClick={onClickLogout}>
+                  Log out
+                </button>
+              </div>
+            </>
+          ) : (
+            <ul className="navbar-links">
+              <li>
+                <NavLink to="/" className={{ navLinkClass }}>
+                  Home
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/register" className={{ navLinkClass }}>
+                  Register
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/login" className={navLinkClass}>
+                  Log in
+                </NavLink>
+              </li>
             </ul>
-          </div>
+          )}
         </div>
-      </nav>
-    </div>
+      </div>
+    </nav>
   );
 };
 
