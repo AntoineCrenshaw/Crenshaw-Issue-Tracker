@@ -24,7 +24,6 @@ const BugEditor = ({ showSuccess, showError }) => {
     api
       .get(`/api/bugs/${id}`)
       .then((response) => {
-        console.log("initial bug fetch", response.data);
         const bugData = response.data;
         setBug(bugData);
         setTitle(bugData.title);
@@ -34,33 +33,29 @@ const BugEditor = ({ showSuccess, showError }) => {
       })
       .catch((error) => console.log(error));
 
-    api.get("/api/bugs").then((response) => {
-      console.log(response.data);
-    });
     api
       .get("/api/users")
       .then((response) => {
         setUsers(response.data.users);
-        console.log(response.data.users);
       })
       .catch((error) => console.log(error));
 
     api
       .get(`/api/bugs/${id}/comment/list`)
       .then((response) => {
-        console.log("Comment list", response.data);
         setComments(response.data);
       })
       .catch((error) => console.log(error));
   }, [id]);
 
+  function getErrorMessage(err) {
+    if (err.response) return err.response.data?.message ?? "Server error";
+    if (err.request) return "No response from server";
+    return err.message ?? "Something went wrong";
+  }
+
   const onBugUpdate = async (e) => {
     e.preventDefault();
-    console.log("Updating bug");
-
-    if (newComment) {
-      await onAddComment();
-    }
 
     const updatedBug = {
       ...bug,
@@ -68,48 +63,36 @@ const BugEditor = ({ showSuccess, showError }) => {
       description,
       stepsToReproduce,
       assignedToUserName,
-      newComment,
     };
 
     delete updatedBug._id;
 
     try {
-      let response = await api.patch(`/api/bugs/${id}`, { ...updatedBug });
-      if (response.status === 200) {
-        setBug(response.data.bugs);
-        showSuccess(response.data.message);
-        navigate("/bugs");
-      } else {
-        showError(response.data.message);
-      }
-    } catch (e) {
-      showError(e.response.data.message);
+      let response = await api.patch(`/api/bugs/${id}`, updatedBug);
+      setBug(response.data.bugs ?? response.data.bug ?? bug);
+      showSuccess("Bug Update Successful");
+      navigate("/bugs");
+    } catch (err) {
+      showError(getErrorMessage(err));
     }
   };
 
   const onAddComment = async () => {
     try {
-      console.log("Adding comment:", newComment);
-      let response = await api.post(`/api/bugs/${id}/comment/new`, {
+      const response = await api.post(`/api/bugs/${id}/comment/new`, {
         comment: newComment,
       });
-      console.log("Response:", response);
-      if (response.status === 200) {
-        showSuccess("Comment Added");
-        setNewComment("");
-      } else {
-        showError(response.data.message);
-      }
-    } catch (e) {
-      console.error("Error adding comment:", e);
-      showError(e.response.data.message);
+      setComments(response.data.comment);
+      console.log(response.data.comment);
+      setNewComment("");
+      showSuccess("Comment added successfully");
+    } catch (err) {
+      showError(getErrorMessage(err));
     }
   };
 
   const cancelEdit = (e) => {
     e.preventDefault();
-    // Redirect to the users page
-    console.log("Cancelling edit and returning to bugs page");
     navigate("/bugs");
   };
 
@@ -257,10 +240,12 @@ const BugEditor = ({ showSuccess, showError }) => {
               />
             </div>
           </div>
-          <div className="col-md-3"></div>
-          <div className="col-md-10"></div>
           <div className="col-md-2">
-            <button className="btn btn-primary" onClick={(e) => onBugUpdate(e)}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={(e) => onAddComment(e)}
+            >
               Add Comment
             </button>
           </div>
