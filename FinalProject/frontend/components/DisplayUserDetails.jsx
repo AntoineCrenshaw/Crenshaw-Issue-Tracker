@@ -52,18 +52,14 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
       return;
     }
 
-    console.log("Updating user");
-    console.log("Fetched user data:", user);
 
     const updatedUser = {
-      ...user,
       givenName,
       familyName,
       fullName,
       email,
     };
 
-    console.log("Updated user data being sent:", updatedUser);
 
     try {
       const response = await api.patch("/api/users/me", updatedUser, {
@@ -72,6 +68,7 @@ const DisplayUserDetails = ({ auth, showSuccess, showError }) => {
       console.log("You have successfully updated your data", response.data);
       setUser(response.data.users);
       showSuccess(response.data.message);
+      navigate("/bugs");
     } catch (error) {
       showError(error.message);
       return;
