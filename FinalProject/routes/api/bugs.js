@@ -217,91 +217,49 @@ router.patch(
   isLoggedIn(),
   validBody(updateBugSchema),
   async (req, res) => {
-    const bugId = req.params.bugId;
-
-    const getBug = await GetBugById(bugId);
-
-    if (!getBug) {
-      return res.status(404).json({ message: `Bug ${bugId} not found` });
-    }
-
-    const bugUpdates = {};
-    const {
-      title,
-      description,
-      stepsToReproduce,
-      assignedTo,
-      assignedToUserName,
-      closed,
-      classification,
-    } = req.body;
-
-    if (title) {
-      getBug.title = title;
-      bugUpdates.title = title;
-    }
-
-    if (description) {
-      getBug.description = description;
-      bugUpdates.description = description;
-    }
-
-    if (stepsToReproduce) {
-      getBug.stepsToReproduce = stepsToReproduce;
-      bugUpdates.stepsToReproduce = stepsToReproduce;
-    }
-
-    if (classification) {
-      getBug.classification = classification;
-      bugUpdates.classification = classification;
-    }
-
-    if (assignedTo) {
-      getBug.assignedTo = assignedTo;
-      bugUpdates.assignedTo = assignedTo;
-    }
-
-    if (assignedToUserName) {
-      getBug.assignedToUserName = assignedToUserName;
-      bugUpdates.assignedToUserName = assignedToUserName;
-    }
-
-    if (closed === true) {
-      getBug.closed = closed;
-      bugUpdates.closed = closed;
-      getBug.closedOn = new Date();
-      bugUpdates.closedOn = new Date();
-      getBug.closedBy = req.auth._id;
-      bugUpdates.closedBy = req.auth._id;
-    } else {
-      getBug.closed = closed;
-      bugUpdates.closed = closed;
-      getBug.closedOn = "";
-      bugUpdates.closedOn = "";
-      getBug.closedBy = "";
-      bugUpdates.closedBy = "";
-    }
-
-    getBug.lastUpdated = new Date();
-    getBug.lastUpdatedBy = req.auth._id;
-
+    const bugId = req.params._id;
+    const updatedBug = req.body
+    //try catch
     try {
-      const result = await updateBug(getBug);
-      const log = {
-        timestamp: new Date(),
-        collection: "bugs",
-        operation: "update",
-        target: bugId,
-        update: bugUpdates,
-        auth: req.auth,
-      };
-      await saveAuditLog(log);
-      res.status(200).json({ message: `Bug ${bugId} updated!`, bugId });
+      const getBug = await GetBugById(bugId);
+      console.log(`bug id value returned: ${bugId}`)
+      if (getBug) {
+        for (const key of Object.keys(updatedBug)) {
+          getBug[key] = updatedBug[key];
+          getBug.lastUpdated = new Date();
+          getBug.lastUpdatedBy = req.auth_id;
+
+          if (closed === true) {
+            getBug.closed = closed;
+            bugUpdates.closed = closed;
+            getBug.closedOn = new Date();
+            bugUpdates.closedOn = new Date();
+            getBug.closedBy = req.auth._id;
+            bugUpdates.closedBy = req.auth._id;
+          } else {
+            getBug.closed = "open";
+            getBug.closedOn = "";
+            getBug.closedBy = "";
+          }
+          const result = await updateBug(getBug);
+          const log = {
+            timestamp: new Date(),
+            collection: "bugs",
+            operation: "update",
+            target: bugId,
+            update: getBug,
+            auth: req.auth,
+          };
+          await saveAuditLog(log);
+          res.status(200).json({ message: `Bug ${bugId} updated!`, bugId });
+        }
+      } else {
+        res.status(404).json({ message: `Bug ${bugId} not found.` });
+      }
     } catch (err) {
-      res.status(500).send(err);
+      res.status(500).send(err.message);
     }
-  },
-);
+  },);
 
 //Update Bug Classification/Priority
 router.patch(
