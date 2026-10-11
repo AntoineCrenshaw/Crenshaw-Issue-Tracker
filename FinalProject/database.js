@@ -51,12 +51,9 @@ async function createBug(bug) {
 
 async function updateBug(updatedBug) {
   const db = await connect();
-
-  const { _id, ...fieldsToUpdate } = updateBug;
-
   const dbResult = await db
     .collection("bugs")
-    .updateOne({ _id: new ObjectId(_id) }, { $set: fieldsToUpdate });
+    .updateOne({ _id: new ObjectId(_id) }, { $set: updatedBug});
   return dbResult;
 }
 
