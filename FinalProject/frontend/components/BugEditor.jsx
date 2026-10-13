@@ -14,6 +14,8 @@ const BugEditor = ({ showSuccess, showError }) => {
   const [description, setDescription] = useState("");
   const [stepsToReproduce, setStepsToReproduce] = useState("");
   const [assignedToUserName, setAssignedToUserName] = useState("");
+  const [classification, setClassification] = useState("");
+  const [closed, setClosed] = useState("false");
   const [users, setUsers] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([]);
@@ -30,6 +32,8 @@ const BugEditor = ({ showSuccess, showError }) => {
         setDescription(bugData.description);
         setStepsToReproduce(bugData.stepsToReproduce);
         setAssignedToUserName(bugData.assignedToUserName);
+        setClassification(bugData.classification);
+        setClosed(String(bugData.closed));
       })
       .catch((error) => console.log(error));
 
@@ -57,18 +61,22 @@ const BugEditor = ({ showSuccess, showError }) => {
   const onBugUpdate = async (e) => {
     e.preventDefault();
 
-    const updatedBug = {
-      ...bug,
+    const { _id, updatedBug } = {
       title,
       description,
       stepsToReproduce,
       assignedToUserName,
+      classification,
+      closed: closed,
     };
 
-    delete updatedBug._id;
+    // Delete updatedBug._id;
 
     try {
-      let response = await api.patch(`/api/bugs/${id}`, updatedBug);
+      let response = await api.patch(`/api/bugs/${id}`, updatedBug, {
+        withCredentials: true,
+      });
+      console.log(response.data);
       setBug(response.data.bugs ?? response.data.bug ?? bug);
       showSuccess("Bug Update Successful");
       navigate("/bugs");
@@ -163,9 +171,9 @@ const BugEditor = ({ showSuccess, showError }) => {
                 <select
                   className="form-select"
                   id="classification"
-                  value={bug.classification}
+                  value={classification}
                   onChange={(e) =>
-                    setBug({ ...bug, classification: e.target.value })
+                    setClassification(e.target.value)
                   }
                 >
                   <option value="Approved">Approved</option>
@@ -181,8 +189,8 @@ const BugEditor = ({ showSuccess, showError }) => {
                 <select
                   className="form-select"
                   id="closedStatus"
-                  value={bug.closed}
-                  onChange={(e) => setBug({ ...bug, closed: e.target.value })}
+                  value={closed}
+                  onChange={(e) => setClosed(e.target.value)}
                 >
                   <option value="true">Closed</option>
                   <option value="false">Open</option>{" "}
