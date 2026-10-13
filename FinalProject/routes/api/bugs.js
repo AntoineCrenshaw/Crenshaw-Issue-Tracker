@@ -37,10 +37,11 @@ const newBugSchema = Joi.object({
 
 const updateBugSchema = Joi.object({
   title: Joi.string().min(1).max(100),
-  bugDescription: Joi.string().min(1).max(500),
+  description: Joi.string().min(1).max(500),
   stepsToReproduce: Joi.string().min(1).max(500),
-  assignedTo: Joi.string().min(1).max(100),
+  assignedToUserName: Joi.string().min(1).max(100),
   closed: Joi.boolean(),
+  classification: Joi.string(),
 }).unknown(true);
 
 const classifyBugSchema = Joi.object({
@@ -217,31 +218,30 @@ router.patch(
   isLoggedIn(),
   validBody(updateBugSchema),
   async (req, res) => {
-    const bugId = req.params._id;
+    const bugId = req.bugId;
     const updatedBug = req.body
     //try catch
     try {
       const getBug = await GetBugById(bugId);
       console.log(`bug id value returned: ${bugId}`)
-      if (getBug) {
+      if (!getBug) {
+        return res.status(404).json({ message: `Bug ${bugId} not found.`});
+      }
+
         for (const key of Object.keys(updatedBug)) {
           getBug[key] = updatedBug[key];
-          getBug.lastUpdated = new Date();
-          getBug.lastUpdatedBy = req.auth_id;
 
-          if (closed === true) {
-            getBug.closed = closed;
-            bugUpdates.closed = closed;
+         if (getBug.closed === true) {
             getBug.closedOn = new Date();
-            bugUpdates.closedOn = new Date();
             getBug.closedBy = req.auth._id;
-            bugUpdates.closedBy = req.auth._id;
           } else {
-            getBug.closed = "open";
+            getBug.closed = false;
             getBug.closedOn = "";
             getBug.closedBy = "";
           }
-          const result = await updateBug(getBug);
+
+           await updateBug(getBug);
+
           const log = {
             timestamp: new Date(),
             collection: "bugs",
@@ -253,11 +253,9 @@ router.patch(
           await saveAuditLog(log);
           res.status(200).json({ message: `Bug ${bugId} updated!`, bugId });
         }
-      } else {
-        res.status(404).json({ message: `Bug ${bugId} not found.` });
-      }
     } catch (err) {
-      res.status(500).send(err.message);
+      console.error(err);
+      return res.status(500).json({ message: err.message });
     }
   },);
 
@@ -306,7 +304,7 @@ router.patch(
   isLoggedIn(),
   validBody(assignBugSchema),
   async (req, res, next) => {
-    const bugId = req.params.bugId;
+    const bugId = req.bugId;
 
     const { assignedToUserId } = req.body;
 
@@ -351,7 +349,7 @@ router.put(
   isLoggedIn(),
   validBody(closeBugSchema),
   async (req, res, next) => {
-    const bugId = req.params.bugId;
+    const bugId = req.bugId;
     const { closed } = req.body;
 
     try {
