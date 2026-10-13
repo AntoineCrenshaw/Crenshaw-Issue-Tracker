@@ -53,7 +53,7 @@ async function updateBug(updatedBug) {
   const db = await connect();
   const dbResult = await db
     .collection("bugs")
-    .updateOne({ _id: new ObjectId(_id) }, { $set: updatedBug});
+    .updateOne({ _id: new ObjectId(updatedBug._id) }, { $set: updatedBug});
   return dbResult;
 }
 
