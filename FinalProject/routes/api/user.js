@@ -48,11 +48,9 @@ const updateUserSchema = Joi.object({
       "email",
     )
     .optional(),
-  // password: Joi.string().min(6).max(30).optional(),
   givenName: Joi.string().min(3).max(20).optional(),
   familyName: Joi.string().min(3).max(20).optional(),
   fullName: Joi.string().min(3).max(50).optional(),
-  // role: Joi.array().items(Joi.string().min(3)).unique().optional(),
 }).unknown(true);
 
 const loginUserSchema = Joi.object({
@@ -171,6 +169,7 @@ router.get("/me", isLoggedIn(), async (req, res) => {
   } catch (err) {
     // Send 500 error if database query fails
     res.status(500).json({ message: err.message });
+    console.log(error.message);
   }
 });
 
@@ -303,17 +302,18 @@ router.get(
   isLoggedIn(),
   hasPermission("canViewData"),
   async (req, res, next) => {
-    const userId = req.userId;
+    const userId = req.auth._Id;
     try {
       // If user is found, return user details
       const user = await GetUserById(userId);
+      console.log(`${userId} returned successfully!`);
       if (user) {
         res.status(200).json(user);
       } else {
         res.status(404).json({ message: `User not found.` });
       }
     } catch (err) {
-      res.status(500).send(err);
+      res.status(500).send(err.message);
     }
   },
 );
@@ -327,7 +327,7 @@ router.patch(
   validId("userId"),
   hasPermission("canEditAnyUser"),
   async (req, res, next) => {
-    const userId = req.userId;
+    const userId = req.auth._Id;
     const updatedUser = req.body;
 
     try {
@@ -358,7 +358,7 @@ router.patch(
         res.status(404).json({ message: `User ${userId} not found.` });
       }
     } catch (err) {
-      res.status(500).send(err);
+      res.status(500).send(err.message);
     }
   },
 );
