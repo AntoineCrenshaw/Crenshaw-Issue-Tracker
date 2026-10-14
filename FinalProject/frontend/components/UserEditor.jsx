@@ -57,14 +57,16 @@ export default function UserEditor({ showSuccess, showError, auth }) {
       showError("Email is required and must be at least 3 characters");
       return;
     }
+    
+    if (fullName === "") {
+      showError("Full name is required")
+    }
 
-    const { _id, ...updatedUser } = {
-      ...user,
+    const updatedUser = {
       givenName,
       familyName,
       fullName,
       email,
-      roles,
     };
 
     try {
