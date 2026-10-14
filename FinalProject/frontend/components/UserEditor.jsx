@@ -14,7 +14,6 @@ export default function UserEditor({ showSuccess, showError, auth }) {
   const [roles, setRoles] = useState("");
   const navigate = useNavigate();
 
-  // Display the user details on open of the page
   useEffect(() => {
     api
       .get(`/api/users/${id}`, { withCredentials: true })
@@ -84,8 +83,6 @@ export default function UserEditor({ showSuccess, showError, auth }) {
 
   const cancelEdit = (e) => {
     e.preventDefault();
-    // Redirect to the users page
-    console.log("Cancelling edit and returning to users page");
     navigate("/users");
   };
 
