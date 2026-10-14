@@ -227,9 +227,9 @@ router.patch(
       if (!getBug) {
         return res.status(404).json({ message: `Bug ${bugId} not found.`});
       }
-
         for (const key of Object.keys(updatedBug)) {
           getBug[key] = updatedBug[key];
+        }
 
          if (getBug.closed === true) {
             getBug.closedOn = new Date();
@@ -239,6 +239,7 @@ router.patch(
             getBug.closedOn = "";
             getBug.closedBy = "";
           }
+        
 
            await updateBug(getBug);
 
@@ -252,9 +253,7 @@ router.patch(
           };
           await saveAuditLog(log);
           res.status(200).json({ message: `Bug ${bugId} updated!`, bugId });
-        }
     } catch (err) {
-      console.error(err);
       return res.status(500).json({ message: err.message });
     }
   },);
@@ -350,7 +349,7 @@ router.put(
   validBody(closeBugSchema),
   async (req, res, next) => {
     const bugId = req.bugId;
-    const { closed } = req.body;
+    const  closed  = req.body;
 
     try {
       const bug = await GetBugById(bugId);
@@ -394,7 +393,7 @@ router.get(
   hasPermission("canViewData"),
   validId("bugId"),
   async (req, res) => {
-    const bugId = req.params.bugId;
+    const bugId = req.bugId;
 
     try {
       const bug = await GetBugById(bugId);
@@ -433,8 +432,8 @@ router.get(
   validId("commentId"),
   hasPermission("canViewData"),
   async (req, res) => {
-    const bugId = req.params.bugId;
-    const commentId = req.params.commentId;
+    const bugId = req.bugId;
+    const commentId = req.commentId;
 
     try {
       // Get the bug by id
@@ -461,7 +460,7 @@ router.post(
   validId("bugId"),
   validBody(commentSchema),
   async (req, res) => {
-    const bugId = req.params.bugId;
+    const bugId = req.bugId;
     const newComment = req.body;
 
     if (req.auth) {
@@ -524,8 +523,8 @@ router.get(
   validId("bugId"),
   validId("testsId"),
   async (req, res) => {
-    const bugId = req.params.bugId;
-    const testsId = req.params.testsId;
+    const bugId = req.bugId;
+    const testsId = req.testsId;
 
     try {
       const bug = await GetBugById(bugId);
@@ -593,8 +592,8 @@ router.patch(
   validId("testsId"),
   validBody(updateTestSchema),
   async (req, res) => {
-    const bugId = req.params.bugId;
-    const testsId = req.params.testsId;
+    const bugId = req.bugId;
+    const testsId = req.testsId;
     const updatedTests = req.body;
 
     try {
@@ -644,8 +643,8 @@ router.delete(
   validId("bugId"),
   validId("testsId"),
   async (req, res) => {
-    const bugId = req.params.bugId;
-    const testsId = req.params.testsId;
+    const bugId = req.bugId;
+    const testsId = req.testsId;
 
     try {
       const bug = await GetBugById(bugId);
