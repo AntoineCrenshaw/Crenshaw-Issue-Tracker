@@ -15,7 +15,7 @@ const BugEditor = ({ showSuccess, showError }) => {
   const [stepsToReproduce, setStepsToReproduce] = useState("");
   const [assignedToUserName, setAssignedToUserName] = useState("");
   const [classification, setClassification] = useState("");
-  const [closed, setClosed] = useState("false");
+  const [closed, setClosed] = useState(false);
   const [users, setUsers] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([]);
@@ -33,7 +33,7 @@ const BugEditor = ({ showSuccess, showError }) => {
         setStepsToReproduce(bugData.stepsToReproduce);
         setAssignedToUserName(bugData.assignedToUserName);
         setClassification(bugData.classification);
-        setClosed(String(bugData.closed));
+        setClosed(bugData.closed === true);
       })
       .catch((error) => console.log(error));
 
@@ -61,13 +61,13 @@ const BugEditor = ({ showSuccess, showError }) => {
   const onBugUpdate = async (e) => {
     e.preventDefault();
 
-    const { _id, updatedBug } = {
+    const updatedBug = {
       title,
       description,
       stepsToReproduce,
       assignedToUserName,
       classification,
-      closed: closed,
+      closed,
     };
 
     // Delete updatedBug._id;
@@ -189,8 +189,10 @@ const BugEditor = ({ showSuccess, showError }) => {
                 <select
                   className="form-select"
                   id="closedStatus"
-                  value={closed}
-                  onChange={(e) => setClosed(e.target.value)}
+                  value={String(closed)}
+                  onChange={(e) => setClosed(e.target.value === 
+                    "true"
+                  )}
                 >
                   <option value="true">Closed</option>
                   <option value="false">Open</option>{" "}
