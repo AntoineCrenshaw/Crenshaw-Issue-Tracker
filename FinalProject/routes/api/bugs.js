@@ -219,44 +219,44 @@ router.patch(
   validBody(updateBugSchema),
   async (req, res) => {
     const bugId = req.bugId;
-    const updatedBug = req.body
+    const updatedBug = req.body;
     //try catch
     try {
       const getBug = await GetBugById(bugId);
-      console.log(`bug id value returned: ${bugId}`)
+      console.log(`bug id value returned: ${bugId}`);
       if (!getBug) {
-        return res.status(404).json({ message: `Bug ${bugId} not found.`});
+        return res.status(404).json({ message: `Bug ${bugId} not found.` });
       }
-        for (const key of Object.keys(updatedBug)) {
-          getBug[key] = updatedBug[key];
-        }
+      for (const key of Object.keys(updatedBug)) {
+        getBug[key] = updatedBug[key];
+      }
 
-         if (getBug.closed === true) {
-            getBug.closedOn = new Date();
-            getBug.closedBy = req.auth._id;
-          } else {
-            getBug.closed = false;
-            getBug.closedOn = "";
-            getBug.closedBy = "";
-          }
-        
+      if (getBug.closed === true) {
+        getBug.closedOn = new Date();
+        getBug.closedBy = req.auth._id;
+      } else {
+        getBug.closed = false;
+        getBug.closedOn = "";
+        getBug.closedBy = "";
+      }
 
-           await updateBug(getBug);
+      await updateBug(getBug);
 
-          const log = {
-            timestamp: new Date(),
-            collection: "bugs",
-            operation: "update",
-            target: bugId,
-            update: getBug,
-            auth: req.auth,
-          };
-          await saveAuditLog(log);
-          res.status(200).json({ message: `Bug ${bugId} updated!`, bugId });
+      const log = {
+        timestamp: new Date(),
+        collection: "bugs",
+        operation: "update",
+        target: bugId,
+        update: getBug,
+        auth: req.auth,
+      };
+      await saveAuditLog(log);
+      res.status(200).json({ message: `Bug ${bugId} updated!`, bugId });
     } catch (err) {
       return res.status(500).json({ message: err.message });
     }
-  },);
+  },
+);
 
 //Update Bug Classification/Priority
 router.patch(
@@ -349,11 +349,10 @@ router.put(
   validBody(closeBugSchema),
   async (req, res, next) => {
     const bugId = req.bugId;
-    const  closed  = req.body;
+    const closed = req.body;
 
     try {
       const bug = await GetBugById(bugId);
-      //Set to null if bug is reopened
       if (closed === false) {
         bug.closed = closed;
         bug.closedOn = "";
