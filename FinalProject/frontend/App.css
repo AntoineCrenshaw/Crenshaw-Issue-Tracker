@@ -4,3 +4,7 @@
   align-items: center; /* Center vertically */
   min-height: 100vh; /* Ensure the container takes up full viewport height */
 }
+
+h1 {
+  font-family: Poppins;
+}
