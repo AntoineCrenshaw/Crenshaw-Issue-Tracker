@@ -35,7 +35,7 @@ const ListUsers = ({ showSuccess, showError, auth }) => {
   const onSubmitSearch = async (evt) => {
     evt.preventDefault();
     try {
-      const { data } = await api.get(`/api/users/`, {
+      const data = await api.get(`/api/users/`, {
         headers: { authorization: `Bearer ${auth?.token}` },
         params: { keywords: keywords, roles: roleFilter, sortBy: sortBy },
       });
