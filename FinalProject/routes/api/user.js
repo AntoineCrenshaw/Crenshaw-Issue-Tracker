@@ -302,7 +302,7 @@ router.get(
   isLoggedIn(),
   hasPermission("canViewData"),
   async (req, res, next) => {
-    const userId = req.auth._Id;
+    const userId = req._id;
     try {
       // If user is found, return user details
       const user = await GetUserById(userId);
