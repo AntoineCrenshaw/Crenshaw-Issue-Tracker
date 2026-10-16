@@ -11,20 +11,19 @@ const Home = () => {
       </div>
 
       <div className="home-actions">
-        <NavLink to="/bugs/new" className="home-card">
+        <div className="home-card">
           <h2>Report a bug</h2>
-          <p>Log a new issue with steps to reproduce.</p>
-        </NavLink>
-
-        <NavLink to="/bugs" className="home-card">
+          <p>Log a new bug along with the steps to reproduce.</p>
+        </div>
+        <div className="home-card">
           <h2>View bugs</h2>
-          <p>Search, filter, and manage existing issues.</p>
-        </NavLink>
+          <p>Search, filter, and manage existing bugs.</p>
+        </div>
 
-        <NavLink to="/users" className="home-card">
+        <div className="home-card">
           <h2>View users</h2>
-          <p>See who's on the team and their roles.</p>
-        </NavLink>
+          <p>See all users and their respective roles</p>
+        </div>
       </div>
     </div>
   );
