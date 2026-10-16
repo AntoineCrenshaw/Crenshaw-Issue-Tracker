@@ -100,7 +100,7 @@ function UserListItem({ showSuccess, showError, auth }) {
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Confirm Delete</h5>
+                <h5 className="modal-title">Confirm Closing of Bug</h5>
                 <button
                   type="button"
                   className="btn-close"
