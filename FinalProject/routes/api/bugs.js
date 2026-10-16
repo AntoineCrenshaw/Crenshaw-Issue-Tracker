@@ -123,27 +123,26 @@ router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
     }
 
     const today = new Date(); // Get current date and time
-    today.setHours(0);
-    today.setMinutes(0);
-    today.setSeconds(0);
-    today.setMilliseconds(0); // Remove time from Date
+    today.setHours(0, 0, 0, 0);
 
     const parsedMinAge = parseInt(minAge, 10);
     const parsedMaxAge = parseInt(maxAge, 10);
 
-    // Calculate past date based on minAge and maxAge
-    const pastMaximumDaysOld = new Date(today);
-    pastMaximumDaysOld.setDate(pastMaximumDaysOld.getDate() - parsedMaxAge); // Set pastMaximumDaysOld to today minus maxAge
-    const pastMinimumDaysOld = new Date(today);
-    pastMinimumDaysOld.setDate(pastMinimumDaysOld.getDate() - parsedMinAge); // Set pastMinimumDaysOld to today minus minAge
+    const hasMin = !Number.isNaN(parsedMinAge);
+    const hasMax = !Number.isNaN(parsedMaxAge);
 
-    if (parsedMinAge && parsedMaxAge) {
-      match.createdOn = { $lte: pastMinimumDaysOld, $gte: pastMaximumDaysOld };
-    } else if (parsedMinAge) {
-      match.createdOn = { $gte: pastMinimumDaysOld };
-    } else if (parsedMaxAge) {
-      match.createdOn = { $lte: pastMaximumDaysOld };
+    const minCutoff = new Date(today);
+    if (hasMin) minCutoff.setMonth(minCutoff.getMonth() - parsedMinAge);
+
+    const maxCutoff = new Date(today);
+    if (hasMax) maxCutoff.setMonth(maxCutoff.getMonth() - parsedMaxAge);
+
+    if (hasMin || hasMax) {
+      match.createdOn = {};
+      if (hasMin) match.createdOn.$lte = minCutoff; // at least N months old
+      if (hasMax) match.createdOn.$gte = maxCutoff; // at most N months old
     }
+
     const pipeline = [{ $match: match }, { $sort: sort }];
 
     let bugs = await GetAllBugs(pipeline);
@@ -220,7 +219,7 @@ router.patch(
   async (req, res) => {
     const bugId = req.bugId;
     const updatedBug = req.body;
-    //try catch
+
     try {
       const getBug = await GetBugById(bugId);
       console.log(`bug id value returned: ${bugId}`);
@@ -304,8 +303,7 @@ router.patch(
   validBody(assignBugSchema),
   async (req, res, next) => {
     const bugId = req.bugId;
-
-    const { assignedToUserId } = req.body;
+    const assignedToUserId = req.body;
 
     try {
       const bug = await GetBugById(bugId);
