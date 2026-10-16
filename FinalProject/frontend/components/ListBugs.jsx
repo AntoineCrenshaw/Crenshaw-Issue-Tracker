@@ -202,7 +202,6 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
             {bugs.length > 0 ? (
               <>
                 <table className="bugs-table">
-                  <caption>Bugs</caption>
                   <thead>
                     <tr>
                       <th>Title</th>
