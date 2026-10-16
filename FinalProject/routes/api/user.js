@@ -302,7 +302,7 @@ router.get(
   isLoggedIn(),
   hasPermission("canViewData"),
   async (req, res, next) => {
-    const userId = req._id;
+    const userId = req.params.userId;
     try {
       // If user is found, return user details
       const user = await GetUserById(userId);
@@ -370,7 +370,7 @@ router.delete(
   validId("userId"),
   hasPermission("canEditAnyUser"),
   async (req, res, next) => {
-    const userId = req.userId;
+    const userId = req.params.userId;
 
     try {
       const userToDelete = await GetUserById(userId);
