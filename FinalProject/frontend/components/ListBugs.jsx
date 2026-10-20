@@ -182,7 +182,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                       name="txtMinAge"
                       id="txtMinAge"
                       className="form-control"
-                      placeholder="Minimum Age"
+                      placeholder="Minimum Age Of Bug (months)"
                       onChange={(evt) => setMinAge(evt.target.value)}
                     />
                   </div>
@@ -192,7 +192,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                       name="txtMaxAge"
                       id="txtMaxAge"
                       className="form-control"
-                      placeholder="Maximum Age"
+                      placeholder="Maximum Age of Bug (months)"
                       onChange={(evt) => setMaxAge(evt.target.value)}
                     />
                   </div>
@@ -253,14 +253,14 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                               ["Admin", "Business Analyst"].includes(role),
                             ) ? (
                               <div>
-                                <button className="btn btn-link">
+                                <button className="btn btn-link" title="edit user">
                                   <Link to={`/bugs/${bug._id}`}>
                                     <i className="bi bi-pencil text-primary-emphasis"></i>
                                   </Link>
                                 </button>
 
                                 <button
-                                  className="btn btn-link"
+                                  className="btn btn-link" title="close bug"
                                   onClick={() => handleBugClick(bug)}
                                 >
                                   <i className="bi bi-ban text-primary-emphasis"></i>
@@ -275,7 +275,7 @@ const ListBugs = ({ showSuccess, showError, auth }) => {
                                   <div className="modal-content">
                                     <div className="modal-header">
                                       <h5 className="modal-title">
-                                        Confirm Delete
+                                        Confirm Closing
                                       </h5>
                                       <button
                                         type="button"
