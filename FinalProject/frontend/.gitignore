@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 __tests__
 jest.config.js
+app.yaml
