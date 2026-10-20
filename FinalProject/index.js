@@ -22,7 +22,8 @@ app.use(express.static("frontend/dist"));
 const allowedOrigins = [
   "https://semiotic-runner-433715-b2.uc.r.appspot.com",
   "http://localhost:2024", 
-  "http://localhost:5173"
+  "http://localhost:5173",
+ "https://backend-dot-semiotic-runner-433715-b2.uc.r.appspot.com",
 ];
 
 app.use(
