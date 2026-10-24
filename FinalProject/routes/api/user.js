@@ -167,9 +167,7 @@ router.get("/me", isLoggedIn(), async (req, res) => {
       res.status(404).json({ message: `User ${userId} not found.` });
     }
   } catch (err) {
-    // Send 500 error if database query fails
     res.status(500).json({ message: err.message });
-    console.log(error.message);
   }
 });
 
