@@ -73,7 +73,6 @@ const updateTestSchema = Joi.object({
 
 // List all bugs
 router.get("", isLoggedIn(), hasPermission("canViewData"), async (req, res) => {
-  console.log("Body:", req.body);
   try {
     let match = {};
 
