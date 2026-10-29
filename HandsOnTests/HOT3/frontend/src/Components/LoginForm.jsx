@@ -9,7 +9,6 @@ import {
   Link,
   Grid2,
 } from "@mui/material";
-import "../Components/LoginForm.css";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -53,21 +52,15 @@ const LoginForm = ({ showSuccess, showError, setAuth }) => {
         { email, password },
         { withCredentials: true }
       );
-      {
-        console.log(response);
-      }
-      if (response.status === 200) {
-        console.log(response.data);
+
         if (response.data.message === " Invalid email or password") {
           setAuth(null);
           showError("Invalid username or password");
         }
-      } else {
         setAuth(response.data);
         showSuccess(response.data.message);
         localStorage.setItem("auth", JSON.stringify(response.data));
         navigate("/users");
-      }
     } catch (e) {
       console.log(`Errror Block ${JSON.stringify(e.response.data)}`);
       showError("Invalid username or password");
