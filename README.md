@@ -1,0 +1,1 @@
+Code to my Issue Tracker is located under the FinalProject folder! Everything else is coursework I did while attending Ranken. The issue tracker I continued to work on after graduating in order to grow my skills and knowledge as a developer.
